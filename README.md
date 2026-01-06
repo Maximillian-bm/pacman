@@ -1,6 +1,4 @@
-# Project XXX - YYY
-
-> Replace XXX with your group number. Replace YYY with your project's name.
+# Project 004 - Pacman
 
 # Abstract
 
@@ -8,13 +6,11 @@
 
 # Contributors
 
-> Replace your names and email addressses below
-
 Project contributors:
-* Alice (s000001@student.dtu.dk)
-* Bob (s000001@student.dtu.dk)
-* Charlize (s000001@student.dtu.dk)
-* Dave (s000001@student.dtu.dk)
+* Maximillian (s000001@student.dtu.dk)
+* Tobias (s000001@student.dtu.dk)
+* Christian (s000001@student.dtu.dk)
+* Gustav (s000001@student.dtu.dk)
 
 > Indicate the name of main people contributing to each part of the project below (keep the bullet points!). Note that the report as a whole is under the joint responsibility of the entire
 group. 

@@ -1,0 +1,73 @@
+@startuml
+package "java/com/example" {
+    class App {
+      + main(args: String): void
+    }
+
+    package "model" {
+      abstract Entity {
+        + update(): void
+        - position: int
+        - direction: int
+      }
+
+      class Player extends Entity {
+        + updateDir(dir: int): void
+        - id: int
+        - points: int
+        - hearts: int
+      }
+
+      class Ghost extends Entity {
+        + type: GhostType
+      }
+
+      enum GhostType {
+        PINK
+        GREEN
+        BLUE
+        ORANGE
+        RED
+      }
+      Ghost o-- GhostType: contains
+    }
+    package "UI" {
+      class UI {
+
+      }
+    }
+    package "ServerController" {
+      class ServerController {
+        - lobby: List
+      }
+      class Lobby {
+        - serverGameController: ServerGameController
+        - clientGameController: ClientGameController
+        - id: int
+      }
+      ServerController "1" o-- "many" Lobby: contains
+    }
+    package "GameController" {
+
+      abstract GameController {
+        - update(): void
+        - ghosts: List
+        - players: List
+
+      }
+
+      class ServerGameController extends GameController {
+
+      }
+
+      class ClientGameController extends GameController {
+        - UI: UI
+      }
+      GameController "1" o-- "many" Ghost: contains
+      GameController "1" o-- "many" Player: contains
+    }
+    ClientGameController o-- UI: contains
+    Lobby o-- ServerGameController: contains
+    Lobby o-- ClientGameController: contains
+}
+@enduml
