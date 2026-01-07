@@ -2,6 +2,9 @@
 .vscode/
 # Java compiled bytecode
 *.class
-
+# IntelliJ Idea
+.idea/
+# Build files
 target/
-**/target/
+out/
+build/

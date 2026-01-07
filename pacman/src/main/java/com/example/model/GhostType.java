@@ -1,7 +1,6 @@
 package com.example.model;
 
 public enum GhostType {
- 
     PINK(),
     GREEN(),
     BLUE(),
