@@ -1,14 +1,15 @@
 package com.example.model;
 
 public enum GhostType {
-    PINK(),
-    GREEN(),
-    BLUE(),
-    ORANGE(),
-    RED();
+    RED("Blinky"),
+    PINK("Pinky"),
+    CYAN("Inky"),
+    ORANGE("Clyde"),
+    PURPLE("Sue");
 
+    public final String name;
 
-    GhostType() {
-        //TODO
+    GhostType(String name) {
+        this.name = name;
     }
 }

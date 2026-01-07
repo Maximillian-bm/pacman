@@ -3,8 +3,6 @@ package com.example.GameLogic;
 import com.example.UI.UI;
 import com.example.model.*;
 import javafx.application.Application;
-import org.jspace.Space;
-import org.jspace.SpaceRepository;
 import org.jspace.PileSpace;
 
 public class ClientMain {
