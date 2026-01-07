@@ -7,7 +7,6 @@ public enum GhostType {
     ORANGE(),
     RED();
 
-
     GhostType() {
         //TODO
     }
