@@ -3,8 +3,6 @@ package com.example.GameLogic;
 import com.example.UI.UI;
 import com.example.model.*;
 import javafx.application.Application;
-import org.jspace.Space;
-import org.jspace.SpaceRepository;
 import org.jspace.PileSpace;
 
 public class ClientMain {
@@ -18,8 +16,8 @@ public class ClientMain {
     private ClientGameController gameController;
     
     public static void main(String[] args) {
-        Constands.rep.addGate(Constands.SPACE_URI);
-        Constands.rep.add("cleanActions", new PileSpace());
+        Constants.rep.addGate(Constants.SPACE_URI);
+        Constants.rep.add("cleanActions", new PileSpace());
         Application.launch(UI.class, args);
     }
 }

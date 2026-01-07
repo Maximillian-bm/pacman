@@ -1,8 +1,8 @@
-package com.example.GameLogic;
+package com.example.model;
 
 import org.jspace.SpaceRepository;
 
-public class Constands {
+public class Constants {
     public final static String SPACE_URI = "tcp://127.0.0.1:9001/?rep";
     public final static SpaceRepository rep = new SpaceRepository();
 }
