@@ -11,7 +11,7 @@ import org.jspace.Space;
 import com.example.model.Action;
 import com.example.GameLogic.ActionUtil;
 import com.example.GameLogic.ClientMain;
-import com.example.GameLogic.Constands;
+import com.example.model.Constants;
 
 public class Reader implements Runnable {
 
@@ -19,10 +19,10 @@ public class Reader implements Runnable {
     @Override
     public void run() {
         try {
-            Space remoteActions = new RemoteSpace(Constands.REMOTE_URI);
+            Space remoteActions = new RemoteSpace(Constants.REMOTE_URI);
             while(true) {
                 Action action = ActionUtil.convertObjToAction(remoteActions.query(new ActualField(ClientMain.nrOfActions), new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class)));
-                Constands.cleanActions.add(action);
+                Constants.cleanActions.add(action);
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();
