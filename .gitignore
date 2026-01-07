@@ -3,5 +3,5 @@
 # Java compiled bytecode
 *.class
 
-# target/
-# **/target/
+target/
+**/target/

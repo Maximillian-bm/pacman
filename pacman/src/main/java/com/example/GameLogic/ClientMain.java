@@ -4,6 +4,7 @@ import com.example.UI.UI;
 import com.example.model.*;
 import javafx.application.Application;
 import com.example.UI.UI;
+import com.example.GameLogic.ClientThreads.KeyHandler;
 public class ClientMain {
  
     //private jSpaceStack rawAction;
@@ -16,6 +17,6 @@ public class ClientMain {
     private ClientGameController gameController;
     
     public static void main(String[] args) {
-        Application.launch(UI.class, args);
+        Application.launch(KeyHandler.class, args);
     }
 }

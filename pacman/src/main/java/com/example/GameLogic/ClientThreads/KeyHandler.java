@@ -11,21 +11,21 @@ import javafx.stage.Stage;
 import java.util.HashSet;
 import java.util.Set;
 
-public class KeyHandler  extends Application implements Runnable {
+public class KeyHandler extends Application implements Runnable {
 
-private static final double Speed = 3.0;
+private static final double Speed = 5.0;
 
 private final Set<String> pressedKeys = new HashSet<>();
 
 @Override
 public void start(Stage stage) {
-
     Circle player = new Circle();
     player.setCenterX(200f);
     player.setCenterY(200f);
     player.setRadius(50f);
     player.setFill(Color.YELLOW);
 
+    
     Pane root = new Pane(player);
     Scene scene = new Scene(root, 800, 600);
     scene.setOnKeyPressed(e -> pressedKeys.add(e.getCode().toString()));
