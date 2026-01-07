@@ -1,73 +1,104 @@
 @startuml
-package "java/com/example" {
-    class App {
-      + main(args: String): void
+
+  package "model" {
+    abstract Entity {
+      + update(): void
+      - position: int
+      - direction: int
     }
 
-    package "model" {
-      abstract Entity {
-        + update(): void
-        - position: int
-        - direction: int
-      }
-
-      class Player extends Entity {
-        + updateDir(dir: int): void
-        - id: int
-        - points: int
-        - hearts: int
-      }
-
-      class Ghost extends Entity {
-        + type: GhostType
-      }
-
-      enum GhostType {
-        PINK
-        GREEN
-        BLUE
-        ORANGE
-        RED
-      }
-      Ghost o-- GhostType: contains
+    class Player extends Entity {
+      + updateDir(dir: int): void
+      - id: int
+      - points: int
+      - hearts: int
     }
-    package "UI" {
-      class UI {
+
+    class Ghost extends Entity {
+      + type: GhostType
+    }
+
+    enum GhostType {
+      PINK
+      GREEN
+      BLUE
+      ORANGE
+      RED
+    }
+
+    class Action {
+      - playerId: int
+      - clock: int
+      - move: int
+    }
+
+    class GameState {
+      - players: List
+      - ghosts: List
+    }
+  }
+  package "UI" {
+    class UI {
+
+    }
+  }
+  package "ServerLogic" {
+    class ServerController {
+      - lobby: List
+    }
+    class Lobby {
+      - saveState: GameState
+      - serverGameController: ServerGameController
+      - id: int
+    }
+  }
+  package "GameLogic" {
+
+    abstract GameController {
+      - update(): void
+    }
+
+    class ServerGameController extends GameController {
+
+    }
+
+    class ClientMain {
+      - rawAction: jSpaceStack
+      - cleanAction: jSpaceStack
+      + nrOfActions: int
+      + clock: int
+      - gameState: GameState
+      - saveState: GameState
+      - ClientGameController: gameController
+    }
+
+    class ClientGameController extends GameController {
+      - UI: UI
+    }
+
+    package "ClientThreads" {
+      class Reader implements Runnable {
+
+      }
+
+      class HandleActions implements Runnable {
+
+      }
+
+      class KeyHandler implements Runnable {
 
       }
     }
-    package "ServerController" {
-      class ServerController {
-        - lobby: List
-      }
-      class Lobby {
-        - serverGameController: ServerGameController
-        - clientGameController: ClientGameController
-        - id: int
-      }
-      ServerController "1" o-- "many" Lobby: contains
-    }
-    package "GameController" {
+  }
+ClientGameController o-- UI: contains
+Lobby o-- ServerGameController: contains
+GameState "1" o-- "many" Ghost: contains
+GameState "1" o-- "many" Player: contains
+ClientMain "1" o-- "2" GameState: contains
+Lobby o-- GameState: contains
+ClientMain o-- ClientGameController: contains
+ServerController "1" o-- "many" Lobby: contains
+ClientMain "1" o-- "many" Action: contains
+Ghost o-- GhostType: contains
 
-      abstract GameController {
-        - update(): void
-        - ghosts: List
-        - players: List
-
-      }
-
-      class ServerGameController extends GameController {
-
-      }
-
-      class ClientGameController extends GameController {
-        - UI: UI
-      }
-      GameController "1" o-- "many" Ghost: contains
-      GameController "1" o-- "many" Player: contains
-    }
-    ClientGameController o-- UI: contains
-    Lobby o-- ServerGameController: contains
-    Lobby o-- ClientGameController: contains
-}
 @enduml
