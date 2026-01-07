@@ -1,4 +1,3 @@
-com\example\GameLogic\ClientThreads\KeyHandler$1.class
 com\example\GameLogic\ClientMain.class
 com\example\model\GameState.class
 com\example\GameLogic\GameController.class
@@ -13,6 +12,5 @@ com\example\GameLogic\ClientGameController.class
 com\example\GameLogic\ClientThreads\KeyHandler.class
 com\example\ServerLogic\ServerController.class
 com\example\model\Entity.class
-com\example\UItest.class
 com\example\model\GhostType.class
 com\example\UI\UI.class
