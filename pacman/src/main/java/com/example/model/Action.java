@@ -2,15 +2,38 @@ package com.example.model;
 
 public class Action {
     
-    private int index;
     private int playerId;
     private int clock;
     private int move;
+    private int index;
 
-    public Action(int index, int playerId, int clock, int move){
+    public Action(int playerId, int clock, int move, int index){
         this.index = index;
         this.playerId = playerId;
         this.clock = clock;
         this.move = move;
+    }
+
+    public Action(int playerId, int clock, int move){
+        this.index = -1;
+        this.playerId = playerId;
+        this.clock = clock;
+        this.move = move;
+    }
+
+    public int getPlayerId(){
+        return playerId;
+    }
+
+    public int getClock(){
+        return clock;
+    }
+
+    public int getMove(){
+        return move;
+    }
+
+    public int getIndex(){
+        return index;
     }
 }
