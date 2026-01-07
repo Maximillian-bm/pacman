@@ -7,5 +7,6 @@ public class Constants {
     public final static SpaceRepository rep = new SpaceRepository();
 
     // Game constants
-    public final static int POINTS_PER_PELLET = 10;
+    public final static int PLAYER_HEALTH = 1;
+    public final static int PLAYER_LIVES = 3;
 }

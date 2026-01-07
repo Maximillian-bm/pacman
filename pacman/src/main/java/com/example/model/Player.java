@@ -1,12 +1,30 @@
 package com.example.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Player extends Entity {
-    private int id;
+    @Getter
+    private final int id;
+
+    @Getter
+    @Setter
     private Position position;
+    @Getter
+    @Setter
     private Direction direction;
 
-    private int points;
-    private int hearts;
+    @Getter
+    private int
+            points = 0,
+            health = Constants.PLAYER_HEALTH,
+            lives = Constants.PLAYER_LIVES;
+
+    private boolean isEnergized;
+
+    public Player(int id) {
+        this.id = id;
+    }
 
     /*
      * From: "https://pacman.fandom.com/wiki/Power_Pellet"
@@ -14,12 +32,8 @@ public class Player extends Entity {
      */
     private int ghostsEatenThisEnergizer;
 
-    public void updateDir(Direction direction) {
-        this.direction = direction;
-    }
-
-    public void eatPellet() {
-        points += Constants.POINTS_PER_PELLET;
+    public void addTilePoints(TileType tileType) {
+        points += tileType.points;
     }
 
     public void eatGhost() {
@@ -32,5 +46,20 @@ public class Player extends Entity {
         };
 
         ghostsEatenThisEnergizer++;
+    }
+
+    public void loseHealth() {
+        if (health > 0) health--;
+
+        if (health <= 0 && lives > 0) {
+            lives--;
+
+            if (lives > 0) health = Constants.PLAYER_HEALTH;
+        }
+    }
+
+    // Instead of calling a function/event like 'die()' in loseHealth, we can just check if a player is dead like this:
+    public boolean isDead() {
+        return lives <= 0;
     }
 }

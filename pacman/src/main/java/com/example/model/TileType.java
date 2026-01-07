@@ -3,8 +3,13 @@ package com.example.model;
 public enum TileType {
     EMPTY(0),
     WALL(0),
-    POWERUP(50),
-    PELLET(10),
+
+    // https://pacman.fandom.com/wiki/Pac-Dot
+    PAC_DOT(10),
+    /* From 'https://pacman.fandom.com/wiki/Power_Pellet':
+     * "Making their debut in Pac-Man as Energizers, ..."
+     */
+    ENERGIZER(50),
 
     // Fruits
     CHERRY(100),
