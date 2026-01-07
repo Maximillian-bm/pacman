@@ -12,5 +12,6 @@ com\example\GameLogic\ClientGameController.class
 com\example\GameLogic\ClientThreads\KeyHandler.class
 com\example\ServerLogic\ServerController.class
 com\example\model\Entity.class
+com\example\GameLogic\Constands.class
 com\example\model\GhostType.class
 com\example\UI\UI.class
