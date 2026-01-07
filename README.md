@@ -2,7 +2,7 @@
 
 # Abstract
 
-> Briefly describe your project with 250 words at most. Example: This project implements a service that provides dinner tables to philosophers, which they can use to do their usual business, namely Just Eat & Think. The service works as follows...
+In this project we plan to make a Player vs. Player version of Pacman. In our Pacman game you can compete against your friend up to four players at the time. In our version you compete against each other, where you can eat each other to steal a sum of their points, to further increase your total score points. There will be a central server to handle the clients but most of the logic will be distributed to the clients using the server purely for syncing and to avoid abuse of the game for cheating. The entire program will be developed in Java using JavaFX for the GUI. The backend will run and be hosted on a server while the players will have to run the client program locally. To avoid the need for players to install java we plan to compile the client program to a jar file and create an exe file that includes a JRE.
 
 # Contributors
 
