@@ -16,13 +16,9 @@ public enum TileType {
     BELL(3000),
     KEY(5000);
 
-    private final int points;
+    public final int points;
 
     TileType(int points) {
         this.points = points;
-    }
-
-    public int toPoints() {
-        return points;
     }
 }
