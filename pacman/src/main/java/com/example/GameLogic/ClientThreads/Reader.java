@@ -15,6 +15,7 @@ import com.example.GameLogic.Constands;
 
 public class Reader implements Runnable {
 
+    //Continuesly reads from the remote clean actions space and updates the static list of clean actions
     @Override
     public void run() {
         try {

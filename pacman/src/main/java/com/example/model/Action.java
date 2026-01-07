@@ -7,6 +7,8 @@ public class Action {
     private int move;
     private int index;
 
+    //Construct clean action with index
+    //Meant for server
     public Action(int playerId, int clock, int move, int index){
         this.index = index;
         this.playerId = playerId;
@@ -14,6 +16,8 @@ public class Action {
         this.move = move;
     }
 
+    //Construct raw action
+    //Meant for key handler
     public Action(int playerId, int clock, int move){
         this.index = -1;
         this.playerId = playerId;
