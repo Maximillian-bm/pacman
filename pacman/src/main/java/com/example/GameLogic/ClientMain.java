@@ -16,9 +16,6 @@ public class ClientMain {
     private ClientGameController gameController;
     
     public static void main(String[] args) {
-        Constands.rep.addGate(Constands.SPACE_URI);
-        Constands.rep.add("cleanActions", new PileSpace());
-        Constands.rep.add("rawActions", new PileSpace());
         Application.launch(UI.class, args);
     }
 }
