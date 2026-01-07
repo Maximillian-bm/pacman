@@ -36,4 +36,8 @@ public class Action {
     public int getIndex(){
         return index;
     }
+
+    public void setClock(int clock){
+        this.clock = clock;
+    }
 }

@@ -15,12 +15,22 @@ public class ActionUtil {
         return new Action(index, playerId, clock, move);
     }
 
-    public static void registerRawAction(Action action, Space remoteRawActions){
+    public static void registerRawAction(Action action, Space remoteRawActions) {
         try {
             remoteRawActions.put(action.getPlayerId(), action.getClock(), action.getMove());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public static int handleRawAction(int lastActionsClock, int index, Action action, Space cleanActions) {
+        action.setClock(((action.getClock() < lastActionsClock) ? lastActionsClock : action.getClock()));
+        try {
+            cleanActions.put(action.getPlayerId(), action.getClock(), action.getMove(), index);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return index++;
     }
 
 }
