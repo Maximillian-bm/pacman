@@ -18,8 +18,6 @@ import lombok.Getter;
 
 public class ClientGameController extends GameController {
 
-    private static final long DT_DIVISOR = 4_000_000L;
-
     @Getter
     private Player localPlayer;
 
@@ -39,6 +37,8 @@ public class ClientGameController extends GameController {
                 }
             }
         }
+
+        stepMovement();
 
         GameState newGameState = new GameState(
             ClientMain.clock,
@@ -90,7 +90,7 @@ public class ClientGameController extends GameController {
         );
     }
 
-    public void stepMovement() {
+    private void stepMovement() {
         int dx = 0;
         int dy = 0;
 

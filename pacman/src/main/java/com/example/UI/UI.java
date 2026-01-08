@@ -80,8 +80,6 @@ public class UI extends Application {
                 .toList();
             gameState = gameController.updateGameState(gameState, ActionOfClock);
 
-            gameController.stepMovement();
-
             drawPlayerPosition(time);
 
             ClientMain.clock++;
