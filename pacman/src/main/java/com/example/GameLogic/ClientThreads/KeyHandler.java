@@ -41,19 +41,19 @@ public class KeyHandler implements Runnable {
     }
 
     private void moveUp() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock, 3), rawActions);
+        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 3), rawActions);
     }
 
     private void moveDown() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock, 4), rawActions);
+        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 4), rawActions);
     }
 
     private void moveLeft() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock, 1), rawActions);
+        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 1), rawActions);
     }
 
     private void moveRight() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock, 2), rawActions);
+        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 2), rawActions);
     }
  
 }
