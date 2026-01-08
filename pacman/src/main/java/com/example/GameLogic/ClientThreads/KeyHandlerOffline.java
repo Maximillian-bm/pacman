@@ -1,7 +1,7 @@
 package com.example.GameLogic.ClientThreads;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.jspace.RemoteSpace;
@@ -14,20 +14,12 @@ import com.example.model.Constants;
 
 import javafx.scene.input.KeyCode;
 
-public class KeyHandler implements Runnable {
+public class KeyHandlerOffline implements Runnable{
 
-    private Space rawActions;
     private final Set<KeyCode> down;
 
-    public KeyHandler(Set<KeyCode> down) {
+    public KeyHandlerOffline(Set<KeyCode> down) {
         this.down = down;
-        try {
-            this.rawActions = new RemoteSpace(Constants.REMOTE_URI_RAW);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -41,19 +33,20 @@ public class KeyHandler implements Runnable {
     }
 
     private void moveUp() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 3), rawActions);
+        Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 3));
     }
 
     private void moveDown() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 4), rawActions);
+        Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 4));
     }
 
     private void moveLeft() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 1), rawActions);
+        Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 1));
     }
 
     private void moveRight() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 2), rawActions);
+        Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 2));
     }
- 
+
+    
 }

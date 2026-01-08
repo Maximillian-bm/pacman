@@ -3,16 +3,21 @@ package com.example.UI;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
+import com.example.GameLogic.ClientThreads.KeyHandler;
+import com.example.GameLogic.ClientThreads.KeyHandlerOffline;
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.GameState;
 
 import javafx.application.Application;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.canvas.Canvas;
@@ -34,6 +39,8 @@ public class UI extends Application {
     private Image playerImage;
     private Player player;
 
+    private final Set<KeyCode> down = EnumSet.noneOf(KeyCode.class);
+
     @Override
     public void start(Stage stage) {
         player = new Player(0);
@@ -48,6 +55,22 @@ public class UI extends Application {
         final Group root = new Group();
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
+
+        scene.setOnKeyPressed(e -> down.add(e.getCode()));
+        scene.setOnKeyReleased(e -> down.remove(e.getCode()));
+
+        if(Constants.online){
+            KeyHandler keyHandler = new KeyHandler(down);
+            Thread t = new Thread(keyHandler);
+            t.setDaemon(true);;
+            t.start();
+        }else{
+            KeyHandlerOffline keyHandler = new KeyHandlerOffline(down);
+            Thread t = new Thread(keyHandler);
+            t.setDaemon(true);;
+            t.start();
+        }
+
         stage.setScene(scene);
 
         canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
