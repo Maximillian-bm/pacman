@@ -2,10 +2,10 @@ package com.example.model;
 
 public class Action {
     
-    private int playerId;
+    private final int playerId;
     private int clock;
-    private int move;
-    private int index;
+    private final int move;
+    private final int index;
 
     //Construct clean action with index
     //Meant for server

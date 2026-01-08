@@ -8,17 +8,16 @@ public class Player extends Entity {
     private final int id;
 
     @Getter
-    @Setter
-    private Position position;
-    @Getter
-    @Setter
-    private Direction direction;
-
-    @Getter
     private int
             points = 0,
-            health = Constants.PLAYER_HEALTH,
             lives = Constants.PLAYER_LIVES;
+
+    @Getter
+    @Setter
+    private Position position = new Position();
+    @Getter
+    @Setter
+    private Direction direction = Direction.EAST;
 
     private boolean isEnergized;
 
@@ -48,14 +47,8 @@ public class Player extends Entity {
         ghostsEatenThisEnergizer++;
     }
 
-    public void loseHealth() {
-        if (health > 0) health--;
-
-        if (health <= 0 && lives > 0) {
-            lives--;
-
-            if (lives > 0) health = Constants.PLAYER_HEALTH;
-        }
+    public void loseLife() {
+        if (!isDead()) lives--;
     }
 
     // Instead of calling a function/event like 'die()' in loseHealth, we can just check if a player is dead like this:
