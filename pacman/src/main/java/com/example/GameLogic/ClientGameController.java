@@ -97,18 +97,40 @@ public class ClientGameController extends GameController {
 
             Direction d = directionFromMove(a.getMove());
             if (d != null && d != player.getDirection()) {
-                int diff = Math.abs(d.ordinal() - player.getDirection().ordinal());
-                // 90-degree turn: difference is 1 or 3 (not 2 which is 180-degree)
-                if (diff == 1 || diff == 3) {
-                    // Snap player to center of current tile when turning
-                    Position pos = player.getPosition();
-                    Pair<Integer, Integer> gridPos = pos.ToGridPosition();
-                    pos.x = gridPos.getKey() * TILE_SIZE;
-                    pos.y = gridPos.getValue() * TILE_SIZE;
-                    player.setPosition(pos);
+                // Check if there's a wall in the direction the player wants to turn
+                Position pos = player.getPosition();
+                Pair<Integer, Integer> gridPos = pos.ToGridPosition();
+                int gridX = gridPos.getKey();
+                int gridY = gridPos.getValue();
+
+                // Calculate next grid position in the new direction
+                int nextGridX = gridX;
+                int nextGridY = gridY;
+                switch (d) {
+                    case WEST -> nextGridX--;
+                    case EAST -> nextGridX++;
+                    case NORTH -> nextGridY--;
+                    case SOUTH -> nextGridY++;
                 }
 
-                player.setDirection(d);
+                TileType[][] tiles = gameState.tiles();
+
+                // Check if next tile is a wall
+                if (nextGridX >= 0 && nextGridX < tiles.length &&
+                    nextGridY >= 0 && nextGridY < tiles[0].length &&
+                    tiles[nextGridX][nextGridY] != TileType.WALL) {
+
+                    int diff = Math.abs(d.ordinal() - player.getDirection().ordinal());
+                    // 90-degree turn: difference is 1 or 3 (not 2 which is 180-degree)
+                    if (diff == 1 || diff == 3) {
+                        // Snap player to center of current tile when turning
+                        pos.x = gridX * TILE_SIZE;
+                        pos.y = gridY * TILE_SIZE;
+                        player.setPosition(pos);
+                    }
+
+                    player.setDirection(d);
+                }
             }
         }
     }
