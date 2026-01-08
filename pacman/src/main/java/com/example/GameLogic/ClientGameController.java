@@ -110,8 +110,6 @@ public class ClientGameController extends GameController {
     private void stepMovement(GameState gameState) {
         gameState.players().forEach(player -> {
             Position pos = player.getPosition();
-            double oldX = pos.x;
-            double oldY = pos.y;
 
             double movementPerFrame = PLAYER_SPEED / TARGET_FPS;
 
@@ -227,9 +225,23 @@ public class ClientGameController extends GameController {
                 isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + margin) ||
                 isWall(tiles, pos.x + margin, pos.y + TILE_SIZE - margin) ||
                 isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + TILE_SIZE - margin)) {
-                // Player collided with wall, restore previous position
-                pos.x = oldX;
-                pos.y = oldY;
+
+                // Find the tile right before the wall in the direction of movement
+                Pair<Integer, Integer> currentGridPos = pos.ToGridPosition();
+                int targetGridX = currentGridPos.getKey();
+                int targetGridY = currentGridPos.getValue();
+
+                // If current position is in a wall, step back in the opposite direction
+                while (targetGridX >= 0 && targetGridX < tiles.length &&
+                       targetGridY >= 0 && targetGridY < tiles[0].length &&
+                       tiles[targetGridX][targetGridY] == TileType.WALL) {
+                    targetGridX -= dx;
+                    targetGridY -= dy;
+                }
+
+                // Snap to the center of the tile before the wall
+                pos.x = targetGridX * TILE_SIZE;
+                pos.y = targetGridY * TILE_SIZE;
             }
 
             player.setPosition(pos);
