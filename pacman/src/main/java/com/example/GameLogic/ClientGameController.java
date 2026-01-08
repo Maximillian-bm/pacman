@@ -62,8 +62,8 @@ public class ClientGameController extends GameController {
         // Create test player
         localPlayer = new Player(1);
         localPlayer.setPosition(new Position(
-            5 * TILE_SIZE,
-            2 * TILE_SIZE
+            3 * TILE_SIZE,
+            4 * TILE_SIZE
         ));
         players.add(localPlayer);
 
@@ -106,11 +106,24 @@ public class ClientGameController extends GameController {
             }
 
             Position pos = player.getPosition();
+            double oldX = pos.x;
+            double oldY = pos.y;
+
             pos.x += dx * PLAYER_SPEED;
             pos.y += dy * PLAYER_SPEED;
 
-            // Teleport player to the other side here
+            Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
             TileType[][] tiles = gameState.tiles();
+            int tileX = playerGridPosition.getKey();
+            int tileY = playerGridPosition.getValue();
+            TileType tileType = tiles[tileX][tileY];
+            if (tileType == TileType.WALL) {
+                // Player collided with wall, restore previous position
+                pos.x = oldX;
+                pos.y = oldY;
+            }
+
+            // Teleport player to the other side
             double mapWidth = tiles[0].length * TILE_SIZE;
             double mapHeight = tiles.length * TILE_SIZE;
 

@@ -126,9 +126,6 @@ public class UI extends Application {
                     case WEST:
                         sy += 50 * 5;
                         break;
-                    case EAST:
-                        sy = 0;
-                        break;
                     case NORTH:
                         sy += 50 * 8;
                         break;
