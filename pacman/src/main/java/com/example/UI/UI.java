@@ -15,6 +15,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -30,15 +31,17 @@ public class UI extends Application {
     private GraphicsContext gc;
     private Canvas canvas;
 
-    private Image playerImage;
+    private Image spriteSheet;
 
     private long lastTime = 0;
+
+    private long firstTime = 0;
 
     private KeyHandler keyHandler;
 
     @Override
     public void start(Stage stage) {
-        playerImage = new Image("./tilesets/pacman-sprite-sheet.png");
+        spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
 
         final Group root = new Group();
 
@@ -86,53 +89,83 @@ public class UI extends Application {
                 }
             }*/
 
-            drawPlayerPosition(time);
+            draw(time);
 
             ClientMain.clock++;
 
             prevTime = time;
         }
 
-        private void drawPlayerPosition(long time) {
+        private void draw(long time) {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
+            drawMap();
+
+            drawPlayerPosition(time);
+        }
+
+        private void drawMap() {
             TileType[][] tiles = gameState.tiles();
             for (int i = 0; i < tiles.length; i++) {
                 for (int j = 0; j < tiles[0].length; j++) {
-                    switch(tiles[i][j]) {
+                    switch (tiles[i][j]) {
                         case EMPTY:
                             gc.setFill(Color.BLACK);
-                            gc.fillRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case WALL:
                             gc.setFill(Color.DARKBLUE);
-                            gc.fillRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            break;
+                        case PAC_DOT:
+                            gc.setFill(Color.YELLOW);
+                            gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                     }
+
+                    // Show which tile the player is on
+                    /*int finalI = i;
+                    int finalJ = j;
+                    gameState.players().forEach(player -> {
+                        Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
+                        System.out.println(playerGridPosition.getKey() + " " + playerGridPosition.getValue());
+                        if (playerGridPosition.getKey() == finalI && playerGridPosition.getValue() == finalJ) {
+                            gc.setFill(Color.DARKRED);
+                            gc.fillRect(finalI * TILE_SIZE, finalJ * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    });*/
                 }
             }
+        }
 
-            Player localPlayer = gameController.getLocalPlayer();
+        private void drawPlayerPosition(long time) {
+            gameState.players().forEach(player -> {
+                int sy = 0;
+                switch (player.getDirection()) {
+                    case WEST:
+                        sy += 50 * 5;
+                        break;
+                    case NORTH:
+                        sy += 50 * 8;
+                        break;
+                    case SOUTH:
+                        sy += 50 * 2;
+                        break;
+                }
 
-            int sy = 0;
-            switch (localPlayer.getDirection()) {
-                case WEST: sy += 50*6; break;
-                case EAST: sy = 50; break;
-                case NORTH: sy += 50*9; break;
-                case SOUTH: sy += 50*3; break;
-            }
+                Position playerPos = player.getPosition();
 
-            Position playerPos = localPlayer.getPosition();
+                int pacmanFrame = (int)(time / 75000000) % 4;
 
-            long pacmanFrame = (time / 200000000) % 4;
-            if (pacmanFrame == 0) {
-                gc.drawImage(playerImage, 850, sy, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
-            } else if (pacmanFrame == 1 || pacmanFrame == 3) {
-                gc.drawImage(playerImage, 850, sy+50, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
-            } else {
-                gc.drawImage(playerImage, 850, sy+50*2, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
-            }
+                int syf = switch (pacmanFrame) {
+                    case 0 -> sy;
+                    case 2 -> sy + 50 * 2;
+                    default -> sy + 50;
+                };
+
+                gc.drawImage(spriteSheet, 850, syf, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
+            });
 
             lastTime = time;
         }
