@@ -113,8 +113,6 @@ public class UI extends Application {
             gc.setFill(Color.WHITE);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
-            TileType[][] tiles = gameState.tiles();
-
             Position pos = player.getPosition();
             pos.x += x * (deltaTime / 2000000);
             pos.y += y * (deltaTime / 2000000);
