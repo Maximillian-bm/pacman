@@ -159,16 +159,21 @@ public class ClientGameController extends GameController {
             double mapWidth = tiles.length * TILE_SIZE;
             double mapHeight = tiles[0].length * TILE_SIZE;
 
-            if (pos.x < 0) {
-                pos.x = mapWidth - TILE_SIZE;
-            } else if (pos.x >= mapWidth) {
-                pos.x = 0;
+            // Check when player center has crossed the boundary
+            if (pos.x + TILE_SIZE / 2.0 <= 0) {
+                // Center crossed left edge, appear on right
+                pos.x = mapWidth - TILE_SIZE / 2.0;
+            } else if (pos.x + TILE_SIZE / 2.0 >= mapWidth) {
+                // Center crossed right edge, appear on left
+                pos.x = -TILE_SIZE / 2.0;
             }
 
-            if (pos.y < 0) {
-                pos.y = mapHeight - TILE_SIZE;
-            } else if (pos.y >= mapHeight) {
-                pos.y = 0;
+            if (pos.y + TILE_SIZE / 2.0 <= 0) {
+                // Center crossed top edge, appear on bottom
+                pos.y = mapHeight - TILE_SIZE / 2.0;
+            } else if (pos.y + TILE_SIZE / 2.0 >= mapHeight) {
+                // Center crossed bottom edge, appear on top
+                pos.y = -TILE_SIZE / 2.0;
             }
 
             double margin = 0.1; // Small margin to avoid checking exactly on tile boundaries
@@ -224,9 +229,9 @@ public class ClientGameController extends GameController {
         int gridX = (int)(x / TILE_SIZE);
         int gridY = (int)(y / TILE_SIZE);
 
-        // Check bounds
+        // Check bounds - out of bounds is not a wall (allows teleportation)
         if (gridX < 0 || gridX >= tiles.length || gridY < 0 || gridY >= tiles[0].length) {
-            return true; // Treat out of bounds as walls
+            return false;
         }
 
         return tiles[gridX][gridY] == TileType.WALL;
