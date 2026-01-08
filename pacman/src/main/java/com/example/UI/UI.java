@@ -22,6 +22,7 @@ import javafx.animation.AnimationTimer;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.Direction;
+import com.example.model.TileType;
 
 public class UI extends Application {
     private final ClientGameController gameController = new ClientGameController();
@@ -87,10 +88,24 @@ public class UI extends Application {
             }
 
             // System.out.println(deltaTime);
-            gc.setFill(Color.WHITE);
+            gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
             TileType[][] tiles = gameState.tiles();
+            for (int i = 0; i < tiles.length; i++) {
+                for (int j = 0; j < tiles[0].length; j++) {
+                    switch(tiles[i][j]) {
+                        case EMPTY:
+                            gc.setFill(Color.BLACK);
+                            gc.fillRect(i*Constants.TILE_SIZE, j*Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
+                            break;
+                        case WALL:
+                            gc.setFill(Color.DARKBLUE);
+                            gc.fillRect(i*Constants.TILE_SIZE, j*Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
+                            break;
+                    }
+                }
+            }
 
             Position pos = player.getPosition();
             pos.x += x * (deltaTime / 2000000);

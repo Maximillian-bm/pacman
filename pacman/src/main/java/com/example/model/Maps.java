@@ -21,7 +21,6 @@ public class Maps {
         {0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
         {0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
-        {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     };
 
     public static TileType[][] getMap1() {
@@ -32,7 +31,7 @@ public class Maps {
                 tileMap1[i][j] = TileType.values()[map1[i][j]];
             }
         }
-        
+
         return tileMap1;
     }
 }
