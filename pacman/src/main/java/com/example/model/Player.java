@@ -10,9 +10,14 @@ public class Player extends Entity {
     @Getter
     @Setter
     private Position position;
+    public void setPosition(Position pos) {position = pos;}
+    public Position getPosition() {return position;}
+
     @Getter
     @Setter
     private Direction direction;
+    public void setDirection(Direction dir) {direction = dir;}
+    public Direction getDirection() {return direction;}
 
     @Getter
     private int
