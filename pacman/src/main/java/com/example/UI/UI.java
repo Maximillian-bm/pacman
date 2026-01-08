@@ -72,9 +72,16 @@ public class UI extends Application {
     }
 
     private class GameAnimator extends AnimationTimer {
+        private static final int targetFPS = 15;
+
+        long prevTime = 0;
 
         @Override
         public void handle(long time) {
+            if (prevTime != 0 && (time - prevTime) < (1000000000 / targetFPS)) {
+                return;
+            }
+
             List<Action> ActionOfClock = Constants.cleanActions.stream()
                 .filter(e -> e.getClock() == ClientMain.clock)
                 .toList();
@@ -85,6 +92,8 @@ public class UI extends Application {
             drawPlayerPosition(time);
 
             ClientMain.clock++;
+
+            prevTime = time;
         }
 
         private void drawPlayerPosition(long time) {
