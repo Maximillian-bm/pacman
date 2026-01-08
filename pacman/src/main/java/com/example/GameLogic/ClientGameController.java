@@ -5,9 +5,6 @@ import java.util.List;
 
 import com.example.model.*;
 
-import static com.example.model.Constants.PLAYER_SPEED;
-import static com.example.model.Constants.TILE_SIZE;
-
 import com.example.model.Maps;
 import com.example.model.Action;
 import com.example.model.Direction;
@@ -16,6 +13,8 @@ import com.example.model.Player;
 import com.example.model.Position;
 import javafx.util.Pair;
 import lombok.Getter;
+
+import static com.example.model.Constants.*;
 
 public class ClientGameController extends GameController {
 
@@ -151,24 +150,12 @@ public class ClientGameController extends GameController {
             double oldX = pos.x;
             double oldY = pos.y;
 
-            pos.x += dx * PLAYER_SPEED;
-            pos.y += dy * PLAYER_SPEED;
+            pos.x += dx * PLAYER_SPEED / TARGET_FPS;
+            pos.y += dy * PLAYER_SPEED / TARGET_FPS;
 
             TileType[][] tiles = gameState.tiles();
 
-            double margin = 0.1; // Small margin to avoid checking exactly on tile boundaries
-
-            // Check collision with player bounding box
-            if (isWall(tiles, pos.x + margin, pos.y + margin) ||
-                isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + margin) ||
-                isWall(tiles, pos.x + margin, pos.y + TILE_SIZE - margin) ||
-                isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + TILE_SIZE - margin)) {
-                // Player collided with wall, restore previous position
-                pos.x = oldX;
-                pos.y = oldY;
-            }
-
-            // Teleport player to the other side
+            // Teleport player to the other side (check this before collision)
             double mapWidth = tiles.length * TILE_SIZE;
             double mapHeight = tiles[0].length * TILE_SIZE;
 
@@ -182,6 +169,18 @@ public class ClientGameController extends GameController {
                 pos.y = mapHeight - TILE_SIZE;
             } else if (pos.y >= mapHeight) {
                 pos.y = 0;
+            }
+
+            double margin = 0.1; // Small margin to avoid checking exactly on tile boundaries
+
+            // Check collision with player bounding box
+            if (isWall(tiles, pos.x + margin, pos.y + margin) ||
+                isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + margin) ||
+                isWall(tiles, pos.x + margin, pos.y + TILE_SIZE - margin) ||
+                isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + TILE_SIZE - margin)) {
+                // Player collided with wall, restore previous position
+                pos.x = oldX;
+                pos.y = oldY;
             }
 
             player.setPosition(pos);

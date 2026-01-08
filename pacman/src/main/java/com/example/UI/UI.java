@@ -103,6 +103,17 @@ public class UI extends Application {
             drawMap();
 
             drawPlayerPosition(time);
+
+            drawPoints();
+        }
+
+        private void drawPoints() {
+            Player localPlayer = gameController.getLocalPlayer();
+            if (localPlayer != null) {
+                gc.setFill(Color.WHITE);
+                gc.setFont(new javafx.scene.text.Font(20));
+                gc.fillText("Score: " + localPlayer.getPoints(), 10, 25);
+            }
         }
 
         private void drawMap() {
