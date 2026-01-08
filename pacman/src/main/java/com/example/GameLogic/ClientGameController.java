@@ -5,19 +5,41 @@ import java.util.List;
 
 import com.example.model.*;
 
+import static com.example.model.Constants.PLAYER_SPEED;
 import static com.example.model.Constants.TILE_SIZE;
 
 import com.example.model.Maps;
+import com.example.model.Action;
+import com.example.model.Direction;
+import com.example.model.GameState;
+import com.example.model.Player;
+import com.example.model.Position;
+import lombok.Getter;
 
 public class ClientGameController extends GameController {
 
-    public ClientGameController(){}
+    private static final long DT_DIVISOR = 4_000_000L;
+
+    @Getter
+    private Player localPlayer;
 
     public GameState updateGameState(GameState gameState, List<Action> actions) {
         // Initialize game and return early
         if (gameState == null) return initializeGameState();
 
         // Actual update loop
+        if (actions != null) {
+            for (Action a : actions) {
+                if (a == null) continue;
+                if (a.getPlayerId() != localPlayer.getId()) continue;
+
+                Direction d = directionFromMove(a.getMove());
+                if (d != null) {
+                    localPlayer.setDirection(d);
+                }
+            }
+        }
+
         GameState newGameState = new GameState(
             ClientMain.clock,
             gameState.players(),
@@ -35,12 +57,12 @@ public class ClientGameController extends GameController {
         TileType[][] tiles = Maps.getMap1();
 
         // Create test player
-        Player testPlayer = new Player(1);
-        testPlayer.setPosition(new Position(
+        localPlayer = new Player(1);
+        localPlayer.setPosition(new Position(
             5 * TILE_SIZE + TILE_SIZE / 2.0,
             TILE_SIZE + TILE_SIZE / 2.0
         ));
-        players.add(testPlayer);
+        players.add(localPlayer);
 
         // Create test ghosts
         Ghost ghost1 = new Ghost();
@@ -59,33 +81,6 @@ public class ClientGameController extends GameController {
         );
         ghosts.add(ghost2);
 
-        // // Initialize tiles with a simple test level
-        // for (int row = 0; row < tiles.length; row++) {
-        //     for (int col = 0; col < tiles[row].length; col++) {
-        //         // Border walls
-        //         if (row == 0 || row == tiles.length - 1 || col == 0 || col == tiles[row].length - 1) {
-        //             tiles[row][col] = TileType.WALL;
-        //         }
-        //         // Some interior walls
-        //         else if ((row == 3 || row == 7 || row == 11 || row == 15) && col % 3 == 0) {
-        //             tiles[row][col] = TileType.WALL;
-        //         }
-        //         // Energizers in corners
-        //         else if ((row == 2 && col == 2) || (row == 2 && col == 17) ||
-        //             (row == 17 && col == 2) || (row == 17 && col == 17)) {
-        //             tiles[row][col] = TileType.ENERGIZER;
-        //         }
-        //         // Cherry in center
-        //         else if (row == 10 && col == 10) {
-        //             tiles[row][col] = TileType.CHERRY;
-        //         }
-        //         // Pac-dots everywhere else
-        //         else {
-        //             tiles[row][col] = TileType.PAC_DOT;
-        //         }
-        //     }
-        // }
-
         return new GameState(
             ClientMain.clock,
             players,
@@ -93,5 +88,32 @@ public class ClientGameController extends GameController {
             tiles,
             null
         );
+    }
+
+    public void stepMovement() {
+        int dx = 0;
+        int dy = 0;
+
+        switch (localPlayer.getDirection()) {
+            case WEST  -> dx = -1;
+            case EAST  -> dx = 1;
+            case NORTH -> dy = -1;
+            case SOUTH -> dy = 1;
+        }
+
+        Position pos = localPlayer.getPosition();
+        pos.x += dx * PLAYER_SPEED;
+        pos.y += dy * PLAYER_SPEED;
+        localPlayer.setPosition(pos);
+    }
+
+    private Direction directionFromMove(int move) {
+        return switch (move) {
+            case 1 -> Direction.WEST;
+            case 2 -> Direction.EAST;
+            case 3 -> Direction.NORTH;
+            case 4 -> Direction.SOUTH;
+            default -> null;
+        };
     }
 }

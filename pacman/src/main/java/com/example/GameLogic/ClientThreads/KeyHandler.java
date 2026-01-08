@@ -55,5 +55,4 @@ public class KeyHandler implements Runnable {
     private void moveRight() {
         ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 2), rawActions);
     }
- 
 }
