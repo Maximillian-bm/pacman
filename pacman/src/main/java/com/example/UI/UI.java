@@ -33,6 +33,8 @@ public class UI extends Application {
 
     private long lastTime = 0;
 
+    private long firstTime = 0;
+
     private KeyHandler keyHandler;
 
     @Override
@@ -68,14 +70,20 @@ public class UI extends Application {
 
         @Override
         public void handle(long time) {
-            List<Action> ActionOfClock = Constants.cleanActions.stream()
-                .filter(e -> e.getClock() == ClientMain.clock)
-                .toList();
-            gameState = gameController.updateGameState(gameState, ActionOfClock);
+            if(firstTime == 0){
+                firstTime = time;
+            }else{
+                long timeSinceStart = time - firstTime;
+                if(timeSinceStart/50000000 > ClientMain.clock){
+                    List<Action> ActionOfClock = Constants.cleanActions.stream()
+                        .filter(e -> e.getClock() == ClientMain.clock)
+                        .toList();
+                    gameState = gameController.updateGameState(gameState, ActionOfClock);
+                    ClientMain.clock++;
+                }
+            }
 
             drawPlayerPosition(time);
-
-            ClientMain.clock++;
         }
 
         private void drawPlayerPosition(long time) {
