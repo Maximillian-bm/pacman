@@ -132,10 +132,10 @@ public class UI extends Application {
                 }
             }
 
-            Position pos = player.getPosition();
-            pos.x += x * (deltaTime / 2000000);
-            pos.y += y * (deltaTime / 2000000);
-            player.setPosition(pos);
+            // Position pos = player.getPosition();
+            // pos.x += x * (deltaTime / 2000000);
+            // pos.y += y * (deltaTime / 2000000);
+            // player.setPosition(pos);
 
             int sy = 0;
             switch (player.getDirection()) {
@@ -145,13 +145,15 @@ public class UI extends Application {
                 case SOUTH: sy += 50*3; break;
             }
 
+            Position playerPos = gameState.players().get(0).getPosition();
+
             long pacmanFrame = (time / 200000000) % 4;
             if (pacmanFrame == 0) {
-                gc.drawImage(playerImage, 850, sy, 50, 50, pos.x, pos.y, TILE_SIZE, TILE_SIZE);
+                gc.drawImage(playerImage, 850, sy, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
             } else if (pacmanFrame == 1 || pacmanFrame == 3) {
-                gc.drawImage(playerImage, 850, sy+50, 50, 50, pos.x, pos.y, TILE_SIZE, TILE_SIZE);
+                gc.drawImage(playerImage, 850, sy+50, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
             } else {
-                gc.drawImage(playerImage, 850, sy+50*2, 50, 50, pos.x, pos.y, TILE_SIZE, TILE_SIZE);
+                gc.drawImage(playerImage, 850, sy+50*2, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
             }
 
             lastTime = time;
