@@ -27,20 +27,8 @@ public class ClientGameController extends GameController {
         if (gameState == null) return initializeGameState();
 
         // Actual update loop
-        if (actions != null) {
-            for (Action a : actions) {
-                if (a == null) continue;
-                if (a.getPlayerId() != localPlayer.getId()) continue;
-
-                Direction d = directionFromMove(a.getMove());
-                if (d != null) {
-                    localPlayer.setDirection(d);
-                }
-            }
-        }
-
+        handleActions(gameState, actions);
         stepMovement(gameState);
-
         handlePlayerGridPosition(gameState);
 
         GameState newGameState = new GameState(
@@ -91,6 +79,38 @@ public class ClientGameController extends GameController {
             tiles,
             null
         );
+    }
+
+    private void handleActions(GameState gameState, List<Action> actions) {
+        if (actions == null) return;
+
+        for (Action a : actions) {
+            if (a == null) continue;
+
+            // Find the player that this action belongs to
+            Player player = gameState.players().stream()
+                .filter(p -> p.getId() == a.getPlayerId())
+                .findFirst()
+                .orElse(null);
+
+            if (player == null) continue;
+
+            Direction d = directionFromMove(a.getMove());
+            if (d != null && d != player.getDirection()) {
+                int diff = Math.abs(d.ordinal() - player.getDirection().ordinal());
+                // 90-degree turn: difference is 1 or 3 (not 2 which is 180-degree)
+                if (diff == 1 || diff == 3) {
+                    // Snap player to center of current tile when turning
+                    Position pos = player.getPosition();
+                    Pair<Integer, Integer> gridPos = pos.ToGridPosition();
+                    pos.x = gridPos.getKey() * TILE_SIZE;
+                    pos.y = gridPos.getValue() * TILE_SIZE;
+                    player.setPosition(pos);
+                }
+
+                player.setDirection(d);
+            }
+        }
     }
 
     private void stepMovement(GameState gameState) {
