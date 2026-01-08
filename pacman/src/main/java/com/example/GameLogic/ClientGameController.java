@@ -231,10 +231,15 @@ public class ClientGameController extends GameController {
                 int targetGridX = currentGridPos.getKey();
                 int targetGridY = currentGridPos.getValue();
 
-                // If current position is in a wall, step back in the opposite direction
-                while (targetGridX >= 0 && targetGridX < tiles.length &&
-                       targetGridY >= 0 && targetGridY < tiles[0].length &&
-                       tiles[targetGridX][targetGridY] == TileType.WALL) {
+                // Step back in the opposite direction until we find a non-wall tile
+                while (true) {
+                    // Check if current tile is valid and not a wall
+                    if (targetGridX >= 0 && targetGridX < tiles.length &&
+                        targetGridY >= 0 && targetGridY < tiles[0].length &&
+                        tiles[targetGridX][targetGridY] != TileType.WALL) {
+                        break; // Found a non-wall tile
+                    }
+                    // Step back in opposite direction of movement
                     targetGridX -= dx;
                     targetGridY -= dy;
                 }
