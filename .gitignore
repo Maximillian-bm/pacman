@@ -1,2 +1,10 @@
 # VS Code
 .vscode/
+# Java compiled bytecode
+*.class
+# IntelliJ Idea
+.idea/
+# Build files
+target/
+out/
+build/
