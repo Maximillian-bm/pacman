@@ -9,10 +9,10 @@ import javafx.scene.input.KeyCode;
 public class KeyHandler {
 
     public void move(KeyCode key) {
-        if(key == KeyCode.W) moveUp();
-        if(key == KeyCode.S) moveDown();
-        if(key == KeyCode.A) moveLeft();
-        if(key == KeyCode.D) moveRight();
+        if(key == KeyCode.W || key == KeyCode.UP) moveUp();
+        if(key == KeyCode.S || key == KeyCode.DOWN) moveDown();
+        if(key == KeyCode.A || key == KeyCode.LEFT) moveLeft();
+        if(key == KeyCode.D || key == KeyCode.RIGHT) moveRight();
     }
 
     public void moveUp() {
