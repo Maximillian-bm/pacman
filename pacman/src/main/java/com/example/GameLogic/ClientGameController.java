@@ -57,7 +57,7 @@ public class ClientGameController extends GameController {
         TileType[][] tiles = Maps.getMap1();
 
         // Create test player
-        localPlayer = new Player(1);
+        localPlayer = new Player(0);
         localPlayer.setPosition(new Position(
             5 * TILE_SIZE + TILE_SIZE / 2.0,
             TILE_SIZE + TILE_SIZE / 2.0
