@@ -8,6 +8,8 @@ import com.example.model.*;
 import static com.example.model.Constants.TILE_COUNT;
 import static com.example.model.Constants.TILE_SIZE;
 
+import com.example.model.Maps;
+
 public class ClientGameController extends GameController {
 
     public ClientGameController(){}
@@ -31,7 +33,7 @@ public class ClientGameController extends GameController {
     private GameState initializeGameState() {
         List<Player> players = new ArrayList<>();
         List<Ghost> ghosts = new ArrayList<>();
-        TileType[][] tiles = new TileType[TILE_COUNT][TILE_COUNT];
+        TileType[][] tiles = Maps.getMap1(); // new TileType[TILE_COUNT][TILE_COUNT];
 
         // Create test player
         Player testPlayer = new Player(1);
