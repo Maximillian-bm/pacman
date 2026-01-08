@@ -169,8 +169,8 @@ public class ClientGameController extends GameController {
             }
 
             // Teleport player to the other side
-            double mapWidth = tiles[0].length * TILE_SIZE;
-            double mapHeight = tiles.length * TILE_SIZE;
+            double mapWidth = tiles.length * TILE_SIZE;
+            double mapHeight = tiles[0].length * TILE_SIZE;
 
             if (pos.x < 0) {
                 pos.x = mapWidth - TILE_SIZE;
