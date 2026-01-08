@@ -15,10 +15,10 @@ public class ClientMain {
     public static int clock = 0;
     
     public static void main(String[] args) {
-        Reader reader = new Reader();
+        //Reader reader = new Reader();
         KeyHandler keyHandler = new KeyHandler();
-        reader.run();
-        keyHandler.run();
+        //reader.run();
+        //keyHandler.run();
         Application.launch(UI.class, args);
     }
 }
