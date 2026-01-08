@@ -20,10 +20,12 @@ import com.example.model.GameState;
 import com.example.model.Constants;
 
 public class UI extends Application {
-    private GameState gameState;
-    private Player player;
+    // private GameState gameState;
     private GraphicsContext gc;
+    private Canvas canvas;
+
     private Image playerImage;
+    private Player player;
 
      @Override
     public void start(Stage stage) {
@@ -41,10 +43,10 @@ public class UI extends Application {
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
         stage.setScene(scene);
 
-        final Canvas canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
+        canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
         root.getChildren().add(canvas);
 
-        final AnimationTimer tm = new TimerMethod();
+        final AnimationTimer tm = new GameAnimator();
         tm.start();
 
         scene.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
@@ -52,15 +54,15 @@ public class UI extends Application {
                   player.setDirection(Direction.WEST);
                   System.out.println("Move left(west)");
               }
-              if(key.getCode()==KeyCode.D || key.getCode()==KeyCode.RIGHT) {
+              else if(key.getCode()==KeyCode.D || key.getCode()==KeyCode.RIGHT) {
                   player.setDirection(Direction.EAST);
                   System.out.println("Move right(east)");
               }
-              if(key.getCode()==KeyCode.W || key.getCode()==KeyCode.UP) {
+              else if(key.getCode()==KeyCode.W || key.getCode()==KeyCode.UP) {
                   player.setDirection(Direction.NORTH);
                   System.out.println("Move up(north)");
               }
-              if(key.getCode()==KeyCode.S || key.getCode()==KeyCode.DOWN) {
+              else if(key.getCode()==KeyCode.S || key.getCode()==KeyCode.DOWN) {
                   player.setDirection(Direction.SOUTH);
                   System.out.println("Move down(south)");
               }
@@ -74,33 +76,54 @@ public class UI extends Application {
         stage.show();
     }
 
-    private class TimerMethod extends AnimationTimer {
+    private class GameAnimator extends AnimationTimer {
+        private long lastTime;
 
         @Override
-        public void handle(long now) {
+        public void handle(long time) {
             switch(player.getDirection()) {
-                case WEST:
-                    drawPlayerPosition(-1, 0);
-                    break;
-                case EAST:
-                    drawPlayerPosition(1, 0);
-                    break;
-                case NORTH:
-                    drawPlayerPosition(0, -1);
-                    break;
-                case SOUTH:
-                    drawPlayerPosition(0, 1);
-                    break;
+                case WEST: drawPlayerPosition(-1, 0, time); break;
+                case EAST: drawPlayerPosition(1, 0, time); break;
+                case NORTH: drawPlayerPosition(0, -1, time); break;
+                case SOUTH: drawPlayerPosition(0, 1, time); break;
             }
         }
 
-        private void drawPlayerPosition(int x, int y) {
-            Position pos = player.getPosition();
-            pos.x += x;
-            pos.y += y;
-            player.setPosition(pos);
+        private void drawPlayerPosition(int x, int y, long time) {
+            long deltaTime;
+            if (lastTime == 0) {
+                deltaTime = 0;
+            } else {
+                deltaTime = time - lastTime;
+            }
+
+            System.out.println(deltaTime);
             gc.setFill(Color.WHITE);
-            gc.drawImage(playerImage, 757, 42, 32, 32, pos.x, pos.y, 100, 100);
+            gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+            Position pos = player.getPosition();
+            pos.x += x * (deltaTime / 4000000);
+            pos.y += y * (deltaTime / 4000000);
+            player.setPosition(pos);
+
+            int sy = 42;
+            switch (player.getDirection()) {
+                case WEST: sy += 43*6; break;
+                case EAST: ; break;
+                case NORTH: sy += 43*9; break;
+                case SOUTH: sy += 43*3; break;
+            }
+
+            long pacmanFrame = (time / 200000000) % 4;
+            if (pacmanFrame == 0) {
+                gc.drawImage(playerImage, 757, 42, 32, 32, pos.x, pos.y, 100, 100);
+            } else if (pacmanFrame == 1 || pacmanFrame == 3) {
+                gc.drawImage(playerImage, 757, sy+43, 32, 32, pos.x, pos.y, 100, 100);
+            } else {
+                gc.drawImage(playerImage, 757, sy+43*2, 32, 32, pos.x, pos.y, 100, 100);
+            }
+
+            lastTime = time;
         }
     }
 }
