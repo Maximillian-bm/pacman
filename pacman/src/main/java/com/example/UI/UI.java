@@ -140,14 +140,14 @@ public class UI extends Application {
             int sy = 0;
             switch (player.getDirection()) {
                 case WEST: sy += 50*6; break;
-                case EAST: ; break;
+                case EAST: sy = 50; break;
                 case NORTH: sy += 50*9; break;
                 case SOUTH: sy += 50*3; break;
             }
 
             long pacmanFrame = (time / 200000000) % 4;
             if (pacmanFrame == 0) {
-                gc.drawImage(playerImage, 850, 50, 50, 50, pos.x, pos.y, TILE_SIZE, TILE_SIZE);
+                gc.drawImage(playerImage, 850, sy, 50, 50, pos.x, pos.y, TILE_SIZE, TILE_SIZE);
             } else if (pacmanFrame == 1 || pacmanFrame == 3) {
                 gc.drawImage(playerImage, 850, sy+50, 50, 50, pos.x, pos.y, TILE_SIZE, TILE_SIZE);
             } else {
