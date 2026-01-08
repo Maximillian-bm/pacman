@@ -10,6 +10,7 @@ import java.util.Set;
 import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
 import com.example.GameLogic.ClientThreads.KeyHandler;
+import com.example.GameLogic.ClientThreads.KeyHandlerOffline;
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.GameState;
@@ -39,8 +40,6 @@ public class UI extends Application {
 
     private final Set<KeyCode> down = EnumSet.noneOf(KeyCode.class);
 
-    private KeyHandler keyHandler = new KeyHandler(down);
-
     @Override
     public void start(Stage stage) {
         player = new Player(0);
@@ -59,7 +58,17 @@ public class UI extends Application {
         scene.setOnKeyPressed(e -> down.add(e.getCode()));
         scene.setOnKeyReleased(e -> down.remove(e.getCode()));
 
-        keyHandler.run();
+        if(Constants.online){
+            KeyHandler keyHandler = new KeyHandler(down);
+            Thread t = new Thread(keyHandler);
+            t.setDaemon(true);;
+            t.start();
+        }else{
+            KeyHandlerOffline keyHandler = new KeyHandlerOffline(down);
+            Thread t = new Thread(keyHandler);
+            t.setDaemon(true);;
+            t.start();
+        }
 
         stage.setScene(scene);
 

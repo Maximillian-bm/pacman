@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.jspace.SpaceRepository;
 
 public class Constants {
+    public final static boolean online = false;
     public final static ArrayList<Action> cleanActions = new ArrayList<>();
     public final static String REMOTE_URI_CLEAN = "tcp://XXX.XXX.X.XXX/cleanAction?rep";
     public final static String REMOTE_URI_RAW = "tcp://XXX.XXX.X.XXX/rawAction?rep";
