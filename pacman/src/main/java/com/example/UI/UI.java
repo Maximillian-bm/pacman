@@ -39,7 +39,7 @@ public class UI extends Application {
 
     private final Set<KeyCode> down = EnumSet.noneOf(KeyCode.class);
 
-    private KeyHandler keyHandler = new KeyHandler(down);
+    //private KeyHandler keyHandler = new KeyHandler(down);
 
     @Override
     public void start(Stage stage) {
@@ -59,7 +59,7 @@ public class UI extends Application {
         scene.setOnKeyPressed(e -> down.add(e.getCode()));
         scene.setOnKeyReleased(e -> down.remove(e.getCode()));
 
-        keyHandler.run();
+        //keyHandler.run();
 
         stage.setScene(scene);
 

@@ -16,7 +16,7 @@ public class ClientMain {
     
     public static void main(String[] args) {
         Reader reader = new Reader();
-        reader.run();
+        //reader.run();
         Application.launch(UI.class, args);
     }
 }
