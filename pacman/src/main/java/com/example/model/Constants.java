@@ -7,11 +7,11 @@ import org.jspace.SpaceRepository;
 import static com.example.model.Maps.map1;
 
 public class Constants {
-    public final static boolean online = false;
+    public final static boolean online = true;
     public final static ArrayList<Action> cleanActions = new ArrayList<>();
-    public final static String REMOTE_URI_CLEAN = "tcp://XXX.XXX.X.XXX/cleanAction?rep";
-    public final static String REMOTE_URI_RAW = "tcp://XXX.XXX.X.XXX/rawAction?rep";
-    public final static String GATE_URI = "tcp://XXX.XXX.X.XXX/?rep";
+    public final static String REMOTE_URI_CLEAN = "tcp://127.0.0.1:9001/cleanAction?keep";
+    public final static String REMOTE_URI_RAW = "tcp://127.0.0.1:9001/rawAction?keep";
+    public final static String GATE_URI = "tcp://127.0.0.1:9001/?keep";
 
     public final static int TILE_SIZE = 48;
     public final static int PLAYER_LIVES = 3;
