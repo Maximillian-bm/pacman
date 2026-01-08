@@ -2,8 +2,8 @@ package com.example.UI;
 
 import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
+import com.example.GameLogic.ClientThreads.KeyHandlerOnline;
 import com.example.GameLogic.ClientThreads.KeyHandler;
-import com.example.GameLogic.ClientThreads.KeyHandlerOffline;
 import com.example.model.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -31,9 +31,9 @@ public class UI extends Application {
 
     private Image playerImage;
 
-    private final Set<KeyCode> down = EnumSet.noneOf(KeyCode.class);
-
     private long lastTime = 0;
+
+    private KeyHandler keyHandler;
 
     @Override
     public void start(Stage stage) {
@@ -43,20 +43,13 @@ public class UI extends Application {
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
-        scene.setOnKeyPressed(e -> down.add(e.getCode()));
-        scene.setOnKeyReleased(e -> down.remove(e.getCode()));
-
         if(Constants.online){
-            KeyHandler keyHandler = new KeyHandler(down);
-            Thread t = new Thread(keyHandler);
-            t.setDaemon(true);
-            t.start();
+            keyHandler = new KeyHandlerOnline();
         }else{
-            KeyHandlerOffline keyHandler = new KeyHandlerOffline(down);
-            Thread t = new Thread(keyHandler);
-            t.setDaemon(true);
-            t.start();
+            keyHandler = new KeyHandler();
         }
+
+        scene.setOnKeyPressed(e -> keyHandler.move(e.getCode()));
 
         stage.setScene(scene);
 

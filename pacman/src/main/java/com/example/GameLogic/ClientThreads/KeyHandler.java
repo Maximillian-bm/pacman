@@ -1,58 +1,37 @@
 package com.example.GameLogic.ClientThreads;
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.jspace.RemoteSpace;
-import org.jspace.Space;
-
-import com.example.GameLogic.ActionUtil;
 import com.example.GameLogic.ClientMain;
 import com.example.model.Action;
 import com.example.model.Constants;
 
 import javafx.scene.input.KeyCode;
 
-public class KeyHandler implements Runnable {
+public class KeyHandler {
 
-    private Space rawActions;
-    private final Set<KeyCode> down;
-
-    public KeyHandler(Set<KeyCode> down) {
-        this.down = down;
-        try {
-            this.rawActions = new RemoteSpace(Constants.REMOTE_URI_RAW);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void move(KeyCode key) {
+        if(key == KeyCode.W) moveUp();
+        if(key == KeyCode.S) moveDown();
+        if(key == KeyCode.A) moveLeft();
+        if(key == KeyCode.D) moveRight();
     }
 
-    @Override
-    public void run() {
-        while(true){
-            if (down.contains(KeyCode.W)) moveUp();
-            if (down.contains(KeyCode.S)) moveDown();
-            if (down.contains(KeyCode.A)) moveLeft();
-            if (down.contains(KeyCode.D)) moveRight();
-        }
+    public void moveUp() {
+        System.out.println("move up");
+        Constants.cleanActions.add(new Action(0, ClientMain.clock + 60, 3));
     }
 
-    private void moveUp() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 3), rawActions);
+    public void moveDown() {
+        System.out.println("move down");
+        Constants.cleanActions.add(new Action(0, ClientMain.clock + 60, 4));
     }
 
-    private void moveDown() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 4), rawActions);
+    public void moveLeft() {
+        System.out.println("move left");
+        Constants.cleanActions.add(new Action(0, ClientMain.clock + 60, 1));
     }
 
-    private void moveLeft() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 1), rawActions);
-    }
-
-    private void moveRight() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 2), rawActions);
+    public void moveRight() {
+        System.out.println("move right");
+        Constants.cleanActions.add(new Action(0, ClientMain.clock + 60, 2));
     }
 }
