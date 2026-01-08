@@ -32,7 +32,6 @@ public class ClientGameController extends GameController {
 
         // Actual update loop
         handleActions(gameState, actions);
-        applyIntendedDirections(gameState);
         stepMovement(gameState);
         handlePlayerGridPosition(gameState);
 
@@ -108,66 +107,83 @@ public class ClientGameController extends GameController {
         }
     }
 
-    private void applyIntendedDirections(GameState gameState) {
-        for (Player player : gameState.players()) {
-            Direction d = intendedDirections.get(player.getId());
+    private void stepMovement(GameState gameState) {
+        gameState.players().forEach(player -> {
+            Position pos = player.getPosition();
+            double oldX = pos.x;
+            double oldY = pos.y;
 
-            if (d != null && d != player.getDirection()) {
-                Position pos = player.getPosition();
+            double movementPerFrame = PLAYER_SPEED / TARGET_FPS;
+
+            // Check if player wants to turn
+            Direction intendedDir = intendedDirections.get(player.getId());
+
+            if (intendedDir != null && intendedDir != player.getDirection()) {
                 Pair<Integer, Integer> gridPos = pos.ToGridPosition();
                 int gridX = gridPos.getKey();
                 int gridY = gridPos.getValue();
-
-                // Calculate the center of the current grid cell
                 double gridCenterX = gridX * TILE_SIZE;
                 double gridCenterY = gridY * TILE_SIZE;
 
-                // Calculate distance from player center to grid center
-                double playerCenterX = pos.x;
-                double playerCenterY = pos.y;
-                double distanceX = Math.abs(playerCenterX - gridCenterX);
-                double distanceY = Math.abs(playerCenterY - gridCenterY);
+                int diff = Math.abs(intendedDir.ordinal() - player.getDirection().ordinal());
+                boolean is90DegreeTurn = (diff == 1 || diff == 3);
 
-                // Only allow turn if player is close enough to the grid center
-                double turnThreshold = TILE_SIZE * 0.2; // 20% of tile size
-                if (distanceX > turnThreshold || distanceY > turnThreshold) {
-                    continue; // Skip this turn attempt
-                }
+                // For 90-degree turns, check if we would cross or are near the grid center
+                if (is90DegreeTurn) {
+                    boolean shouldTurn = false;
+                    double distanceToCenter = 0;
 
-                // Calculate next grid position in the new direction
-                int nextGridX = gridX;
-                int nextGridY = gridY;
-                switch (d) {
-                    case WEST -> nextGridX--;
-                    case EAST -> nextGridX++;
-                    case NORTH -> nextGridY--;
-                    case SOUTH -> nextGridY++;
-                }
-
-                TileType[][] tiles = gameState.tiles();
-
-                // Check if next tile is a wall
-                if (nextGridX >= 0 && nextGridX < tiles.length &&
-                    nextGridY >= 0 && nextGridY < tiles[0].length &&
-                    tiles[nextGridX][nextGridY] != TileType.WALL) {
-
-                    int diff = Math.abs(d.ordinal() - player.getDirection().ordinal());
-                    // 90-degree turn: difference is 1 or 3 (not 2 which is 180-degree)
-                    if (diff == 1 || diff == 3) {
-                        // Snap player to center of current tile when turning
-                        pos.x = gridX * TILE_SIZE;
-                        pos.y = gridY * TILE_SIZE;
-                        player.setPosition(pos);
+                    // Check based on current direction
+                    switch (player.getDirection()) {
+                        case WEST, EAST -> {
+                            // Moving horizontally, check if we're near or would cross the vertical center line
+                            distanceToCenter = Math.abs(pos.x - gridCenterX);
+                            double nextX = pos.x + (player.getDirection() == Direction.EAST ? movementPerFrame : -movementPerFrame);
+                            boolean wouldCrossCenter = (pos.x <= gridCenterX && nextX >= gridCenterX) ||
+                                                      (pos.x >= gridCenterX && nextX <= gridCenterX) ||
+                                                      distanceToCenter <= movementPerFrame;
+                            shouldTurn = wouldCrossCenter;
+                        }
+                        case NORTH, SOUTH -> {
+                            // Moving vertically, check if we're near or would cross the horizontal center line
+                            distanceToCenter = Math.abs(pos.y - gridCenterY);
+                            double nextY = pos.y + (player.getDirection() == Direction.SOUTH ? movementPerFrame : -movementPerFrame);
+                            boolean wouldCrossCenter = (pos.y <= gridCenterY && nextY >= gridCenterY) ||
+                                                      (pos.y >= gridCenterY && nextY <= gridCenterY) ||
+                                                      distanceToCenter <= movementPerFrame;
+                            shouldTurn = wouldCrossCenter;
+                        }
                     }
 
-                    player.setDirection(d);
+                    if (shouldTurn) {
+                        // Check if turn is valid (no wall in intended direction)
+                        int nextGridX = gridX;
+                        int nextGridY = gridY;
+                        switch (intendedDir) {
+                            case WEST -> nextGridX--;
+                            case EAST -> nextGridX++;
+                            case NORTH -> nextGridY--;
+                            case SOUTH -> nextGridY++;
+                        }
+
+                        TileType[][] tiles = gameState.tiles();
+                        if (nextGridX >= 0 && nextGridX < tiles.length &&
+                            nextGridY >= 0 && nextGridY < tiles[0].length &&
+                            tiles[nextGridX][nextGridY] != TileType.WALL) {
+
+                            // Execute the turn: snap to grid center and change direction
+                            pos.x = gridCenterX;
+                            pos.y = gridCenterY;
+                            player.setDirection(intendedDir);
+                        }
+                    }
+                } else {
+                    // 180-degree turn or same direction - just change direction without snapping
+                    player.setDirection(intendedDir);
                 }
             }
-        }
-    }
 
-    private void stepMovement(GameState gameState) {
-        gameState.players().forEach(player -> {
+            // Now move in the (possibly new) direction
             int dx = 0;
             int dy = 0;
 
@@ -178,12 +194,8 @@ public class ClientGameController extends GameController {
                 case SOUTH -> dy = 1;
             }
 
-            Position pos = player.getPosition();
-            double oldX = pos.x;
-            double oldY = pos.y;
-
-            pos.x += dx * PLAYER_SPEED / TARGET_FPS;
-            pos.y += dy * PLAYER_SPEED / TARGET_FPS;
+            pos.x += dx * movementPerFrame;
+            pos.y += dy * movementPerFrame;
 
             TileType[][] tiles = gameState.tiles();
 
