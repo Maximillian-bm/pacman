@@ -10,4 +10,6 @@ public class GameState {
     private TileType[][] tiles;
 
     private Player winner;
+
+    public GameState(){}
 }
