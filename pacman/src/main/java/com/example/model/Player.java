@@ -9,8 +9,8 @@ public class Player extends Entity {
 
     @Getter
     private int
-            points = 0,
-            lives = Constants.PLAYER_LIVES;
+        points = 0,
+        lives = Constants.PLAYER_LIVES;
 
     @Getter
     @Setter
@@ -31,8 +31,8 @@ public class Player extends Entity {
      */
     private int ghostsEatenThisEnergizer;
 
-    public void addTilePoints(TileType tileType) {
-        points += tileType.points;
+    public void addPoints(int points) {
+        this.points += points;
     }
 
     public void eatGhost() {

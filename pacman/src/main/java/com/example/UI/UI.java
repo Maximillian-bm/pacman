@@ -101,6 +101,10 @@ public class UI extends Application {
                             gc.setFill(Color.DARKBLUE);
                             gc.fillRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
+                        case PAC_DOT:
+                            gc.setFill(Color.YELLOW);
+                            gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            break;
                     }
                 }
             }

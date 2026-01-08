@@ -14,6 +14,7 @@ import com.example.model.Direction;
 import com.example.model.GameState;
 import com.example.model.Player;
 import com.example.model.Position;
+import javafx.util.Pair;
 import lombok.Getter;
 
 public class ClientGameController extends GameController {
@@ -38,7 +39,9 @@ public class ClientGameController extends GameController {
             }
         }
 
-        stepMovement();
+        stepMovement(gameState);
+
+        handlePlayerGridPosition(gameState);
 
         GameState newGameState = new GameState(
             ClientMain.clock,
@@ -59,8 +62,8 @@ public class ClientGameController extends GameController {
         // Create test player
         localPlayer = new Player(1);
         localPlayer.setPosition(new Position(
-            5 * TILE_SIZE + TILE_SIZE / 2.0,
-            TILE_SIZE + TILE_SIZE / 2.0
+            5 * TILE_SIZE,
+            2 * TILE_SIZE
         ));
         players.add(localPlayer);
 
@@ -68,16 +71,16 @@ public class ClientGameController extends GameController {
         Ghost ghost1 = new Ghost();
         ghost1.type = GhostType.RED;
         ghost1.position = new Position(
-            3 * TILE_SIZE + TILE_SIZE / 2.0,
-            TILE_SIZE + TILE_SIZE / 2.0
+            3 * TILE_SIZE,
+            TILE_SIZE
         );
         ghosts.add(ghost1);
 
         Ghost ghost2 = new Ghost();
         ghost2.type = GhostType.PINK;
         ghost1.position = new Position(
-            2 * TILE_SIZE + TILE_SIZE / 2.0,
-            TILE_SIZE + TILE_SIZE / 2.0
+            2 * TILE_SIZE,
+            TILE_SIZE
         );
         ghosts.add(ghost2);
 
@@ -90,21 +93,64 @@ public class ClientGameController extends GameController {
         );
     }
 
-    private void stepMovement() {
-        int dx = 0;
-        int dy = 0;
+    private void stepMovement(GameState gameState) {
+        gameState.players().forEach(player -> {
+            int dx = 0;
+            int dy = 0;
 
-        switch (localPlayer.getDirection()) {
-            case WEST  -> dx = -1;
-            case EAST  -> dx = 1;
-            case NORTH -> dy = -1;
-            case SOUTH -> dy = 1;
-        }
+            switch (player.getDirection()) {
+                case WEST -> dx = -1;
+                case EAST -> dx = 1;
+                case NORTH -> dy = -1;
+                case SOUTH -> dy = 1;
+            }
 
-        Position pos = localPlayer.getPosition();
-        pos.x += dx * PLAYER_SPEED;
-        pos.y += dy * PLAYER_SPEED;
-        localPlayer.setPosition(pos);
+            Position pos = player.getPosition();
+            pos.x += dx * PLAYER_SPEED;
+            pos.y += dy * PLAYER_SPEED;
+
+            // Teleport player to the other side here
+            TileType[][] tiles = gameState.tiles();
+            double mapWidth = tiles[0].length * TILE_SIZE;
+            double mapHeight = tiles.length * TILE_SIZE;
+
+            if (pos.x < 0) {
+                pos.x = mapWidth - TILE_SIZE;
+            } else if (pos.x >= mapWidth) {
+                pos.x = 0;
+            }
+
+            if (pos.y < 0) {
+                pos.y = mapHeight - TILE_SIZE;
+            } else if (pos.y >= mapHeight) {
+                pos.y = 0;
+            }
+
+            player.setPosition(pos);
+        });
+    }
+
+    private void handlePlayerGridPosition(GameState gameState) {
+        gameState.players().forEach(player -> {
+            Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
+
+            TileType[][] tiles = gameState.tiles();
+
+            int tileX = playerGridPosition.getKey();
+            int tileY = playerGridPosition.getValue();
+
+            TileType tileType = tiles[tileX][tileY];
+
+            player.addPoints(tileType.points);
+
+            switch (tileType) {
+                case EMPTY -> {
+                }
+                case WALL -> {
+                }
+                default -> tiles[tileX][tileY] = TileType.EMPTY;
+            }
+        });
     }
 
     private Direction directionFromMove(int move) {
