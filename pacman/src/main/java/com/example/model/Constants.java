@@ -11,11 +11,10 @@ public class Constants {
     public final static String REMOTE_URI_RAW = "tcp://XXX.XXX.X.XXX/rawAction?rep";
     public final static String GATE_URI = "tcp://XXX.XXX.X.XXX/?rep";
 
-    // Game constants
-    public final static int TILE_SIZE = 64;
-    public final static int TILE_COUNT = 14;
+    public final static int PLAYER_HEALTH = 1;
+    public final static int TILE_SIZE = 48;
     public final static int PLAYER_LIVES = 3;
 
-    public final static int INIT_SCREEN_WIDTH = 720;
-    public final static int INIT_SCREEN_HEIGHT = 720;
+    public final static int INIT_SCREEN_WIDTH = 920;
+    public final static int INIT_SCREEN_HEIGHT = 920;
 }
