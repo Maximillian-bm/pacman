@@ -63,7 +63,7 @@ public class ClientGameController extends GameController {
         localPlayer = new Player(1);
         localPlayer.setPosition(new Position(
             3 * TILE_SIZE,
-            4 * TILE_SIZE
+            3 * TILE_SIZE
         ));
         players.add(localPlayer);
 

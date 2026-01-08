@@ -15,6 +15,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -115,6 +116,18 @@ public class UI extends Application {
                             gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                     }
+
+                    // Show which tile the player is on
+                    /*int finalI = i;
+                    int finalJ = j;
+                    gameState.players().forEach(player -> {
+                        Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
+                        System.out.println(playerGridPosition.getKey() + " " + playerGridPosition.getValue());
+                        if (playerGridPosition.getKey() == finalI && playerGridPosition.getValue() == finalJ) {
+                            gc.setFill(Color.DARKRED);
+                            gc.fillRect(finalI * TILE_SIZE, finalJ * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    });*/
                 }
             }
         }
