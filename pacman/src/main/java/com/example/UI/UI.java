@@ -111,16 +111,17 @@ public class UI extends Application {
                 for (int j = 0; j < tiles[0].length; j++) {
                     switch (tiles[i][j]) {
                         case EMPTY:
-                            gc.setFill(Color.BLACK);
-                            gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            //gc.setFill(Color.BLACK);
+                            //gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case WALL:
                             gc.setFill(Color.DARKBLUE);
                             gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case PAC_DOT:
+                            double pacDotSize = TILE_SIZE / 8.0;
                             gc.setFill(Color.YELLOW);
-                            gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.fillRect(i * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, j * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
                             break;
                     }
 

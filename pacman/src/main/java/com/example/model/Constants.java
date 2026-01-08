@@ -15,7 +15,7 @@ public class Constants {
 
     public final static int TILE_SIZE = 48;
     public final static int PLAYER_LIVES = 3;
-    public final static double PLAYER_SPEED = 10;
+    public final static double PLAYER_SPEED = 15;
 
     public final static int INIT_SCREEN_WIDTH = map1[0].length * TILE_SIZE;
     public final static int INIT_SCREEN_HEIGHT = map1.length * TILE_SIZE;
