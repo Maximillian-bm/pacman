@@ -19,7 +19,7 @@ public class Reader implements Runnable {
     @Override
     public void run() {
         try {
-            Space remoteActions = new RemoteSpace(Constants.REMOTE_URI);
+            Space remoteActions = new RemoteSpace(Constants.REMOTE_URI_CLEAN);
             while(true) {
                 Action action = ActionUtil.convertObjToAction(remoteActions.query(new ActualField(ClientMain.nrOfActions), new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class)));
                 Constants.cleanActions.add(action);
