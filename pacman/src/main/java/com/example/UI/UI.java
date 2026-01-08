@@ -25,7 +25,7 @@ import com.example.model.Direction;
 
 public class UI extends Application {
     private final ClientGameController gameController = new ClientGameController();
-    private GameState gameState = new GameState();
+    private GameState gameState;
 
     private GraphicsContext gc;
     private Canvas canvas;
