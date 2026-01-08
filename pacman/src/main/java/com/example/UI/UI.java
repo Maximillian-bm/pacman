@@ -34,8 +34,6 @@ public class UI extends Application {
 
     private long lastTime = 0;
 
-    private long firstTime = 0;
-
     private KeyHandler keyHandler;
 
     @Override
@@ -80,8 +78,6 @@ public class UI extends Application {
                 .filter(e -> e.getClock() == ClientMain.clock)
                 .toList();
             gameState = gameController.updateGameState(gameState, ActionOfClock);
-
-            gameController.stepMovement();
 
             drawPlayerPosition(time);
 
