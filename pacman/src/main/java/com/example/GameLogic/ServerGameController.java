@@ -1,5 +1,7 @@
 package com.example.GameLogic;
 
-public class ServerGameController extends GameController {
+
+//Har indsat abstract ind som placeholder.
+public abstract class ServerGameController extends GameController {
  
 }
