@@ -144,13 +144,13 @@ public class UI extends Application {
                 int sy = 0;
                 switch (player.getDirection()) {
                     case WEST:
-                        sy += 50 * 5;
+                        sy += 50 * 6;
                         break;
                     case NORTH:
-                        sy += 50 * 8;
+                        sy += 50 * 9;
                         break;
                     case SOUTH:
-                        sy += 50 * 2;
+                        sy += 50 * 3;
                         break;
                 }
 
