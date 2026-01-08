@@ -1,5 +1,7 @@
 package com.example.ServerLogic;
 
+import org.jspace.ActualField;
+import org.jspace.FormalField;
 import org.jspace.PileSpace;
 import org.jspace.QueueSpace;
 import org.jspace.Space;
@@ -22,11 +24,10 @@ public class LobbyActionHandler{
         int clock = 0;
         while(true) {
             try {
-                System.out.print("waiting for action");
-                Action rawAction = ActionUtil.convertObjToAction(rawActions.get());
-                System.out.print("got action");
+                Action rawAction = ActionUtil.convertObjToAction(rawActions.get(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class)));
                 int tempClock = rawAction.getClock();
-                actionCount = ActionUtil.handleRawAction(clock, actionCount, rawAction, cleanActions);
+                ActionUtil.handleRawAction(clock, actionCount, rawAction, cleanActions);
+                actionCount++;
                 clock = ((tempClock < clock) ? clock : tempClock);
             } catch (InterruptedException e) {
                 e.printStackTrace();
