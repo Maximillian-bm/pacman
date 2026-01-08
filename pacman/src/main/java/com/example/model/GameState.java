@@ -2,10 +2,14 @@ package com.example.model;
 
 import java.util.*;
 
-public record GameState(
-    int clock,
-    List<Player> players,
-    List<Ghost> ghosts,
-    TileType[][] tiles,
-    Player winner
-) { }
+public class GameState {
+    private int clock;
+
+    private List<Player> players;
+    private List<Ghost> ghosts;
+    private TileType[][] tiles;
+
+    private Player winner;
+
+    public GameState(){}
+}
