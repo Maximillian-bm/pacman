@@ -13,8 +13,12 @@ import com.example.GameLogic.ClientThreads.KeyHandler;
 import com.example.GameLogic.ClientThreads.KeyHandlerOffline;
 import com.example.model.Action;
 import com.example.model.Constants;
+import com.example.model.Direction;
 import com.example.model.GameState;
+import com.example.model.Player;
+import com.example.model.Position;
 
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -31,6 +35,14 @@ import com.example.model.TileType;
 
 import static com.example.model.Constants.TILE_SIZE;
 
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+
 public class UI extends Application {
     private final ClientGameController gameController = new ClientGameController();
     private GameState gameState;
@@ -42,6 +54,8 @@ public class UI extends Application {
     private Player player;
 
     private final Set<KeyCode> down = EnumSet.noneOf(KeyCode.class);
+
+    private long lastTime = 0;
 
     @Override
     public void start(Stage stage) {
@@ -83,6 +97,13 @@ public class UI extends Application {
 
         gc = canvas.getGraphicsContext2D();
 
+        // Forward JavaFX input to KeyHandler
+        scene.setOnKeyPressed(e -> {
+            if (ClientMain.keyHandler != null) {
+                ClientMain.keyHandler.onKeyPressed(e.getCode());
+            }
+        });
+
         stage.show();
     }
 
@@ -91,10 +112,17 @@ public class UI extends Application {
 
         @Override
         public void handle(long time) {
+            long deltaTime = (lastTime == 0) ? 0 : (now - lastTime);
+            lastTime = now;
+
             List<Action> ActionOfClock = Constants.cleanActions.stream()
                 .filter(e -> e.getClock() == ClientMain.clock)
                 .toList();
             gameState = gameController.updateGameState(gameState, ActionOfClock);
+
+            controller.stepMovement(deltaTime);
+
+            ClientMain.clock++;
 
             switch(player.getDirection()) {
                 case WEST: drawPlayerPosition(-1, 0, time); break;
