@@ -113,11 +113,26 @@ public class ClientGameController extends GameController {
             Direction d = intendedDirections.get(player.getId());
 
             if (d != null && d != player.getDirection()) {
-                // Check if there's a wall in the direction the player wants to turn
                 Position pos = player.getPosition();
                 Pair<Integer, Integer> gridPos = pos.ToGridPosition();
                 int gridX = gridPos.getKey();
                 int gridY = gridPos.getValue();
+
+                // Calculate the center of the current grid cell
+                double gridCenterX = gridX * TILE_SIZE;
+                double gridCenterY = gridY * TILE_SIZE;
+
+                // Calculate distance from player center to grid center
+                double playerCenterX = pos.x;
+                double playerCenterY = pos.y;
+                double distanceX = Math.abs(playerCenterX - gridCenterX);
+                double distanceY = Math.abs(playerCenterY - gridCenterY);
+
+                // Only allow turn if player is close enough to the grid center
+                double turnThreshold = TILE_SIZE * 0.2; // 20% of tile size
+                if (distanceX > turnThreshold || distanceY > turnThreshold) {
+                    continue; // Skip this turn attempt
+                }
 
                 // Calculate next grid position in the new direction
                 int nextGridX = gridX;
