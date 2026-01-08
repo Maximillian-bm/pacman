@@ -10,6 +10,7 @@ public class Lobby {
     private int id;
 
     public static void main(String[] arg) {
-
+        LobbyActionHandler lobbyActionHandler = new LobbyActionHandler();
+        lobbyActionHandler.launch();
     }
 }
