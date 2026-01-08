@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.example.model.Constants.TILE_SIZE;
+import static com.example.model.Constants.TARGET_FPS;
 
 public class UI extends Application {
     private final ClientGameController gameController = new ClientGameController();
@@ -72,9 +73,14 @@ public class UI extends Application {
     }
 
     private class GameAnimator extends AnimationTimer {
+        long prevTime = 0;
 
         @Override
         public void handle(long time) {
+            if (prevTime != 0 && (time - prevTime) < (1000000000 / TARGET_FPS)) {
+                return;
+            }
+
             List<Action> ActionOfClock = Constants.cleanActions.stream()
                 .filter(e -> e.getClock() == ClientMain.clock)
                 .toList();
@@ -83,6 +89,8 @@ public class UI extends Application {
             drawPlayerPosition(time);
 
             ClientMain.clock++;
+
+            prevTime = time;
         }
 
         private void drawPlayerPosition(long time) {
