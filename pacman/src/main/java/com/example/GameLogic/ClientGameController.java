@@ -1,7 +1,9 @@
 package com.example.GameLogic;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.example.model.*;
 
@@ -21,12 +23,16 @@ public class ClientGameController extends GameController {
     @Getter
     private Player localPlayer;
 
+    // Store the last intended direction for each player
+    private Map<Integer, Direction> intendedDirections = new HashMap<>();
+
     public GameState updateGameState(GameState gameState, List<Action> actions) {
         // Initialize game and return early
         if (gameState == null) return initializeGameState();
 
         // Actual update loop
         handleActions(gameState, actions);
+        applyIntendedDirections(gameState);
         stepMovement(gameState);
         handlePlayerGridPosition(gameState);
 
@@ -95,6 +101,17 @@ public class ClientGameController extends GameController {
             if (player == null) continue;
 
             Direction d = directionFromMove(a.getMove());
+            if (d != null) {
+                // Save the intended direction for this player
+                intendedDirections.put(player.getId(), d);
+            }
+        }
+    }
+
+    private void applyIntendedDirections(GameState gameState) {
+        for (Player player : gameState.players()) {
+            Direction d = intendedDirections.get(player.getId());
+
             if (d != null && d != player.getDirection()) {
                 // Check if there's a wall in the direction the player wants to turn
                 Position pos = player.getPosition();
