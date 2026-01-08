@@ -29,7 +29,7 @@ public class UI extends Application {
     private GraphicsContext gc;
     private Canvas canvas;
 
-    private Image playerImage;
+    private Image spriteSheet;
 
     private final Set<KeyCode> down = EnumSet.noneOf(KeyCode.class);
 
@@ -37,7 +37,7 @@ public class UI extends Application {
 
     @Override
     public void start(Stage stage) {
-        playerImage = new Image("./tilesets/pacman-sprite-sheet.png");
+        spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
 
         final Group root = new Group();
 
@@ -80,26 +80,32 @@ public class UI extends Application {
                 .toList();
             gameState = gameController.updateGameState(gameState, ActionOfClock);
 
-            drawPlayerPosition(time);
+            draw(time);
 
             ClientMain.clock++;
         }
 
-        private void drawPlayerPosition(long time) {
+        private void draw(long time) {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
+            drawMap();
+
+            drawPlayerPosition(time);
+        }
+
+        private void drawMap() {
             TileType[][] tiles = gameState.tiles();
             for (int i = 0; i < tiles.length; i++) {
                 for (int j = 0; j < tiles[0].length; j++) {
-                    switch(tiles[i][j]) {
+                    switch (tiles[i][j]) {
                         case EMPTY:
                             gc.setFill(Color.BLACK);
-                            gc.fillRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case WALL:
                             gc.setFill(Color.DARKBLUE);
-                            gc.fillRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case PAC_DOT:
                             gc.setFill(Color.YELLOW);
@@ -108,27 +114,41 @@ public class UI extends Application {
                     }
                 }
             }
+        }
 
-            Player localPlayer = gameController.getLocalPlayer();
+        private void drawPlayerPosition(long time) {
+            gameState.players().forEach(player -> {
+                int sy = 0;
+                switch (player.getDirection()) {
+                    case WEST:
+                        sy += 50 * 6;
+                        break;
+                    case EAST:
+                        sy = 50;
+                        break;
+                    case NORTH:
+                        sy += 50 * 9;
+                        break;
+                    case SOUTH:
+                        sy += 50 * 3;
+                        break;
+                }
 
-            int sy = 0;
-            switch (localPlayer.getDirection()) {
-                case WEST: sy += 50*6; break;
-                case EAST: sy = 50; break;
-                case NORTH: sy += 50*9; break;
-                case SOUTH: sy += 50*3; break;
-            }
+                Position playerPos = player.getPosition();
 
-            Position playerPos = localPlayer.getPosition();
+                long pacmanFrame = (time / 400000000) % 4;
+                System.out.println(pacmanFrame);
+                if (pacmanFrame == 0) {
+                    gc.drawImage(spriteSheet, 850, sy, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
+                } else if (pacmanFrame == 1 || pacmanFrame == 3) {
+                    gc.drawImage(spriteSheet, 850, sy + 50, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
+                } else {
+                    gc.drawImage(spriteSheet, 850, sy + 50 * 2, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
+                }
 
-            long pacmanFrame = (time / 200000000) % 4;
-            if (pacmanFrame == 0) {
-                gc.drawImage(playerImage, 850, sy, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
-            } else if (pacmanFrame == 1 || pacmanFrame == 3) {
-                gc.drawImage(playerImage, 850, sy+50, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
-            } else {
-                gc.drawImage(playerImage, 850, sy+50*2, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
-            }
+                // Draw pacmanFrame on top of player
+
+            });
 
             lastTime = time;
         }
