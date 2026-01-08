@@ -79,6 +79,13 @@ public class UI extends Application {
                 .toList();
             gameState = gameController.updateGameState(gameState, ActionOfClock);
 
+            //Proof that action is sent to game controller
+            /*if(ActionOfClock.size() != 0){
+                for (Action a : ActionOfClock) {
+                    System.out.println(a.getMove() +" "+ a.getClock());
+                }
+            }*/
+
             drawPlayerPosition(time);
 
             ClientMain.clock++;
