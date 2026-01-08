@@ -1,17 +1,11 @@
 package com.example.model;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Objects;
 
 public class Player extends Entity {
     @Getter
     private final int id;
-    @Getter
-    private final ImageView imageView;
 
     @Getter
     private int
@@ -30,20 +24,6 @@ public class Player extends Entity {
 
     public Player(int id) {
         this.id = id;
-
-        // Feel free to move all this:
-        Image tilesetImage = new Image(Objects.requireNonNull(getClass().getResource("/tilesets/pacman-sprite-sheet.png")).toExternalForm());
-        ImageView imageView = new ImageView(tilesetImage);
-
-        // Use viewport instead of clip for proper sprite selection
-        imageView.setViewport(new javafx.geometry.Rectangle2D(100, 50, 50, 50));
-        imageView.setFitWidth(32);
-        imageView.setFitHeight(32);
-
-        /* Animation guide:
-         * https://frostybee.github.io/fx-course/ui/fx-images/
-         */
-        this.imageView = imageView;
     }
 
     /*
