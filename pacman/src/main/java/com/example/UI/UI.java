@@ -136,7 +136,7 @@ public class UI extends Application {
 
                 Position playerPos = player.getPosition();
 
-                int pacmanFrame = (int)(time / 100000000) % 4;
+                int pacmanFrame = (int)(time / 75000000) % 4;
 
                 int syf = switch (pacmanFrame) {
                     case 0 -> sy;
