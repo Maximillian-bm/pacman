@@ -30,7 +30,6 @@ public class UI extends Application {
     private Canvas canvas;
 
     private Image playerImage;
-    private Player player;
 
     private final Set<KeyCode> down = EnumSet.noneOf(KeyCode.class);
 
@@ -89,7 +88,7 @@ public class UI extends Application {
 
             ClientMain.clock++;
 
-            switch(player.getDirection()) {
+            switch(gameController.getLocalPlayer().getDirection()) {
                 case WEST: drawPlayerPosition(-1, 0, time); break;
                 case EAST: drawPlayerPosition(1, 0, time); break;
                 case NORTH: drawPlayerPosition(0, -1, time); break;
@@ -125,13 +124,15 @@ public class UI extends Application {
                 }
             }
 
-            Position pos = player.getPosition();
+            Player localPlayer = gameController.getLocalPlayer();
+
+            Position pos = localPlayer.getPosition();
             pos.x += x * (deltaTime / 2000000);
             pos.y += y * (deltaTime / 2000000);
-            player.setPosition(pos);
+            localPlayer.setPosition(pos);
 
             int sy = 0;
-            switch (player.getDirection()) {
+            switch (localPlayer.getDirection()) {
                 case WEST: sy += 50*6; break;
                 case EAST:
                     break;
