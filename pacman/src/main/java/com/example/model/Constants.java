@@ -7,6 +7,8 @@ public class Constants {
     public final static SpaceRepository rep = new SpaceRepository();
 
     // Game constants
+    public final static int TILE_SIZE = 64;
+    public final static int TILE_COUNT = 14;
     public final static int PLAYER_HEALTH = 1;
     public final static int PLAYER_LIVES = 3;
 }
