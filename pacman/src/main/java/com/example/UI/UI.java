@@ -17,6 +17,7 @@ import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.Direction;
 import com.example.model.GameState;
+import com.example.model.Constants;
 
 public class UI extends Application {
     private GameState gameState;
@@ -37,14 +38,14 @@ public class UI extends Application {
 
         final Group root = new Group();
 
-        final Canvas canvas = new Canvas(400, 200);
+        final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
+        stage.setScene(scene);
+
+        final Canvas canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
         root.getChildren().add(canvas);
 
         final AnimationTimer tm = new TimerMethod();
         tm.start();
-
-        final Scene scene = new Scene(root, 400, 400);
-        stage.setScene(scene);
 
         scene.addEventHandler(KeyEvent.KEY_PRESSED, (key) -> {
               if(key.getCode()==KeyCode.A || key.getCode()==KeyCode.LEFT) {

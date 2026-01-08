@@ -9,4 +9,7 @@ public class Constants {
     // Game constants
     public final static int PLAYER_HEALTH = 1;
     public final static int PLAYER_LIVES = 3;
+
+    public final static int INIT_SCREEN_WIDTH = 720;
+    public final static int INIT_SCREEN_HEIGHT = 720;
 }
