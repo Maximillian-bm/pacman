@@ -28,7 +28,7 @@ public class Maps {
 
         for (int i = 0; i < map1.length; i++) {
             for (int j = 0; j < map1[0].length; j++) {
-                tileMap1[i][j] = TileType.values()[map1[i][j]];
+                tileMap1[i][j] = TileType.values()[map1[j][i]];
             }
         }
 
