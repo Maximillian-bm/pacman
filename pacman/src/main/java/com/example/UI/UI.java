@@ -121,33 +121,30 @@ public class UI extends Application {
                 int sy = 0;
                 switch (player.getDirection()) {
                     case WEST:
-                        sy += 50 * 6;
+                        sy += 50 * 5;
                         break;
                     case EAST:
-                        sy = 50;
+                        sy = 0;
                         break;
                     case NORTH:
-                        sy += 50 * 9;
+                        sy += 50 * 8;
                         break;
                     case SOUTH:
-                        sy += 50 * 3;
+                        sy += 50 * 2;
                         break;
                 }
 
                 Position playerPos = player.getPosition();
 
-                long pacmanFrame = (time / 400000000) % 4;
-                System.out.println(pacmanFrame);
-                if (pacmanFrame == 0) {
-                    gc.drawImage(spriteSheet, 850, sy, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
-                } else if (pacmanFrame == 1 || pacmanFrame == 3) {
-                    gc.drawImage(spriteSheet, 850, sy + 50, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
-                } else {
-                    gc.drawImage(spriteSheet, 850, sy + 50 * 2, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
-                }
+                int pacmanFrame = (int)(time / 100000000) % 4;
 
-                // Draw pacmanFrame on top of player
+                int syf = switch (pacmanFrame) {
+                    case 0 -> sy;
+                    case 2 -> sy + 50 * 2;
+                    default -> sy + 50;
+                };
 
+                gc.drawImage(spriteSheet, 850, syf, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
             });
 
             lastTime = time;
