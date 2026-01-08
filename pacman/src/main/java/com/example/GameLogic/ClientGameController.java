@@ -9,7 +9,15 @@ public class ClientGameController extends GameController {
 
     public ClientGameController(){}
 
-    public GameState updateGameState(GameState gameState, List<Action> actions){
-        return null;
+    public GameState updateGameState(GameState gameState, List<Action> actions) {
+        GameState newGameState = new GameState(
+            ClientMain.clock,
+            gameState.players(),
+            gameState.ghosts(),
+            gameState.tiles(),
+            gameState.winner()
+        );
+
+        return newGameState;
     }
 }
