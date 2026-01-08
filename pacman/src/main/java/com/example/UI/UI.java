@@ -29,6 +29,8 @@ import com.example.model.Position;
 import com.example.model.Direction;
 import com.example.model.TileType;
 
+import static com.example.model.Constants.TILE_SIZE;
+
 public class UI extends Application {
     private final ClientGameController gameController = new ClientGameController();
     private GameState gameState;
@@ -120,11 +122,11 @@ public class UI extends Application {
                     switch(tiles[i][j]) {
                         case EMPTY:
                             gc.setFill(Color.BLACK);
-                            gc.fillRect(i*Constants.TILE_SIZE, j*Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
+                            gc.fillRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case WALL:
                             gc.setFill(Color.DARKBLUE);
-                            gc.fillRect(i*Constants.TILE_SIZE, j*Constants.TILE_SIZE, Constants.TILE_SIZE, Constants.TILE_SIZE);
+                            gc.fillRect(i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                     }
                 }
@@ -135,21 +137,21 @@ public class UI extends Application {
             pos.y += y * (deltaTime / 2000000);
             player.setPosition(pos);
 
-            int sy = 42;
+            int sy = 0;
             switch (player.getDirection()) {
-                case WEST: sy += 43*6; break;
+                case WEST: sy += 50*6; break;
                 case EAST: ; break;
-                case NORTH: sy += 43*9; break;
-                case SOUTH: sy += 43*3; break;
+                case NORTH: sy += 50*9; break;
+                case SOUTH: sy += 50*3; break;
             }
 
             long pacmanFrame = (time / 200000000) % 4;
             if (pacmanFrame == 0) {
-                gc.drawImage(playerImage, 757, 42, 32, 32, pos.x, pos.y, 100, 100);
+                gc.drawImage(playerImage, 850, 50, 50, 50, pos.x, pos.y, TILE_SIZE, TILE_SIZE);
             } else if (pacmanFrame == 1 || pacmanFrame == 3) {
-                gc.drawImage(playerImage, 757, sy+43, 32, 32, pos.x, pos.y, 100, 100);
+                gc.drawImage(playerImage, 850, sy+50, 50, 50, pos.x, pos.y, TILE_SIZE, TILE_SIZE);
             } else {
-                gc.drawImage(playerImage, 757, sy+43*2, 32, 32, pos.x, pos.y, 100, 100);
+                gc.drawImage(playerImage, 850, sy+50*2, 50, 50, pos.x, pos.y, TILE_SIZE, TILE_SIZE);
             }
 
             lastTime = time;
