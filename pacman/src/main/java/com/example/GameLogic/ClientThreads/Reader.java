@@ -18,11 +18,13 @@ public class Reader implements Runnable {
     //Continuesly reads from the remote clean actions space and updates the static list of clean actions
     @Override
     public void run() {
+        int nrOfActions = 0;
         try {
             Space remoteActions = new RemoteSpace(Constants.REMOTE_URI_CLEAN);
             while(true) {
-                Action action = ActionUtil.convertObjToAction(remoteActions.query(new ActualField(ClientMain.nrOfActions), new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class)));
+                Action action = ActionUtil.convertObjToAction(remoteActions.query(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new ActualField(nrOfActions)));
                 Constants.cleanActions.add(action);
+                nrOfActions++;
             }
         } catch (UnknownHostException e) {
             e.printStackTrace();

@@ -13,7 +13,7 @@ public class ActionUtil {
         int clock = (int) t[1];
         int move = (int) t[2];
         int index = ((t.length != 4) ? -1 : (int) t[3]);
-        return new Action(index, playerId, clock, move);
+        return new Action(playerId, clock, move, index);
     }
 
     //Given a raw action object, registeres that in the given space
@@ -28,14 +28,13 @@ public class ActionUtil {
 
     //Given the clock and index of the last clean action, registeres a raw action to the given clean action space
     //Meant to be used exclusivly by the server
-    public static int handleRawAction(int lastActionsClock, int index, Action action, Space cleanActions) {
+    public static void handleRawAction(int lastActionsClock, int index, Action action, Space cleanActions) {
         action.setClock(((action.getClock() < lastActionsClock) ? lastActionsClock : action.getClock()));
         try {
             cleanActions.put(action.getPlayerId(), action.getClock(), action.getMove(), index);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return index++;
     }
 
 }
