@@ -24,7 +24,7 @@ public class Maps {
         {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
     };
 
-    public TileType[][] getMap1() {
+    public static TileType[][] getMap1() {
         TileType[][] tileMap1 = new TileType[map1.length][map1[0].length];
 
         for (int i = 0; i < map1.length; i++) {

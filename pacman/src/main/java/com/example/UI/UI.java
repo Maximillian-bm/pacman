@@ -86,13 +86,15 @@ public class UI extends Application {
                 deltaTime = time - lastTime;
             }
 
-            System.out.println(deltaTime);
+            // System.out.println(deltaTime);
             gc.setFill(Color.WHITE);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
+            TileType[][] tiles = gameState.tiles();
+
             Position pos = player.getPosition();
-            pos.x += x * (deltaTime / 4000000);
-            pos.y += y * (deltaTime / 4000000);
+            pos.x += x * (deltaTime / 2000000);
+            pos.y += y * (deltaTime / 2000000);
             player.setPosition(pos);
 
             int sy = 42;
