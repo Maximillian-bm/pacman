@@ -1,47 +1,26 @@
 package com.example.UI;
 
+import com.example.GameLogic.ClientGameController;
+import com.example.GameLogic.ClientMain;
+import com.example.GameLogic.ClientThreads.KeyHandler;
+import com.example.GameLogic.ClientThreads.KeyHandlerOffline;
+import com.example.model.*;
+import javafx.animation.AnimationTimer;
+import javafx.application.Application;
+import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import com.example.GameLogic.ClientGameController;
-import com.example.GameLogic.ClientMain;
-import com.example.GameLogic.ClientThreads.KeyHandler;
-import com.example.GameLogic.ClientThreads.KeyHandlerOffline;
-import com.example.model.Action;
-import com.example.model.Constants;
-import com.example.model.Direction;
-import com.example.model.GameState;
-import com.example.model.Player;
-import com.example.model.Position;
-
-import javafx.animation.AnimationTimer;
-import javafx.application.Application;
-import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.Group;
-import javafx.animation.AnimationTimer;
-
-import com.example.model.Player;
-import com.example.model.Position;
-import com.example.model.Direction;
-import com.example.model.TileType;
-
 import static com.example.model.Constants.TILE_SIZE;
-
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
 
 public class UI extends Application {
     private final ClientGameController gameController = new ClientGameController();
@@ -59,13 +38,6 @@ public class UI extends Application {
 
     @Override
     public void start(Stage stage) {
-        player = new Player(0);
-        Position pos = new Position();
-        pos.x = 100;
-        pos.y = 100;
-        player.setPosition(pos);
-        player.setDirection(Direction.SOUTH);
-
         playerImage = new Image("./tilesets/pacman-sprite-sheet.png");
 
         final Group root = new Group();
@@ -97,13 +69,6 @@ public class UI extends Application {
 
         gc = canvas.getGraphicsContext2D();
 
-        // Forward JavaFX input to KeyHandler
-        scene.setOnKeyPressed(e -> {
-            if (ClientMain.keyHandler != null) {
-                ClientMain.keyHandler.onKeyPressed(e.getCode());
-            }
-        });
-
         stage.show();
     }
 
@@ -112,15 +77,15 @@ public class UI extends Application {
 
         @Override
         public void handle(long time) {
-            long deltaTime = (lastTime == 0) ? 0 : (now - lastTime);
-            lastTime = now;
+            long deltaTime = (lastTime == 0) ? 0 : (time - lastTime);
+            lastTime = time;
 
             List<Action> ActionOfClock = Constants.cleanActions.stream()
                 .filter(e -> e.getClock() == ClientMain.clock)
                 .toList();
             gameState = gameController.updateGameState(gameState, ActionOfClock);
 
-            controller.stepMovement(deltaTime);
+            gameController.stepMovement(deltaTime);
 
             ClientMain.clock++;
 

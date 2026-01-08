@@ -20,18 +20,7 @@ public class ClientGameController extends GameController {
     private static final long DT_DIVISOR = 4_000_000L;
 
     @Getter
-    private final Player player;
-
-    public ClientGameController(int playerId, double startX, double startY, Direction startDir) {
-        this.player = new Player(playerId);
-
-        Position pos = new Position();
-        pos.x = startX;
-        pos.y = startY;
-
-        player.setPosition(pos);
-        player.setDirection(startDir);
-    }
+    private Player localPlayer;
 
     public GameState updateGameState(GameState gameState, List<Action> actions) {
         // Initialize game and return early
@@ -41,11 +30,11 @@ public class ClientGameController extends GameController {
         if (actions != null) {
             for (Action a : actions) {
                 if (a == null) continue;
-                if (a.getPlayerId() != player.getId()) continue;
+                if (a.getPlayerId() != localPlayer.getId()) continue;
 
                 Direction d = directionFromMove(a.getMove());
                 if (d != null) {
-                    player.setDirection(d);
+                    localPlayer.setDirection(d);
                 }
             }
         }
@@ -67,12 +56,12 @@ public class ClientGameController extends GameController {
         TileType[][] tiles = Maps.getMap1();
 
         // Create test player
-        Player testPlayer = new Player(1);
-        testPlayer.setPosition(new Position(
+        localPlayer = new Player(1);
+        localPlayer.setPosition(new Position(
             5 * TILE_SIZE + TILE_SIZE / 2.0,
             TILE_SIZE + TILE_SIZE / 2.0
         ));
-        players.add(testPlayer);
+        players.add(localPlayer);
 
         // Create test ghosts
         Ghost ghost1 = new Ghost();
@@ -106,17 +95,17 @@ public class ClientGameController extends GameController {
         int dx = 0;
         int dy = 0;
 
-        switch (player.getDirection()) {
+        switch (localPlayer.getDirection()) {
             case WEST  -> dx = -1;
             case EAST  -> dx = 1;
             case NORTH -> dy = -1;
             case SOUTH -> dy = 1;
         }
 
-        Position pos = player.getPosition();
+        Position pos = localPlayer.getPosition();
         pos.x += dx * (deltaTime / (double) DT_DIVISOR);
         pos.y += dy * (deltaTime / (double) DT_DIVISOR);
-        player.setPosition(pos);
+        localPlayer.setPosition(pos);
     }
 
     private Direction directionFromMove(int move) {
