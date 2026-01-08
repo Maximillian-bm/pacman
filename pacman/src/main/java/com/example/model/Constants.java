@@ -11,9 +11,9 @@ public class Constants {
     public final static String REMOTE_URI_RAW = "tcp://XXX.XXX.X.XXX/rawAction?rep";
     public final static String GATE_URI = "tcp://XXX.XXX.X.XXX/?rep";
 
-    public final static int PLAYER_HEALTH = 1;
     public final static int TILE_SIZE = 48;
     public final static int PLAYER_LIVES = 3;
+    public final static double PLAYER_SPEED = 0.2;
 
     public final static int INIT_SCREEN_WIDTH = 920;
     public final static int INIT_SCREEN_HEIGHT = 920;

@@ -1,33 +1,24 @@
 package com.example.UI;
 
+import com.example.GameLogic.ClientGameController;
+import com.example.GameLogic.ClientMain;
+import com.example.GameLogic.ClientThreads.KeyHandler;
+import com.example.GameLogic.ClientThreads.KeyHandlerOffline;
+import com.example.model.*;
+import javafx.animation.AnimationTimer;
+import javafx.application.Application;
+import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
-
-import com.example.GameLogic.ClientGameController;
-import com.example.GameLogic.ClientMain;
-import com.example.GameLogic.ClientThreads.KeyHandler;
-import com.example.GameLogic.ClientThreads.KeyHandlerOffline;
-import com.example.model.Action;
-import com.example.model.Constants;
-import com.example.model.GameState;
-
-import javafx.application.Application;
-import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.Group;
-import javafx.animation.AnimationTimer;
-
-import com.example.model.Player;
-import com.example.model.Position;
-import com.example.model.Direction;
-import com.example.model.TileType;
 
 import static com.example.model.Constants.TILE_SIZE;
 
@@ -39,19 +30,13 @@ public class UI extends Application {
     private Canvas canvas;
 
     private Image playerImage;
-    private Player player;
 
     private final Set<KeyCode> down = EnumSet.noneOf(KeyCode.class);
 
+    private long lastTime = 0;
+
     @Override
     public void start(Stage stage) {
-        player = new Player(0);
-        Position pos = new Position();
-        pos.x = 100;
-        pos.y = 100;
-        player.setPosition(pos);
-        player.setDirection(Direction.SOUTH);
-
         playerImage = new Image("./tilesets/pacman-sprite-sheet.png");
 
         final Group root = new Group();
@@ -87,7 +72,6 @@ public class UI extends Application {
     }
 
     private class GameAnimator extends AnimationTimer {
-        private long lastTime;
 
         @Override
         public void handle(long time) {
@@ -96,23 +80,14 @@ public class UI extends Application {
                 .toList();
             gameState = gameController.updateGameState(gameState, ActionOfClock);
 
-            switch(player.getDirection()) {
-                case WEST: drawPlayerPosition(-1, 0, time); break;
-                case EAST: drawPlayerPosition(1, 0, time); break;
-                case NORTH: drawPlayerPosition(0, -1, time); break;
-                case SOUTH: drawPlayerPosition(0, 1, time); break;
-            }
+            gameController.stepMovement();
+
+            drawPlayerPosition(time);
+
+            ClientMain.clock++;
         }
 
-        private void drawPlayerPosition(int x, int y, long time) {
-            long deltaTime;
-            if (lastTime == 0) {
-                deltaTime = 0;
-            } else {
-                deltaTime = time - lastTime;
-            }
-
-            // System.out.println(deltaTime);
+        private void drawPlayerPosition(long time) {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
@@ -132,20 +107,17 @@ public class UI extends Application {
                 }
             }
 
-            // Position pos = player.getPosition();
-            // pos.x += x * (deltaTime / 2000000);
-            // pos.y += y * (deltaTime / 2000000);
-            // player.setPosition(pos);
+            Player localPlayer = gameController.getLocalPlayer();
 
             int sy = 0;
-            switch (player.getDirection()) {
+            switch (localPlayer.getDirection()) {
                 case WEST: sy += 50*6; break;
                 case EAST: sy = 50; break;
                 case NORTH: sy += 50*9; break;
                 case SOUTH: sy += 50*3; break;
             }
 
-            Position playerPos = gameState.players().get(0).getPosition();
+            Position playerPos = localPlayer.getPosition();
 
             long pacmanFrame = (time / 200000000) % 4;
             if (pacmanFrame == 0) {

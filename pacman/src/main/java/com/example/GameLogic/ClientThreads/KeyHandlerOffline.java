@@ -26,18 +26,22 @@ public class KeyHandlerOffline implements Runnable{
     }
 
     private void moveUp() {
+        System.out.println("move up");
         Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 3));
     }
 
     private void moveDown() {
+        System.out.println("move down");
         Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 4));
     }
 
     private void moveLeft() {
+        System.out.println("move left");
         Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 1));
     }
 
     private void moveRight() {
+        System.out.println("move right");
         Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 2));
     }
 
