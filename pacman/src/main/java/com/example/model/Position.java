@@ -17,7 +17,7 @@ public class Position {
     }
 
     public Pair<Integer, Integer> ToGridPosition() {
-        return new Pair<>(Math.clamp((int)(x / TILE_SIZE), 0, getMap1()[0].length - 1), Math.clamp((int)(y / TILE_SIZE), 0, getMap1().length - 1));
+        return new Pair<>(Math.clamp((int) (x / TILE_SIZE + TILE_SIZE / 2.0), 0, getMap1()[0].length - 1), Math.clamp((int) (y / TILE_SIZE + TILE_SIZE / 2.0), 0, getMap1().length - 1));
     }
 
     public Pair<Integer, Integer> ToScreenPosition() {

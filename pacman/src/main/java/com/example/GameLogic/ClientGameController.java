@@ -112,12 +112,15 @@ public class ClientGameController extends GameController {
             pos.x += dx * PLAYER_SPEED;
             pos.y += dy * PLAYER_SPEED;
 
-            Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
             TileType[][] tiles = gameState.tiles();
-            int tileX = playerGridPosition.getKey();
-            int tileY = playerGridPosition.getValue();
-            TileType tileType = tiles[tileX][tileY];
-            if (tileType == TileType.WALL) {
+
+            double margin = 0.1; // Small margin to avoid checking exactly on tile boundaries
+
+            // Check collision with player bounding box
+            if (isWall(tiles, pos.x + margin, pos.y + margin) ||
+                isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + margin) ||
+                isWall(tiles, pos.x + margin, pos.y + TILE_SIZE - margin) ||
+                isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + TILE_SIZE - margin)) {
                 // Player collided with wall, restore previous position
                 pos.x = oldX;
                 pos.y = oldY;
@@ -174,5 +177,17 @@ public class ClientGameController extends GameController {
             case 4 -> Direction.SOUTH;
             default -> null;
         };
+    }
+
+    private boolean isWall(TileType[][] tiles, double x, double y) {
+        int gridX = (int)(x / TILE_SIZE);
+        int gridY = (int)(y / TILE_SIZE);
+
+        // Check bounds
+        if (gridX < 0 || gridX >= tiles.length || gridY < 0 || gridY >= tiles[0].length) {
+            return true; // Treat out of bounds as walls
+        }
+
+        return tiles[gridX][gridY] == TileType.WALL;
     }
 }
