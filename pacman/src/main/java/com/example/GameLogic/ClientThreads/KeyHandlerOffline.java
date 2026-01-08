@@ -1,18 +1,11 @@
 package com.example.GameLogic.ClientThreads;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.Set;
-
-import org.jspace.RemoteSpace;
-import org.jspace.Space;
-
-import com.example.GameLogic.ActionUtil;
 import com.example.GameLogic.ClientMain;
 import com.example.model.Action;
 import com.example.model.Constants;
-
 import javafx.scene.input.KeyCode;
+
+import java.util.Set;
 
 public class KeyHandlerOffline implements Runnable{
 

@@ -64,12 +64,12 @@ public class UI extends Application {
         if(Constants.online){
             KeyHandler keyHandler = new KeyHandler(down);
             Thread t = new Thread(keyHandler);
-            t.setDaemon(true);;
+            t.setDaemon(true);
             t.start();
         }else{
             KeyHandlerOffline keyHandler = new KeyHandlerOffline(down);
             Thread t = new Thread(keyHandler);
-            t.setDaemon(true);;
+            t.setDaemon(true);
             t.start();
         }
 

@@ -9,7 +9,7 @@ public class Lobby {
     private ServerGameController serverGameController;
     private int id;
 
-    public static void main(String arg[]) {
+    public static void main(String[] arg) {
 
     }
 }

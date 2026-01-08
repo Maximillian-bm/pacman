@@ -38,7 +38,7 @@ public class ClientGameController extends GameController {
         Player testPlayer = new Player(1);
         testPlayer.setPosition(new Position(
             5 * TILE_SIZE + TILE_SIZE / 2.0,
-            1 * TILE_SIZE + TILE_SIZE / 2.0
+            TILE_SIZE + TILE_SIZE / 2.0
         ));
         players.add(testPlayer);
 
@@ -47,7 +47,7 @@ public class ClientGameController extends GameController {
         ghost1.type = GhostType.RED;
         ghost1.position = new Position(
             3 * TILE_SIZE + TILE_SIZE / 2.0,
-            1 * TILE_SIZE + TILE_SIZE / 2.0
+            TILE_SIZE + TILE_SIZE / 2.0
         );
         ghosts.add(ghost1);
 
@@ -55,7 +55,7 @@ public class ClientGameController extends GameController {
         ghost2.type = GhostType.PINK;
         ghost1.position = new Position(
             2 * TILE_SIZE + TILE_SIZE / 2.0,
-            1 * TILE_SIZE + TILE_SIZE / 2.0
+            TILE_SIZE + TILE_SIZE / 2.0
         );
         ghosts.add(ghost2);
 
