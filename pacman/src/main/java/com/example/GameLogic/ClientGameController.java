@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.example.model.*;
 
+import static com.example.model.Constants.PLAYER_SPEED;
 import static com.example.model.Constants.TILE_SIZE;
 
 import com.example.model.Maps;
@@ -89,9 +90,7 @@ public class ClientGameController extends GameController {
         );
     }
 
-    public void stepMovement(long deltaTime) {
-        if (deltaTime <= 0) return;
-
+    public void stepMovement() {
         int dx = 0;
         int dy = 0;
 
@@ -103,8 +102,8 @@ public class ClientGameController extends GameController {
         }
 
         Position pos = localPlayer.getPosition();
-        pos.x += dx * (deltaTime / (double) DT_DIVISOR);
-        pos.y += dy * (deltaTime / (double) DT_DIVISOR);
+        pos.x += dx * PLAYER_SPEED;
+        pos.y += dy * PLAYER_SPEED;
         localPlayer.setPosition(pos);
     }
 

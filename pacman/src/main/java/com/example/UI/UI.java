@@ -72,39 +72,22 @@ public class UI extends Application {
     }
 
     private class GameAnimator extends AnimationTimer {
-        private long lastTime;
 
         @Override
         public void handle(long time) {
-            long deltaTime = (lastTime == 0) ? 0 : (time - lastTime);
-            lastTime = time;
-
             List<Action> ActionOfClock = Constants.cleanActions.stream()
                 .filter(e -> e.getClock() == ClientMain.clock)
                 .toList();
             gameState = gameController.updateGameState(gameState, ActionOfClock);
 
-            gameController.stepMovement(deltaTime);
+            gameController.stepMovement();
+
+            drawPlayerPosition(time);
 
             ClientMain.clock++;
-
-            switch(gameController.getLocalPlayer().getDirection()) {
-                case WEST: drawPlayerPosition(-1, 0, time); break;
-                case EAST: drawPlayerPosition(1, 0, time); break;
-                case NORTH: drawPlayerPosition(0, -1, time); break;
-                case SOUTH: drawPlayerPosition(0, 1, time); break;
-            }
         }
 
-        private void drawPlayerPosition(int x, int y, long time) {
-            long deltaTime;
-            if (lastTime == 0) {
-                deltaTime = 0;
-            } else {
-                deltaTime = time - lastTime;
-            }
-
-            // System.out.println(deltaTime);
+        private void drawPlayerPosition(long time) {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
@@ -124,6 +107,8 @@ public class UI extends Application {
                 }
             }
 
+            Player localPlayer = gameController.getLocalPlayer();
+
             int sy = 0;
             switch (localPlayer.getDirection()) {
                 case WEST: sy += 50*6; break;
@@ -132,7 +117,6 @@ public class UI extends Application {
                 case SOUTH: sy += 50*3; break;
             }
 
-            Player localPlayer = gameController.getLocalPlayer();
             Position playerPos = localPlayer.getPosition();
 
             long pacmanFrame = (time / 200000000) % 4;
