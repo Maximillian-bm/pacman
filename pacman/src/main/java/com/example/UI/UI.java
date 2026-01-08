@@ -61,12 +61,12 @@ public class UI extends Application {
         if(Constants.online){
             KeyHandler keyHandler = new KeyHandler(down);
             Thread t = new Thread(keyHandler);
-            t.setDaemon(true);;
+            t.setDaemon(true);
             t.start();
         }else{
             KeyHandlerOffline keyHandler = new KeyHandlerOffline(down);
             Thread t = new Thread(keyHandler);
-            t.setDaemon(true);;
+            t.setDaemon(true);
             t.start();
         }
 
@@ -121,7 +121,8 @@ public class UI extends Application {
             int sy = 42;
             switch (player.getDirection()) {
                 case WEST: sy += 43*6; break;
-                case EAST: ; break;
+                case EAST:
+                    break;
                 case NORTH: sy += 43*9; break;
                 case SOUTH: sy += 43*3; break;
             }
