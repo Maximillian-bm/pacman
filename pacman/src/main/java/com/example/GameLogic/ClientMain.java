@@ -1,14 +1,9 @@
 package com.example.GameLogic;
 
-import com.example.GameLogic.ClientThreads.KeyHandler;
 import com.example.GameLogic.ClientThreads.Reader;
 import com.example.UI.UI;
 import com.example.model.*;
 import javafx.application.Application;
-import com.example.GameLogic.ClientThreads.KeyHandler;
-import java.security.Key;
-
-import org.jspace.PileSpace;
 
 public class ClientMain {
     public static int nrOfActions = 0;
