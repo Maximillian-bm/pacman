@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.example.model.Constants.TILE_SIZE;
+import static com.example.model.Constants.TARGET_FPS;
 
 public class UI extends Application {
     private final ClientGameController gameController = new ClientGameController();
@@ -72,13 +73,11 @@ public class UI extends Application {
     }
 
     private class GameAnimator extends AnimationTimer {
-        private static final int targetFPS = 15;
-
         long prevTime = 0;
 
         @Override
         public void handle(long time) {
-            if (prevTime != 0 && (time - prevTime) < (1000000000 / targetFPS)) {
+            if (prevTime != 0 && (time - prevTime) < (1000000000 / TARGET_FPS)) {
                 return;
             }
 

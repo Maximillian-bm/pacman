@@ -17,4 +17,6 @@ public class Constants {
 
     public final static int INIT_SCREEN_WIDTH = 920;
     public final static int INIT_SCREEN_HEIGHT = 920;
+    public final static int TARGET_FPS = 15;
+
 }
