@@ -104,6 +104,8 @@ public class UI extends Application {
 
             drawPlayerPosition(time);
 
+            drawGhosts();
+
             drawPoints();
         }
 
@@ -165,7 +167,7 @@ public class UI extends Application {
                 }
             }
         }
-
+        
         private void drawPlayerPosition(long time) {
             gameState.players().forEach(player -> {
                 int sy = 0;
@@ -195,6 +197,13 @@ public class UI extends Application {
             });
 
             lastTime = time;
+        }
+
+        private void drawGhosts() {
+            gameState.ghosts().forEach(ghost -> {
+                Position ghostPos = ghost.getPosition();
+                gc.drawImage(spriteSheet, 750, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+            });
         }
     }
 }
