@@ -19,9 +19,11 @@ public enum TileType {
     MELON(1000),
     GALAXIAN(2000),
     BELL(3000),
-    KEY(5000);
+    KEY(5000),
 
-    public final int points;
+    WALL10(0),
+    WALL11(0),
+    WALL12(0);
 
     TileType(int points) {
         this.points = points;

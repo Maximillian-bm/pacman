@@ -32,6 +32,7 @@ public class UI extends Application {
     private Canvas canvas;
 
     private Image spriteSheet;
+    private Image wallSheet;
 
     private long lastTime = 0;
 
@@ -42,6 +43,7 @@ public class UI extends Application {
     @Override
     public void start(Stage stage) {
         spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
+        wallSheet = new Image("./tilesets/chompermazetiles.png");
 
         final Group root = new Group();
 
@@ -126,8 +128,12 @@ public class UI extends Application {
                             //gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case WALL:
-                            gc.setFill(Color.DARKBLUE);
-                            gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSheet, 32, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            // gc.setFill(Color.DARKBLUE);
+                            // gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            break;
+                        case WALL10:
+                            gc.drawImage(wallSheet, 0, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case PAC_DOT:
                             double pacDotSize = TILE_SIZE / 8.0;
