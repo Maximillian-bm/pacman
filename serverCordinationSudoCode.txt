@@ -10,21 +10,23 @@ space1.put(URI3);
 space1.put(URI4);
 ...
 
-gameURI, nrOfPlayers = space1.get(int, int);
+loop{
+    gameURI, nrOfPlayers = space1.get(int, int);
 
-Reporsetory gameRep = new Reporsetory(gameURI);
+    Reporsetory gameRep = new Reporsetory(gameURI);
 
-gameRep.add("rawActions", new Quespace());
+    gameRep.add("rawActions", new Quespace());
 
-gameRep.add("cleanActions", new PileSpace());
+    gameRep.add("cleanActions", new PileSpace());
 
-gameRep.add("sync", new Randomspace());
+    gameRep.add("sync", new Randomspace());
 
-Lobby lobby = new Lobby(gameRep, nrOfPlayers);
+    Lobby lobby = new Lobby(gameRep, nrOfPlayers);
 
-lobbys.add(lobby);
+    lobbys.add(lobby);
 
-LobbyController
+    LobbyController
+}
 
 Lobby(Reporsetory gameRep, int nrOfPlayers){
 

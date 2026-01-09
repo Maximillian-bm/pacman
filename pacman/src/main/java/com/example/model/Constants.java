@@ -7,6 +7,7 @@ import org.jspace.SpaceRepository;
 import static com.example.model.Maps.map1;
 
 public class Constants {
+    public final static int NR_OF_LOBBYS_CAP = 4;
     public final static boolean online = false;
     public final static ArrayList<Action> cleanActions = new ArrayList<>();
     public final static String REMOTE_PUBLIC_URI = "tcp://127.0.0.1:50000/space1?keep";
