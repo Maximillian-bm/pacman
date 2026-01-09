@@ -10,17 +10,23 @@ import org.jspace.Space;
 
 import com.example.model.Action;
 import com.example.GameLogic.ActionUtil;
-import com.example.GameLogic.ClientMain;
+import com.example.GameLogic.URIUtil;
 import com.example.model.Constants;
 
 public class Reader implements Runnable {
+
+    private String gameURI;
+
+    public Reader(String gameURI){
+        this.gameURI = gameURI;
+    }
 
     //Continuesly reads from the remote clean actions space and updates the static list of clean actions
     @Override
     public void run() {
         int nrOfActions = 0;
         try {
-            Space remoteActions = new RemoteSpace(Constants.REMOTE_URI_CLEAN);
+            Space remoteActions = new RemoteSpace(URIUtil.getCleanActionURI(gameURI));
             while(true) {
                 Action action = ActionUtil.convertObjToAction(remoteActions.query(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new ActualField(nrOfActions)));
                 Constants.cleanActions.add(action);
