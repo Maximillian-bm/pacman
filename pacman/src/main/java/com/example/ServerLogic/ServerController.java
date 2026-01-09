@@ -33,10 +33,10 @@ public class ServerController {
         while(true){
             try {
                 Object[] lobbyInstruction = space1.get(new FormalField(Integer.class), new FormalField(Integer.class));
-                int lobbyID = (int) lobbyInstruction[0];
+                String gate = (String) lobbyInstruction[0];
                 int nrOfPlayers = (int) lobbyInstruction[1];
                 SpaceRepository lobbyRep = new SpaceRepository();
-                lobbyRep.addGate("tcp://127.0.0.1:50000/"+lobbyID+"/?keep");
+                lobbyRep.addGate(gate);
                 lobbyRep.add("rawActions", new QueueSpace());
                 lobbyRep.add("cleanActions", new PileSpace());
                 lobbyRep.add("sync", new RandomSpace());

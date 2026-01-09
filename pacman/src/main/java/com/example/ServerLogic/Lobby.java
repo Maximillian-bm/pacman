@@ -29,7 +29,7 @@ public class Lobby {
 
         for(int i = 0; i < nrOfPlayers; i++){
             try {
-                sync.put(i);
+                sync.put(i, nrOfPlayers);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
