@@ -11,15 +11,20 @@ import com.example.GameLogic.ActionUtil;
 import com.example.model.Action;
 import com.example.model.Constants;
 
-public class LobbyActionHandler{
+public class LobbyActionHandler implements Runnable{
 
-    public void launch() {
-        SpaceRepository repository = new SpaceRepository();
-        repository.addGate(Constants.GATE_URI);
-        Space cleanActions = new PileSpace();
-        Space rawActions = new QueueSpace();
-        repository.add("cleanAction", cleanActions);
-        repository.add("rawAction", rawActions);
+    SpaceRepository repository;
+    int lobbyID;
+
+    public LobbyActionHandler(SpaceRepository repository, int lobbyID){
+        this.repository = repository;
+        this.lobbyID = lobbyID;
+    }
+
+    @Override
+    public void run() {
+        Space rawActions = repository.get(lobbyID+"rawAction");
+        Space cleanActions = repository.get(lobbyID+"cleanAction");
         int actionCount = 0;
         int clock = 0;
         while(true) {

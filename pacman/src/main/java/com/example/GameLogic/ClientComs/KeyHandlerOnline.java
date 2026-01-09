@@ -1,4 +1,6 @@
-package com.example.GameLogic.ClientThreads;
+package com.example.GameLogic.ClientComs;
+import static com.example.model.Constants.REMOTE_PUBLIC_URI;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.HashSet;
@@ -9,6 +11,7 @@ import org.jspace.Space;
 
 import com.example.GameLogic.ActionUtil;
 import com.example.GameLogic.ClientMain;
+import com.example.GameLogic.URIUtil;
 import com.example.model.Action;
 import com.example.model.Constants;
 
@@ -17,10 +20,12 @@ import javafx.scene.input.KeyCode;
 public class KeyHandlerOnline extends KeyHandler{
 
     private Space rawActions;
+    private int playerID;
 
-    public KeyHandlerOnline() {
+    public KeyHandlerOnline(int lobbyID, int playerID) {
+        this.playerID = playerID;
         try {
-            this.rawActions = new RemoteSpace(Constants.REMOTE_URI_RAW);
+            this.rawActions = new RemoteSpace(URIUtil.getRawActionURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -38,21 +43,21 @@ public class KeyHandlerOnline extends KeyHandler{
 
     @Override
     public void moveUp() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 3), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 3), rawActions);
     }
 
     @Override
     public void moveDown() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 4), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 4), rawActions);
     }
 
     @Override
     public void moveLeft() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 1), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 1), rawActions);
     }
 
     @Override
     public void moveRight() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 2), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 2), rawActions);
     }
 }
