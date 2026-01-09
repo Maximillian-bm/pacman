@@ -104,7 +104,7 @@ public class ClientGameController extends GameController {
             TILE_SIZE
         );
         ghosts.add(ghost5);
-        
+
         ghostDirections.put(ghost1, Direction.WEST);
         ghostDirections.put(ghost2, Direction.WEST);
         ghostDirections.put(ghost3, Direction.WEST);
@@ -480,6 +480,7 @@ public class ClientGameController extends GameController {
         Pair<Integer, Integer> pinkCorner   = new Pair<>(0, 0);
         Pair<Integer, Integer> blueCorner   = new Pair<>(maxX, maxY);
         Pair<Integer, Integer> orangeCorner = new Pair<>(0, maxY);
+        Pair<Integer, Integer> purpleCorner  = new Pair<>(maxX / 2, maxY / 2);
 
         if (ghostScatterMode) {
             return switch (ghost.type) {
@@ -487,6 +488,7 @@ public class ClientGameController extends GameController {
                 case PINK -> pinkCorner;
                 case CYAN -> blueCorner;
                 case ORANGE -> orangeCorner;
+                case PURPLE -> purpleCorner;
                 default -> redCorner;
             };
         }
@@ -532,6 +534,11 @@ public class ClientGameController extends GameController {
                 } else {
                     yield orangeCorner;
                 }
+            }
+            case PURPLE -> {
+                int tx = px + -1 * (pDir == Direction.EAST ? 1 : pDir == Direction.WEST ? -1 : 0);
+                int ty = py + -1 * (pDir == Direction.SOUTH ? 1 : pDir == Direction.NORTH ? -1 : 0);
+                yield new Pair<>(tx, ty);
             }
 
             default -> new Pair<>(px, py);
