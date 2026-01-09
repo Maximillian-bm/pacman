@@ -134,6 +134,21 @@ public class UI extends Application {
                             gc.setFill(Color.YELLOW);
                             gc.fillRect(i * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, j * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
                             break;
+                        case CHERRY:
+                            gc.drawImage(spriteSheet, 600, 0, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            break;
+                        case STRAWBERRY:
+                            gc.drawImage(spriteSheet, 600, 50, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            break;
+                        case ORANGE:
+                            gc.drawImage(spriteSheet, 600, 100, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            break;
+                        case APPLE:
+                            gc.drawImage(spriteSheet, 600, 150, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            break;
+                        case MELON:
+                            gc.drawImage(spriteSheet, 600, 200, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            break;
                     }
 
                     // Show which tile the player is on
