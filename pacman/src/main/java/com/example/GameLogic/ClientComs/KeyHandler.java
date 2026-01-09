@@ -1,4 +1,4 @@
-package com.example.GameLogic.ClientThreads;
+package com.example.GameLogic.ClientComs;
 
 import com.example.GameLogic.ClientMain;
 import com.example.model.Action;

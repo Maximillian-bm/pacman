@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.model.*;
 
 import javafx.util.Pair;
@@ -28,6 +29,12 @@ public class ClientGameController extends GameController {
 
     private double frightenedTimerSec = 0.0;
     private static final double FRIGHTENED_DURATION_SEC = 8.0;
+
+    private ConnectToLobby lobbyHandler;
+
+    public ClientGameController(ConnectToLobby lobbyHandler){
+        this.lobbyHandler = lobbyHandler;
+    }
 
     public GameState updateGameState(GameState gameState, List<Action> actions) {
         if (gameState == null) return initializeGameState();
@@ -57,6 +64,16 @@ public class ClientGameController extends GameController {
         List<Player> players = new ArrayList<>();
         List<Ghost> ghosts = new ArrayList<>();
         TileType[][] tiles = Maps.getMap1();
+
+        for(int i = 0; i < lobbyHandler.getNrOfPlayers(); i++){
+            Player player = new Player(i);
+            player.setPosition(new Position(
+                3 * TILE_SIZE,
+                3 * TILE_SIZE
+            ));
+            players.add(player);
+            if(i == lobbyHandler.getPlayerID()) localPlayer = player;
+        }
 
         localPlayer = new Player(0);
         localPlayer.setPosition(new Position(

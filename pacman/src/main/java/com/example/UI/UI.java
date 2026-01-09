@@ -2,8 +2,9 @@ package com.example.UI;
 
 import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
-import com.example.GameLogic.ClientThreads.KeyHandlerOnline;
-import com.example.GameLogic.ClientThreads.KeyHandler;
+import com.example.GameLogic.ClientComs.ConnectToLobby;
+import com.example.GameLogic.ClientComs.KeyHandler;
+import com.example.GameLogic.ClientComs.KeyHandlerOnline;
 import com.example.model.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -11,11 +12,21 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+
+import javafx.scene.control.TextField;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.geometry.Pos;
+import javafx.geometry.Insets;
+import javafx.scene.control.ChoiceBox;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -25,7 +36,10 @@ import static com.example.model.Constants.TILE_SIZE;
 import static com.example.model.Constants.TARGET_FPS;
 
 public class UI extends Application {
-    private final ClientGameController gameController = new ClientGameController();
+    
+    private ConnectToLobby lobbyHandler = new ConnectToLobby();
+
+    private final ClientGameController gameController = new ClientGameController(lobbyHandler);
     private GameState gameState;
 
     private GraphicsContext gc;
@@ -42,6 +56,89 @@ public class UI extends Application {
 
     @Override
     public void start(Stage stage) {
+
+        Text header = new Text("Pacman");
+        header.setStyle("-fx-font: 24 arial;");
+
+        Button joinLobbyButton = new Button("Join Lobby");
+        joinLobbyButton.setPrefSize(200, 60);
+
+        Text playerCountText = new Text("Select number of players:");
+        ChoiceBox playerCount = new ChoiceBox();
+        playerCount.getItems().add("1");
+        playerCount.getItems().add("2");
+        playerCount.getItems().add("3");
+        playerCount.getItems().add("4");
+        HBox createLobbyH = new HBox(
+            playerCountText,
+            playerCount
+        );
+        createLobbyH.setAlignment(Pos.CENTER);
+
+        Button createLobbyButton = new Button("Create Lobby");
+        createLobbyButton.setPrefSize(200, 60);
+        VBox createLobbyV = new VBox(
+             createLobbyH,
+            createLobbyButton
+        );
+        createLobbyV.setAlignment(Pos.CENTER);
+
+        Button startButton = new Button("Start Game");
+        startButton.setPrefSize(200, 60);
+
+        Text LobbyIDText = new Text("Lobby ID:");
+        TextField lobbyIDInput = new TextField();
+        lobbyIDInput.setMaxWidth(250);
+        HBox joinLobbyH = new HBox(
+            LobbyIDText,
+            lobbyIDInput
+        );
+        joinLobbyH.setAlignment(Pos.CENTER);
+
+        VBox joinLobbyV = new VBox(
+            joinLobbyH,
+            joinLobbyButton
+        );
+        joinLobbyV.setAlignment(Pos.CENTER);
+
+        VBox startRoot = new VBox(
+            header,
+            joinLobbyV,
+            createLobbyV,
+            startButton
+        );
+        startRoot.setAlignment(Pos.CENTER);
+        startRoot.setSpacing(50);
+
+        Scene startScene = new Scene(
+            startRoot,
+            Constants.INIT_SCREEN_WIDTH,
+            Constants.INIT_SCREEN_HEIGHT
+        );
+
+        joinLobbyButton.setOnAction(e -> {
+            System.out.println("Connecting to: " + lobbyIDInput.getText());
+            lobbyHandler.joinLobby(lobbyIDInput.getText());
+        });
+
+        createLobbyButton.setOnAction(e -> {
+            System.out.println("Creating lobby with " + playerCount.getValue() + " number of player");
+            lobbyHandler.createLobby(Integer.parseInt(playerCount.getValue().toString()));
+        });
+
+        startButton.setOnAction(e -> startLobby(stage));
+
+        stage.setTitle("Pacman");
+        stage.setScene(startScene);
+        stage.show();
+    }
+
+    private void startLobby(Stage stage){
+        lobbyHandler.startGame();
+        startGame(stage);
+    }
+
+    private void startGame(Stage stage) {
         spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
         wallSheet = new Image("./tilesets/chompermazetiles.png");
 
@@ -49,11 +146,7 @@ public class UI extends Application {
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
-        if(Constants.online){
-            keyHandler = new KeyHandlerOnline();
-        }else{
-            keyHandler = new KeyHandler();
-        }
+        keyHandler = new KeyHandlerOnline(lobbyHandler.getLobbyID(), lobbyHandler.getPlayerID());
 
         scene.setOnKeyPressed(e -> keyHandler.move(e.getCode()));
 

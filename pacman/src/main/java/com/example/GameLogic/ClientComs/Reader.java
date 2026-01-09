@@ -1,4 +1,6 @@
-package com.example.GameLogic.ClientThreads;
+package com.example.GameLogic.ClientComs;
+
+import static com.example.model.Constants.REMOTE_PUBLIC_URI;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -10,17 +12,23 @@ import org.jspace.Space;
 
 import com.example.model.Action;
 import com.example.GameLogic.ActionUtil;
-import com.example.GameLogic.ClientMain;
+import com.example.GameLogic.URIUtil;
 import com.example.model.Constants;
 
 public class Reader implements Runnable {
+
+    private int lobbyID;
+
+    public Reader(int lobbyID){
+        this.lobbyID = lobbyID;
+    }
 
     //Continuesly reads from the remote clean actions space and updates the static list of clean actions
     @Override
     public void run() {
         int nrOfActions = 0;
         try {
-            Space remoteActions = new RemoteSpace(Constants.REMOTE_URI_CLEAN);
+            Space remoteActions = new RemoteSpace(URIUtil.getCleanActionURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
             while(true) {
                 Action action = ActionUtil.convertObjToAction(remoteActions.query(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new ActualField(nrOfActions)));
                 Constants.cleanActions.add(action);
