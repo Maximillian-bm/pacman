@@ -120,73 +120,15 @@ public class UI extends Application {
 
         private void drawMap() {
             TileType[][] tiles = gameState.tiles();
-            final int N = tiles.length;
-            final int M = tiles[0].length;
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < M; j++) {
+            for (int i = 0; i < tiles.length; i++) {
+                for (int j = 0; j < tiles[0].length; j++) {
                     switch (tiles[i][j]) {
                         case EMPTY:
                             //gc.setFill(Color.BLACK);
                             //gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case WALL:
-                            if (0 > i-1 || tiles[i-1][j] != TileType.WALL) {
-                                if (M <= j+1 || tiles[i][j+1] != TileType.WALL) {
-                                    if (N <= i+1 || tiles[i+1][j] != TileType.WALL) {
-                                        gc.drawImage(wallSheet, 32*6, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                    } else {
-                                        if (0 > j-1 || tiles[i][j-1] != TileType.WALL) {
-                                            gc.drawImage(wallSheet, 32*7, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        } else {
-                                            gc.drawImage(wallSheet, 32*0, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        }
-                                    }
-                                } else {
-                                    if (N <= i+1 || tiles[i+1][j] != TileType.WALL) {
-                                        if (0 > j-1 || tiles[i][j-1] != TileType.WALL) {
-                                            gc.drawImage(wallSheet, 32*6, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        } else {
-                                            gc.drawImage(wallSheet, 32*6, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        }
-                                    } else {
-                                        if (0 > j-1 || tiles[i][j-1] != TileType.WALL) {
-                                            gc.drawImage(wallSheet, 32*0, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        } else {
-                                            gc.drawImage(wallSheet, 32*0, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        }
-                                    }
-                                }
-                            } else {
-                                if (N <= i+1 || tiles[i+1][j] != TileType.WALL) {
-                                    if (0 > j-1 || tiles[i][j-1] != TileType.WALL) {
-                                        if (M <= j+1 || tiles[i][j+1] != TileType.WALL) {
-                                            gc.drawImage(wallSheet, 32*9, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        } else {
-                                            gc.drawImage(wallSheet, 32*2, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        }
-                                    } else {
-                                        if (M <= j+1 || tiles[i][j+1] != TileType.WALL) {
-                                            gc.drawImage(wallSheet, 32*2, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        } else {
-                                            gc.drawImage(wallSheet, 32*2, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        }
-                                    }
-                                } else {
-                                    if (0 > j-1 || tiles[i][j-1] != TileType.WALL) {
-                                        if (M <= j+1 || tiles[i][j+1] != TileType.WALL) {
-                                            gc.drawImage(wallSheet, 32*8, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        } else {
-                                            gc.drawImage(wallSheet, 32, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        }
-                                    } else {
-                                        if (M <= j+1 || tiles[i][j+1] != TileType.WALL) {
-                                            gc.drawImage(wallSheet, 32, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        } else {
-                                            gc.drawImage(wallSheet, 32, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                        }
-                                    }
-                                }
-                            }
+                            drawWall(i, j);
                             break;
                         case PAC_DOT:
                             double pacDotSize = TILE_SIZE / 8.0;
@@ -254,6 +196,70 @@ public class UI extends Application {
             });
 
             lastTime = time;
+        }
+
+        private void drawWall(int i, int j) {
+            TileType[][] tiles = gameState.tiles();
+            final int N = tiles.length;
+            final int M = tiles[0].length;
+
+            if (0 > i-1 || tiles[i-1][j] != TileType.WALL) {
+                if (M <= j+1 || tiles[i][j+1] != TileType.WALL) {
+                    if (N <= i+1 || tiles[i+1][j] != TileType.WALL) {
+                        gc.drawImage(wallSheet, 32*6, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        if (0 > j-1 || tiles[i][j-1] != TileType.WALL) {
+                            gc.drawImage(wallSheet, 32*7, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        } else {
+                            gc.drawImage(wallSheet, 32*0, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    }
+                } else {
+                    if (N <= i+1 || tiles[i+1][j] != TileType.WALL) {
+                        if (0 > j-1 || tiles[i][j-1] != TileType.WALL) {
+                            gc.drawImage(wallSheet, 32*6, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        } else {
+                            gc.drawImage(wallSheet, 32*6, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    } else {
+                        if (0 > j-1 || tiles[i][j-1] != TileType.WALL) {
+                            gc.drawImage(wallSheet, 32*0, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        } else {
+                            gc.drawImage(wallSheet, 32*0, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    }
+                }
+            } else {
+                if (N <= i+1 || tiles[i+1][j] != TileType.WALL) {
+                    if (0 > j-1 || tiles[i][j-1] != TileType.WALL) {
+                        if (M <= j+1 || tiles[i][j+1] != TileType.WALL) {
+                            gc.drawImage(wallSheet, 32*9, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        } else {
+                            gc.drawImage(wallSheet, 32*2, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    } else {
+                        if (M <= j+1 || tiles[i][j+1] != TileType.WALL) {
+                            gc.drawImage(wallSheet, 32*2, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        } else {
+                            gc.drawImage(wallSheet, 32*2, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    }
+                } else {
+                    if (0 > j-1 || tiles[i][j-1] != TileType.WALL) {
+                        if (M <= j+1 || tiles[i][j+1] != TileType.WALL) {
+                            gc.drawImage(wallSheet, 32*8, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        } else {
+                            gc.drawImage(wallSheet, 32, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    } else {
+                        if (M <= j+1 || tiles[i][j+1] != TileType.WALL) {
+                            gc.drawImage(wallSheet, 32, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        } else {
+                            gc.drawImage(wallSheet, 32, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        }
+                    }
+                }
+            }
         }
     }
 }
