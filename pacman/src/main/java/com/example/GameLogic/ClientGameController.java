@@ -81,8 +81,27 @@ public class ClientGameController extends GameController {
         );
         ghosts.add(ghost2);
 
+        Ghost ghost3 = new Ghost();
+        ghost3.type = GhostType.CYAN;
+        ghost3.position = new Position(
+            2 * TILE_SIZE,
+            TILE_SIZE
+        );
+        ghosts.add(ghost3);
+
+        Ghost ghost4 = new Ghost();
+        ghost4.type = GhostType.ORANGE;
+        ghost4.position = new Position(
+            2 * TILE_SIZE,
+            TILE_SIZE
+        );
+        ghosts.add(ghost4);
+
+
         ghostDirections.put(ghost1, Direction.WEST);
         ghostDirections.put(ghost2, Direction.WEST);
+        ghostDirections.put(ghost3, Direction.WEST);
+        ghostDirections.put(ghost4, Direction.WEST);
 
         return new GameState(
             ClientMain.clock,
@@ -268,8 +287,7 @@ public class ClientGameController extends GameController {
     }
 
     private boolean isPowerup(TileType t) {
-        String n = t.name();
-        return n.equals("POWERUP") || n.equals("POWER_PELLET") || n.equals("BIG_DOT") || n.equals("SUPER") || n.equals("POWER");
+        return t == TileType.CHERRY;
     }
 
     private Direction directionFromMove(int move) {
