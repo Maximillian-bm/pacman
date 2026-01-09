@@ -202,7 +202,24 @@ public class UI extends Application {
         private void drawGhosts() {
             gameState.ghosts().forEach(ghost -> {
                 Position ghostPos = ghost.getPosition();
-                gc.drawImage(spriteSheet, 750, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                switch (ghost.getType()) {
+                    case RED -> { // ("Blinky"),
+                        gc.drawImage(spriteSheet, 0, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                    }
+                    case PINK -> { // ("Pinky"),
+                        gc.drawImage(spriteSheet, 50, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                    }
+                    case CYAN -> { // ("Inky"),
+                        gc.drawImage(spriteSheet, 100, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                    }
+                    case ORANGE -> { // ("Clyde"),
+                        gc.drawImage(spriteSheet, 150, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                    }
+                    case PURPLE -> { // ("Sue");
+                        gc.drawImage(spriteSheet, 200, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                    }
+
+                }
             });
         }
     }

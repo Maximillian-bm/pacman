@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class Ghost extends Entity {
+    @Getter
     public GhostType type;
     @Getter
     @Setter
