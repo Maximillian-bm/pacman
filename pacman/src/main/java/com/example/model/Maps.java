@@ -32,18 +32,17 @@ public class Maps {
                 tm[i][j] = TileType.values()[map1[j][i]];
             }
         }
-        for (int i = 0; i < tm.length; i++) {
-            for (int j = 0; j < tm[0].length; j++) {
-                if (tm[i][j] != WALL) {
-                    continue;
-                }
-                // if (0 > i-1 || tm[i-1][j] != WALL) {
-                //     tm[i][j] = WALL10;
-                // } else {
-                // }
-            }
-        }
-
+        // for (int i = 0; i < tm.length; i++) {
+        //     for (int j = 0; j < tm[0].length; j++) {
+        //         if (tm[i][j] != WALL) {
+        //             continue;
+        //         }
+        //         // if (0 > i-1 || tm[i-1][j] != WALL) {
+        //         //     tm[i][j] = WALL10;
+        //         // }
+        //     }
+        // }
+        //
         return tm;
     }
 }

@@ -128,12 +128,13 @@ public class UI extends Application {
                             //gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case WALL:
-                            gc.drawImage(wallSheet, 32, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                            // gc.setFill(Color.DARKBLUE);
-                            // gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                            break;
-                        case WALL10:
-                            gc.drawImage(wallSheet, 0, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.setFill(Color.DARKBLUE);
+                            gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            // if (0 > i-1 || tiles[i-1][j] != TileType.WALL) {
+                                // gc.drawImage(wallSheet, 0, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            // } else {
+                                // gc.drawImage(wallSheet, 32, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            // }
                             break;
                         case PAC_DOT:
                             double pacDotSize = TILE_SIZE / 8.0;

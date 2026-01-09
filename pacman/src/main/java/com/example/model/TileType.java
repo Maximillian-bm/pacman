@@ -25,6 +25,8 @@ public enum TileType {
     WALL11(0),
     WALL12(0);
 
+    public final int points;
+
     TileType(int points) {
         this.points = points;
     }
