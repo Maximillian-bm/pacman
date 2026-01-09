@@ -1,4 +1,4 @@
-package com.example.GameLogic.ClientThreads;
+package com.example.GameLogic.ClientComs;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.HashSet;

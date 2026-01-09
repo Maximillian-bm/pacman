@@ -2,8 +2,9 @@ package com.example.UI;
 
 import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
-import com.example.GameLogic.ClientThreads.KeyHandlerOnline;
-import com.example.GameLogic.ClientThreads.KeyHandler;
+import com.example.GameLogic.ClientComs.ConnectToLobby;
+import com.example.GameLogic.ClientComs.KeyHandler;
+import com.example.GameLogic.ClientComs.KeyHandlerOnline;
 import com.example.model.*;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -44,24 +45,42 @@ public class UI extends Application {
 
     @Override
     public void start(Stage stage) {
-        Button startButton = new Button("Start Game");
-        startButton.setPrefSize(200, 60);
 
-        StackPane startRoot = new StackPane(startButton);
+        ConnectToLobby lobbyHandler = new ConnectToLobby();
+
+        Button joinLobbyButton = new Button("Join Lobby");
+        joinLobbyButton.setPrefSize(200, 60);
+
+        Button createLobbyButton = new Button("Create Lobby");
+        createLobbyButton.setPrefSize(200, 60);
+
+        Button startButton = new Button("Start Game");
+        createLobbyButton.setPrefSize(200, 60);
+
+        StackPane startRoot = new StackPane(joinLobbyButton, createLobbyButton, startButton);
         Scene startScene = new Scene(
             startRoot,
             Constants.INIT_SCREEN_WIDTH,
             Constants.INIT_SCREEN_HEIGHT
-    );
+        );
 
-    startButton.setOnAction(e -> startGame(stage));
+        joinLobbyButton.setOnAction(e -> lobbyHandler.joinLobby("get URI from user"));
 
-    stage.setTitle("Pacman");
-    stage.setScene(startScene);
-    stage.show();
-}
+        createLobbyButton.setOnAction(e -> lobbyHandler.createLobby(1));
 
-    public void startGame(Stage stage) {
+        startButton.setOnAction(e -> startLobby(lobbyHandler, stage));
+
+        stage.setTitle("Pacman");
+        stage.setScene(startScene);
+        stage.show();
+    }
+
+    private void startLobby(ConnectToLobby lobbyHandler, Stage stage){
+        lobbyHandler.startGame();
+        startGame(stage);
+    }
+
+    private void startGame(Stage stage) {
         spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
         wallSheet = new Image("./tilesets/chompermazetiles.png");
 
