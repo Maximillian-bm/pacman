@@ -77,10 +77,10 @@ public class UI extends Application {
 
     private void startLobby(ConnectToLobby lobbyHandler, Stage stage){
         lobbyHandler.startGame();
-        startGame(stage);
+        startGame(stage, lobbyHandler);
     }
 
-    private void startGame(Stage stage) {
+    private void startGame(Stage stage, ConnectToLobby lobbyHandler) {
         spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
         wallSheet = new Image("./tilesets/chompermazetiles.png");
 
@@ -88,11 +88,7 @@ public class UI extends Application {
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
-        if(Constants.online){
-            keyHandler = new KeyHandlerOnline();
-        }else{
-            keyHandler = new KeyHandler();
-        }
+        keyHandler = new KeyHandlerOnline(lobbyHandler.getGameURI());
 
         scene.setOnKeyPressed(e -> keyHandler.move(e.getCode()));
 

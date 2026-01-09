@@ -76,7 +76,15 @@ public class ConnectToLobby {
         
     }
 
-    public int getLobbyID(){
+    public int getLobbyID() {
         return lobbyID;
+    }
+
+    public String getGameURI() {
+        return gameURI;
+    }
+
+    public int getNrOfPlayers() {
+        return nrOfPlayers;
     }
 }

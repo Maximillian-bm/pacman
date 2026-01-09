@@ -9,6 +9,7 @@ import org.jspace.Space;
 
 import com.example.GameLogic.ActionUtil;
 import com.example.GameLogic.ClientMain;
+import com.example.GameLogic.URIUtil;
 import com.example.model.Action;
 import com.example.model.Constants;
 
@@ -18,9 +19,9 @@ public class KeyHandlerOnline extends KeyHandler{
 
     private Space rawActions;
 
-    public KeyHandlerOnline() {
+    public KeyHandlerOnline(String gameURI) {
         try {
-            this.rawActions = new RemoteSpace(Constants.REMOTE_URI_RAW);
+            this.rawActions = new RemoteSpace(URIUtil.getRawActionURI(gameURI));
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
