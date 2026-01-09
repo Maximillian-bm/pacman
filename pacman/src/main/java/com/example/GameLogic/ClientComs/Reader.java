@@ -1,5 +1,7 @@
 package com.example.GameLogic.ClientComs;
 
+import static com.example.model.Constants.REMOTE_PUBLIC_URI;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -15,10 +17,10 @@ import com.example.model.Constants;
 
 public class Reader implements Runnable {
 
-    private String gameURI;
+    private int lobbyID;
 
-    public Reader(String gameURI){
-        this.gameURI = gameURI;
+    public Reader(int lobbyID){
+        this.lobbyID = lobbyID;
     }
 
     //Continuesly reads from the remote clean actions space and updates the static list of clean actions
@@ -26,7 +28,7 @@ public class Reader implements Runnable {
     public void run() {
         int nrOfActions = 0;
         try {
-            Space remoteActions = new RemoteSpace(URIUtil.getCleanActionURI(gameURI));
+            Space remoteActions = new RemoteSpace(URIUtil.getCleanActionURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
             while(true) {
                 Action action = ActionUtil.convertObjToAction(remoteActions.query(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new ActualField(nrOfActions)));
                 Constants.cleanActions.add(action);

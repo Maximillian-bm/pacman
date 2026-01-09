@@ -1,4 +1,6 @@
 package com.example.GameLogic.ClientComs;
+import static com.example.model.Constants.REMOTE_PUBLIC_URI;
+
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.HashSet;
@@ -19,9 +21,9 @@ public class KeyHandlerOnline extends KeyHandler{
 
     private Space rawActions;
 
-    public KeyHandlerOnline(String gameURI) {
+    public KeyHandlerOnline(int lobbyID) {
         try {
-            this.rawActions = new RemoteSpace(URIUtil.getRawActionURI(gameURI));
+            this.rawActions = new RemoteSpace(URIUtil.getRawActionURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {

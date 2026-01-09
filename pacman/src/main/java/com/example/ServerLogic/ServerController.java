@@ -24,7 +24,7 @@ public class ServerController {
         rep.add("space1", space1);
         for(int i = 0; i < Constants.NR_OF_LOBBYS_CAP; i++){
             try {
-                space1.put("tcp://127.0.0.1:50000/"+i+"/?keep");
+                space1.put(i);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -32,16 +32,14 @@ public class ServerController {
 
         while(true){
             try {
-                Object[] lobbyInstruction = space1.get(new FormalField(String.class), new FormalField(Integer.class));
-                String gate = (String) lobbyInstruction[0];
+                Object[] lobbyInstruction = space1.get(new FormalField(Integer.class), new FormalField(Integer.class));
+                int lobbyID = (int) lobbyInstruction[0];
                 int nrOfPlayers = (int) lobbyInstruction[1];
-                SpaceRepository lobbyRep = new SpaceRepository();
-                lobbyRep.addGate(gate);
-                lobbyRep.add("sync", new RandomSpace());
-                lobbyRep.add("rawAction", new QueueSpace());
-                lobbyRep.add("cleanAction", new PileSpace());
-                Lobby lobby = new Lobby(lobbyRep, nrOfPlayers);
-                space1.put(gate, nrOfPlayers, "OK");
+                rep.add(lobbyID+"sync", new RandomSpace());
+                rep.add(lobbyID+"rawAction", new QueueSpace());
+                rep.add(lobbyID+"cleanAction", new PileSpace());
+                Lobby lobby = new Lobby(rep, nrOfPlayers, lobbyID);
+                space1.put(lobbyID, nrOfPlayers, "OK");
                 lobby.start();
                 lobbys.add(lobby);
             } catch (InterruptedException e) {

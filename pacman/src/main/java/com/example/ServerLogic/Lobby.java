@@ -10,14 +10,16 @@ import com.example.GameLogic.*;
 
 public class Lobby {
 
-    private SpaceRepository lobbyRep;
+    private SpaceRepository rep;
     private int nrOfPlayers;
     private LobbyActionHandler actionHandler;
+    private int lobbyID;
 
-    public Lobby(SpaceRepository lobbyRep, int nrOfPlayers){
-        this.lobbyRep = lobbyRep;
+    public Lobby(SpaceRepository rep, int nrOfPlayers, int lobbyID){
+        this.lobbyID = lobbyID;
+        this.rep = rep;
         this.nrOfPlayers = nrOfPlayers;
-        this.actionHandler = new LobbyActionHandler(lobbyRep);
+        this.actionHandler = new LobbyActionHandler(rep, lobbyID);
     }
 
     public void start(){
@@ -25,7 +27,7 @@ public class Lobby {
         actionThread.setDaemon(true);
         actionThread.start();
 
-        Space sync = lobbyRep.get("sync");
+        Space sync = rep.get(lobbyID+"sync");
 
         for(int i = 0; i < nrOfPlayers; i++){
             try {

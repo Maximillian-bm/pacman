@@ -14,15 +14,17 @@ import com.example.model.Constants;
 public class LobbyActionHandler implements Runnable{
 
     SpaceRepository repository;
+    int lobbyID;
 
-    public LobbyActionHandler(SpaceRepository repository){
+    public LobbyActionHandler(SpaceRepository repository, int lobbyID){
         this.repository = repository;
+        this.lobbyID = lobbyID;
     }
 
     @Override
     public void run() {
-        Space rawActions = repository.get("rawAction");
-        Space cleanActions = repository.get("cleanAction");
+        Space rawActions = repository.get(lobbyID+"rawAction");
+        Space cleanActions = repository.get(lobbyID+"cleanAction");
         int actionCount = 0;
         int clock = 0;
         while(true) {

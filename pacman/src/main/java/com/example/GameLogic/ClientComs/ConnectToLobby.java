@@ -16,8 +16,6 @@ public class ConnectToLobby {
 
     private int nrOfPlayers;
 
-    private String gameURI;
-
     private int playerID;
 
     private int lobbyID;
@@ -27,10 +25,10 @@ public class ConnectToLobby {
     public void createLobby(int nrOfPlayers) {
         try {
             Space space1 = new RemoteSpace(Constants.REMOTE_PUBLIC_URI);
-            gameURI = (String) space1.get(new FormalField(String.class))[0];
-            space1.put(gameURI, nrOfPlayers);
-            space1.get(new ActualField(gameURI), new ActualField(nrOfPlayers), new ActualField("OK"));
-            sync = new RemoteSpace(URIUtil.getSyncURI(gameURI));
+            lobbyID = (int) space1.get(new FormalField(Integer.class))[0];
+            space1.put(lobbyID, nrOfPlayers);
+            space1.get(new ActualField(lobbyID), new ActualField(nrOfPlayers), new ActualField("OK"));
+            sync = new RemoteSpace(URIUtil.getSyncURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
             playerID = (int) t[0];
             this.nrOfPlayers = (int) t[1];
@@ -47,8 +45,7 @@ public class ConnectToLobby {
     public void joinLobby(String lobbyID) {
         try {
             this.lobbyID = Integer.parseInt(lobbyID);
-            gameURI = "tcp://127.0.0.1:50000/"+lobbyID+"/?keep";
-            sync = new RemoteSpace(URIUtil.getSyncURI(gameURI));
+            sync = new RemoteSpace(URIUtil.getSyncURI(Constants.REMOTE_PUBLIC_URI, this.lobbyID));
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
             playerID = (int) t[0];
             nrOfPlayers = (int) t[1];
@@ -64,7 +61,7 @@ public class ConnectToLobby {
     public void startGame() {
         try {
 
-            Reader reader = new Reader(gameURI);
+            Reader reader = new Reader(lobbyID);
             Thread t = new Thread(reader);
             t.setDaemon(true);
             t.start();
@@ -79,10 +76,6 @@ public class ConnectToLobby {
 
     public int getLobbyID() {
         return lobbyID;
-    }
-
-    public String getGameURI() {
-        return gameURI;
     }
 
     public int getNrOfPlayers() {
