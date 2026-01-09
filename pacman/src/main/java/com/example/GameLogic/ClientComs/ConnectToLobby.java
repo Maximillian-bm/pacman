@@ -10,15 +10,17 @@ public class ConnectToLobby {
 
     private int playerID;
 
-    public String createLobby(int nrOfPlayers) {
-        return null;
+    public void createLobby(int nrOfPlayers) {
     }
 
-    public int joinLobby(String gameURI) {
-        return 0;
+    public void joinLobby(String gameURI) {
     }
 
     public void startGame() {
 
+    }
+
+    public int getLobbyID(){
+        return 0;
     }
 }
