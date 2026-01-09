@@ -21,11 +21,8 @@ public class LobbyActionHandler implements Runnable{
 
     @Override
     public void run() {
-        repository.addGate(Constants.GATE_URI);
-        Space cleanActions = new PileSpace();
-        Space rawActions = new QueueSpace();
-        repository.add("cleanAction", cleanActions);
-        repository.add("rawAction", rawActions);
+        Space rawActions = repository.get("rawAction");
+        Space cleanActions = repository.get("cleanAction");
         int actionCount = 0;
         int clock = 0;
         while(true) {
