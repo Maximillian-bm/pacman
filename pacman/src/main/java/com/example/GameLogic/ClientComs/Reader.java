@@ -27,19 +27,21 @@ public class Reader implements Runnable {
     @Override
     public void run() {
         int nrOfActions = 0;
-        try {
-            Space remoteActions = new RemoteSpace(URIUtil.getCleanActionURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
-            while(true) {
-                Action action = ActionUtil.convertObjToAction(remoteActions.query(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new ActualField(nrOfActions)));
-                Constants.cleanActions.add(action);
-                nrOfActions++;
+        while(true){
+            try {
+                Space remoteActions = new RemoteSpace(URIUtil.getCleanActionURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
+                while(true) {
+                    Action action = ActionUtil.convertObjToAction(remoteActions.query(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new ActualField(nrOfActions)));
+                    Constants.cleanActions.add(action);
+                    nrOfActions++;
+                }
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
  
