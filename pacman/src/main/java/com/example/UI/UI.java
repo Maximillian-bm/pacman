@@ -20,6 +20,11 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import javafx.scene.control.TextField;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.geometry.Pos;
+
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +53,9 @@ public class UI extends Application {
 
         ConnectToLobby lobbyHandler = new ConnectToLobby();
 
+        Text header = new Text("*Project name*");
+        header.setStyle("-fx-font: 24 arial;");
+
         Button joinLobbyButton = new Button("Join Lobby");
         joinLobbyButton.setPrefSize(200, 60);
 
@@ -57,7 +65,21 @@ public class UI extends Application {
         Button startButton = new Button("Start Game");
         createLobbyButton.setPrefSize(200, 60);
 
-        VBox startRoot = new VBox(joinLobbyButton, createLobbyButton, startButton);
+        TextField lobbyIDInput = new TextField();
+        lobbyIDInput.setMaxWidth(250);
+
+        Text newLobbyID = new Text("");
+
+        VBox startRoot = new VBox(
+            header,
+            lobbyIDInput,
+            joinLobbyButton, 
+            createLobbyButton, 
+            newLobbyID,
+            startButton
+        );
+        startRoot.setAlignment(Pos.BASELINE_CENTER);
+
         Scene startScene = new Scene(
             startRoot,
             Constants.INIT_SCREEN_WIDTH,
