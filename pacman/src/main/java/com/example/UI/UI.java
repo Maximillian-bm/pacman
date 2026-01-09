@@ -26,6 +26,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
+import javafx.scene.control.ChoiceBox;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -61,8 +62,25 @@ public class UI extends Application {
         Button joinLobbyButton = new Button("Join Lobby");
         joinLobbyButton.setPrefSize(200, 60);
 
+        Text playerCountText = new Text("Select number of players:");
+        ChoiceBox playerCount = new ChoiceBox();
+        playerCount.getItems().add("1");
+        playerCount.getItems().add("2");
+        playerCount.getItems().add("3");
+        playerCount.getItems().add("4");
+        HBox createLobbyH = new HBox(
+            playerCountText,
+            playerCount
+        );
+        createLobbyH.setAlignment(Pos.CENTER);
+
         Button createLobbyButton = new Button("Create Lobby");
         createLobbyButton.setPrefSize(200, 60);
+        VBox createLobbyV = new VBox(
+             createLobbyH,
+            createLobbyButton
+        );
+        createLobbyV.setAlignment(Pos.CENTER);
 
         Button startButton = new Button("Start Game");
         startButton.setPrefSize(200, 60);
@@ -85,7 +103,7 @@ public class UI extends Application {
         VBox startRoot = new VBox(
             header,
             joinLobbyV,
-            createLobbyButton,
+            createLobbyV,
             startButton
         );
         startRoot.setAlignment(Pos.CENTER);
@@ -103,7 +121,8 @@ public class UI extends Application {
         });
 
         createLobbyButton.setOnAction(e -> {
-            lobbyHandler.createLobby(1);
+            System.out.println("Creating lobby with " + playerCount.getValue() + " number of player");
+            lobbyHandler.createLobby(Integer.parseInt(playerCount.getValue().toString()));
         });
 
         startButton.setOnAction(e -> startLobby(lobbyHandler, stage));
