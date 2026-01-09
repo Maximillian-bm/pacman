@@ -3,6 +3,7 @@ package com.example.GameLogic.ClientComs;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
+import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.RemoteSpace;
 import org.jspace.Space;
@@ -21,12 +22,14 @@ public class ConnectToLobby {
 
     private int lobbyID;
 
+    private Space sync;
+
     public void createLobby(int nrOfPlayers) {
         try {
             Space space1 = new RemoteSpace(Constants.REMOTE_PUBLIC_URI);
             gameURI = (String) space1.get(new FormalField(String.class))[0];
             space1.put(gameURI, nrOfPlayers);
-            Space sync = new RemoteSpace(URIUtil.getSyncURI(gameURI));
+            sync = new RemoteSpace(URIUtil.getSyncURI(gameURI));
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
             playerID = (int) t[0];
             this.nrOfPlayers = (int) t[1];
@@ -44,7 +47,7 @@ public class ConnectToLobby {
         try {
             this.lobbyID = Integer.parseInt(lobbyID);
             gameURI = "tcp://127.0.0.1:50000/"+lobbyID+"/?keep";
-            Space sync = new RemoteSpace(URIUtil.getSyncURI(gameURI));
+            sync = new RemoteSpace(URIUtil.getSyncURI(gameURI));
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
             playerID = (int) t[0];
             nrOfPlayers = (int) t[1];
@@ -58,7 +61,13 @@ public class ConnectToLobby {
     }
 
     public void startGame() {
-
+        try {
+            sync.put(playerID, "OK");
+            sync.query(new ActualField("START"));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        
     }
 
     public int getLobbyID(){
