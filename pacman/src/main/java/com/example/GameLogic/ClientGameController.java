@@ -97,12 +97,19 @@ public class ClientGameController extends GameController {
         );
         ghosts.add(ghost4);
 
-
+        Ghost ghost5 = new Ghost();
+        ghost5.type = GhostType.ORANGE;
+        ghost5.position = new Position(
+            2 * TILE_SIZE,
+            TILE_SIZE
+        );
+        ghosts.add(ghost5);
+        
         ghostDirections.put(ghost1, Direction.WEST);
         ghostDirections.put(ghost2, Direction.WEST);
         ghostDirections.put(ghost3, Direction.WEST);
         ghostDirections.put(ghost4, Direction.WEST);
-
+        ghostDirections.put(ghost5, Direction.WEST);
         return new GameState(
             ClientMain.clock,
             players,
