@@ -29,6 +29,7 @@ public class ConnectToLobby {
             Space space1 = new RemoteSpace(Constants.REMOTE_PUBLIC_URI);
             gameURI = (String) space1.get(new FormalField(String.class))[0];
             space1.put(gameURI, nrOfPlayers);
+            space1.get(new ActualField(gameURI), new ActualField(nrOfPlayers), new ActualField("OK"));
             sync = new RemoteSpace(URIUtil.getSyncURI(gameURI));
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
             playerID = (int) t[0];

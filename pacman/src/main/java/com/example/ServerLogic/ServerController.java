@@ -37,10 +37,12 @@ public class ServerController {
                 int nrOfPlayers = (int) lobbyInstruction[1];
                 SpaceRepository lobbyRep = new SpaceRepository();
                 lobbyRep.addGate(gate);
+                lobbyRep.add("sync", new RandomSpace());
                 lobbyRep.add("rawActions", new QueueSpace());
                 lobbyRep.add("cleanActions", new PileSpace());
-                lobbyRep.add("sync", new RandomSpace());
                 Lobby lobby = new Lobby(lobbyRep, nrOfPlayers);
+                space1.put(gate, nrOfPlayers, "OK");
+                lobby.start();
                 lobbys.add(lobby);
             } catch (InterruptedException e) {
                 e.printStackTrace();
