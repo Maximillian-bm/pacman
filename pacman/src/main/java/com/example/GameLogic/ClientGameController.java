@@ -294,7 +294,7 @@ public class ClientGameController extends GameController {
     }
 
     private boolean isPowerup(TileType t) {
-        return t == TileType.CHERRY;
+        return t == TileType.ENERGIZER;
     }
 
     private Direction directionFromMove(int move) {

@@ -152,6 +152,10 @@ public class UI extends Application {
                         case MELON:
                             gc.drawImage(spriteSheet, 600, 200, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
+                        case ENERGIZER:
+                            gc.drawImage(spriteSheet, 415, 415, 25, 25, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            break;
+
                     }
 
                     // Show which tile the player is on
