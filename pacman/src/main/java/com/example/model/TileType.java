@@ -19,7 +19,11 @@ public enum TileType {
     MELON(1000),
     GALAXIAN(2000),
     BELL(3000),
-    KEY(5000);
+    KEY(5000),
+
+    WALL10(0),
+    WALL11(0),
+    WALL12(0);
 
     public final int points;
 
