@@ -1,0 +1,88 @@
+servercontroller
+
+List<Lobby> lobbys
+
+Randomspace space1 = new Randomspace(PUBLIC_URI);
+
+space1.put(URI1);
+space1.put(URI2);
+space1.put(URI3);
+space1.put(URI4);
+...
+
+gameURI, nrOfPlayers = space1.get(int, int);
+
+Reporsetory gameRep = new Reporsetory(gameURI);
+
+gameRep.add("rawActions", new Quespace());
+
+gameRep.add("cleanActions", new PileSpace());
+
+gameRep.add("sync", new Randomspace());
+
+Lobby lobby = new Lobby(gameRep, nrOfPlayers);
+
+lobbys.add(lobby);
+
+LobbyController
+
+Lobby(Reporsetory gameRep, int nrOfPlayers){
+
+    LobbyActionHandler lobbyActionHandler = LobbyActionHandler(gameRep);
+    lobbyActionHandler.start();
+
+    Space sync = gameRep.get("sync");
+
+    for(int i = 0; i < nrOfPlayers; i++){
+        sync.put(i);
+    }
+
+    for(int i = 0; i < nrOfPlayers; i++){
+        sync.get(i, "OK");
+    }
+
+    sync.put("START");
+
+}
+
+clientCreatingLobby
+
+Space space1 = new RemoteSpace(PUBLIC_URI);
+
+gameURI = getGameURIFromUser();
+
+space1.put(gameURI, nrOfPlayers);
+
+Reporsetory gameRep = new RemoteRepository(gameURI);
+
+Space sync = gameRep.get("sync");
+
+int playerID = sync.get(int);
+
+sync.put(playerID, "OK");
+
+sync.get("START");
+
+startGame(playerID, gameRep);
+
+clientJoiningLobby
+
+Space space1 = new RemoteSpace(PUBLIC_URI);
+
+gameURI = space1.get(int);
+
+space1.put(gameURI, nrOfPlayers);
+
+Reporsetory gameRep = new RemoteRepository(gameURI);
+
+Space sync = gameRep.get("sync");
+
+int playerID = sync.get(int);
+
+sync.put(playerID, "OK");
+
+sync.get("START");
+
+startGame(playerID, gameRep);
+
+
