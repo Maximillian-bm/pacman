@@ -1,6 +1,7 @@
 package com.example.model;
 
-import com.example.model.TileType.*;
+// import com.example.model.TileType.*;
+import static com.example.model.TileType.*;
 
 public class Maps {
     public static int[][] map1 = {
@@ -24,14 +25,24 @@ public class Maps {
 };
 
     public static TileType[][] getMap1() {
-        TileType[][] tileMap1 = new TileType[map1.length][map1[0].length];
+        TileType[][] tm = new TileType[map1.length][map1[0].length];
 
         for (int i = 0; i < map1.length; i++) {
             for (int j = 0; j < map1[0].length; j++) {
-                tileMap1[i][j] = TileType.values()[map1[j][i]];
+                tm[i][j] = TileType.values()[map1[j][i]];
             }
         }
-
-        return tileMap1;
+        // for (int i = 0; i < tm.length; i++) {
+        //     for (int j = 0; j < tm[0].length; j++) {
+        //         if (tm[i][j] != WALL) {
+        //             continue;
+        //         }
+        //         // if (0 > i-1 || tm[i-1][j] != WALL) {
+        //         //     tm[i][j] = WALL10;
+        //         // }
+        //     }
+        // }
+        //
+        return tm;
     }
 }
