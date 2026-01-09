@@ -62,6 +62,12 @@ public class ConnectToLobby {
 
     public void startGame() {
         try {
+
+            Reader reader = new Reader();
+            Thread t = new Thread(reader);
+            t.setDaemon(true);
+            t.start();
+            
             sync.put(playerID, "OK");
             sync.query(new ActualField("START"));
         } catch (InterruptedException e) {
