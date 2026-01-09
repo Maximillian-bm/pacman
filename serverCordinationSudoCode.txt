@@ -25,8 +25,9 @@ loop{
 
     lobbys.add(lobby);
 
-    LobbyController
 }
+
+LobbyController
 
 Lobby(Reporsetory gameRep, int nrOfPlayers){
 
@@ -47,13 +48,9 @@ Lobby(Reporsetory gameRep, int nrOfPlayers){
 
 }
 
-clientCreatingLobby
-
-Space space1 = new RemoteSpace(PUBLIC_URI);
+clientJoiningLobby
 
 gameURI = getGameURIFromUser();
-
-space1.put(gameURI, nrOfPlayers);
 
 Reporsetory gameRep = new RemoteRepository(gameURI);
 
@@ -67,7 +64,7 @@ sync.get("START");
 
 startGame(playerID, gameRep);
 
-clientJoiningLobby
+clientCreatingLobby
 
 Space space1 = new RemoteSpace(PUBLIC_URI);
 

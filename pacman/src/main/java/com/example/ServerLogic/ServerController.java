@@ -3,6 +3,8 @@ package com.example.ServerLogic;
 import java.util.*;
 
 import org.jspace.FormalField;
+import org.jspace.PileSpace;
+import org.jspace.QueueSpace;
 import org.jspace.RandomSpace;
 import org.jspace.Space;
 import org.jspace.SpaceRepository;
@@ -30,9 +32,16 @@ public class ServerController {
 
         while(true){
             try {
-                Object[] lobbyInstruction = space1.get(new FormalField(String.class), new FormalField(Integer.class));
-                String gameURI = (String) lobbyInstruction[0];
+                Object[] lobbyInstruction = space1.get(new FormalField(Integer.class), new FormalField(Integer.class));
+                String gate = (String) lobbyInstruction[0];
                 int nrOfPlayers = (int) lobbyInstruction[1];
+                SpaceRepository lobbyRep = new SpaceRepository();
+                lobbyRep.addGate(gate);
+                lobbyRep.add("rawActions", new QueueSpace());
+                lobbyRep.add("cleanActions", new PileSpace());
+                lobbyRep.add("sync", new RandomSpace());
+                Lobby lobby = new Lobby(lobbyRep, nrOfPlayers);
+                lobbys.add(lobby);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
