@@ -11,8 +11,10 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -42,6 +44,24 @@ public class UI extends Application {
 
     @Override
     public void start(Stage stage) {
+        Button startButton = new Button("Start Game");
+        startButton.setPrefSize(200, 60);
+
+        StackPane startRoot = new StackPane(startButton);
+        Scene startScene = new Scene(
+            startRoot,
+            Constants.INIT_SCREEN_WIDTH,
+            Constants.INIT_SCREEN_HEIGHT
+    );
+
+    startButton.setOnAction(e -> startGame(stage));
+
+    stage.setTitle("Pacman");
+    stage.setScene(startScene);
+    stage.show();
+}
+
+    public void startGame(Stage stage) {
         spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
         wallSheet = new Image("./tilesets/chompermazetiles.png");
 
