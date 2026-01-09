@@ -20,8 +20,10 @@ import javafx.scene.input.KeyCode;
 public class KeyHandlerOnline extends KeyHandler{
 
     private Space rawActions;
+    private int playerID;
 
-    public KeyHandlerOnline(int lobbyID) {
+    public KeyHandlerOnline(int lobbyID, int playerID) {
+        this.playerID = playerID;
         try {
             this.rawActions = new RemoteSpace(URIUtil.getRawActionURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
         } catch (UnknownHostException e) {
@@ -41,21 +43,21 @@ public class KeyHandlerOnline extends KeyHandler{
 
     @Override
     public void moveUp() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 3), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 3), rawActions);
     }
 
     @Override
     public void moveDown() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 4), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 4), rawActions);
     }
 
     @Override
     public void moveLeft() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 1), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 1), rawActions);
     }
 
     @Override
     public void moveRight() {
-        ActionUtil.registerRawAction(new Action(0, ClientMain.clock + 2, 2), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 2), rawActions);
     }
 }

@@ -145,7 +145,7 @@ public class UI extends Application {
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
-        keyHandler = new KeyHandlerOnline(lobbyHandler.getLobbyID());
+        keyHandler = new KeyHandlerOnline(lobbyHandler.getLobbyID(), lobbyHandler.getPlayerID());
 
         scene.setOnKeyPressed(e -> keyHandler.move(e.getCode()));
 

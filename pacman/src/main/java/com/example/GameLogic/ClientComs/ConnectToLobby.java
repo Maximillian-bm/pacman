@@ -81,4 +81,8 @@ public class ConnectToLobby {
     public int getNrOfPlayers() {
         return nrOfPlayers;
     }
+
+    public int getPlayerID() {
+        return playerID;
+    }
 }
