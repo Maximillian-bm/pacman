@@ -15,7 +15,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -57,7 +57,7 @@ public class UI extends Application {
         Button startButton = new Button("Start Game");
         createLobbyButton.setPrefSize(200, 60);
 
-        StackPane startRoot = new StackPane(joinLobbyButton, createLobbyButton, startButton);
+        VBox startRoot = new VBox(joinLobbyButton, createLobbyButton, startButton);
         Scene startScene = new Scene(
             startRoot,
             Constants.INIT_SCREEN_WIDTH,
