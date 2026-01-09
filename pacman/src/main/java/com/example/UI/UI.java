@@ -145,6 +145,8 @@ public class UI extends Application {
 
             drawPlayerPosition(time);
 
+            drawGhosts();
+
             drawPoints();
         }
 
@@ -189,6 +191,10 @@ public class UI extends Application {
                         case MELON:
                             gc.drawImage(spriteSheet, 600, 200, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
+                        case ENERGIZER:
+                            gc.drawImage(spriteSheet, 415, 415, 25, 25, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            break;
+
                     }
 
                     // Show which tile the player is on
@@ -205,7 +211,7 @@ public class UI extends Application {
                 }
             }
         }
-
+        
         private void drawPlayerPosition(long time) {
             gameState.players().forEach(player -> {
                 int sy = 0;
@@ -235,6 +241,30 @@ public class UI extends Application {
             });
 
             lastTime = time;
+        }
+
+        private void drawGhosts() {
+            gameState.ghosts().forEach(ghost -> {
+                Position ghostPos = ghost.getPosition();
+                switch (ghost.getType()) {
+                    case RED -> { // ("Blinky"),
+                        gc.drawImage(spriteSheet, 0, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                    }
+                    case PINK -> { // ("Pinky"),
+                        gc.drawImage(spriteSheet, 50, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                    }
+                    case CYAN -> { // ("Inky"),
+                        gc.drawImage(spriteSheet, 100, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                    }
+                    case ORANGE -> { // ("Clyde"),
+                        gc.drawImage(spriteSheet, 150, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                    }
+                    case PURPLE -> { // ("Sue");
+                        gc.drawImage(spriteSheet, 200, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                    }
+
+                }
+            });
         }
 
         private void drawWall(int i, int j) {
