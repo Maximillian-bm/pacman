@@ -36,7 +36,10 @@ import static com.example.model.Constants.TILE_SIZE;
 import static com.example.model.Constants.TARGET_FPS;
 
 public class UI extends Application {
-    private final ClientGameController gameController = new ClientGameController();
+    
+    private ConnectToLobby lobbyHandler = new ConnectToLobby();
+
+    private final ClientGameController gameController = new ClientGameController(lobbyHandler);
     private GameState gameState;
 
     private GraphicsContext gc;
@@ -53,8 +56,6 @@ public class UI extends Application {
 
     @Override
     public void start(Stage stage) {
-
-        ConnectToLobby lobbyHandler = new ConnectToLobby();
 
         Text header = new Text("Pacman");
         header.setStyle("-fx-font: 24 arial;");
@@ -125,19 +126,19 @@ public class UI extends Application {
             lobbyHandler.createLobby(Integer.parseInt(playerCount.getValue().toString()));
         });
 
-        startButton.setOnAction(e -> startLobby(lobbyHandler, stage));
+        startButton.setOnAction(e -> startLobby(stage));
 
         stage.setTitle("Pacman");
         stage.setScene(startScene);
         stage.show();
     }
 
-    private void startLobby(ConnectToLobby lobbyHandler, Stage stage){
+    private void startLobby(Stage stage){
         lobbyHandler.startGame();
-        startGame(stage, lobbyHandler);
+        startGame(stage);
     }
 
-    private void startGame(Stage stage, ConnectToLobby lobbyHandler) {
+    private void startGame(Stage stage) {
         spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
         wallSheet = new Image("./tilesets/chompermazetiles.png");
 
