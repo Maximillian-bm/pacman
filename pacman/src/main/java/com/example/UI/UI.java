@@ -16,9 +16,16 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+
+import javafx.scene.control.TextField;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.geometry.Pos;
+import javafx.geometry.Insets;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -48,6 +55,9 @@ public class UI extends Application {
 
         ConnectToLobby lobbyHandler = new ConnectToLobby();
 
+        Text header = new Text("Pacman");
+        header.setStyle("-fx-font: 24 arial;");
+
         Button joinLobbyButton = new Button("Join Lobby");
         joinLobbyButton.setPrefSize(200, 60);
 
@@ -55,18 +65,46 @@ public class UI extends Application {
         createLobbyButton.setPrefSize(200, 60);
 
         Button startButton = new Button("Start Game");
-        createLobbyButton.setPrefSize(200, 60);
+        startButton.setPrefSize(200, 60);
 
-        VBox startRoot = new VBox(joinLobbyButton, createLobbyButton, startButton);
+        Text LobbyIDText = new Text("Lobby ID:");
+        TextField lobbyIDInput = new TextField();
+        lobbyIDInput.setMaxWidth(250);
+        HBox joinLobbyH = new HBox(
+            LobbyIDText,
+            lobbyIDInput
+        );
+        joinLobbyH.setAlignment(Pos.CENTER);
+
+        VBox joinLobbyV = new VBox(
+            joinLobbyH,
+            joinLobbyButton
+        );
+        joinLobbyV.setAlignment(Pos.CENTER);
+
+        VBox startRoot = new VBox(
+            header,
+            joinLobbyV,
+            createLobbyButton,
+            startButton
+        );
+        startRoot.setAlignment(Pos.CENTER);
+        startRoot.setSpacing(50);
+
         Scene startScene = new Scene(
             startRoot,
             Constants.INIT_SCREEN_WIDTH,
             Constants.INIT_SCREEN_HEIGHT
         );
 
-        joinLobbyButton.setOnAction(e -> lobbyHandler.joinLobby("get URI from user"));
+        joinLobbyButton.setOnAction(e -> {
+            System.out.println("Connecting to: " + lobbyIDInput.getText());
+            lobbyHandler.joinLobby(lobbyIDInput.getText());
+        });
 
-        createLobbyButton.setOnAction(e -> lobbyHandler.createLobby(1));
+        createLobbyButton.setOnAction(e -> {
+            lobbyHandler.createLobby(1);
+        });
 
         startButton.setOnAction(e -> startLobby(lobbyHandler, stage));
 
