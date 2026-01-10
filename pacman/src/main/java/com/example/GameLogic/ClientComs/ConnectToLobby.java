@@ -39,7 +39,7 @@ public class ConnectToLobby {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+        System.out.println("Created lobby with ID: "+lobbyID);
     }
 
     public void joinLobby(String lobbyID) {
