@@ -30,14 +30,7 @@ public class ClientGameController extends GameController {
     private double frightenedTimerSec = 0.0;
     private static final double FRIGHTENED_DURATION_SEC = 8.0;
 
-    private ConnectToLobby lobbyHandler;
-
-    public ClientGameController(ConnectToLobby lobbyHandler){
-        this.lobbyHandler = lobbyHandler;
-    }
-
     public GameState updateGameState(GameState gameState, List<Action> actions) {
-        if (gameState == null) return initializeGameState();
 
         if (frightenedTimerSec > 0.0) {
             frightenedTimerSec -= (1.0 / TARGET_FPS);
@@ -60,19 +53,19 @@ public class ClientGameController extends GameController {
         return newGameState;
     }
 
-    private GameState initializeGameState() {
+    public GameState initializeGameState(int nrOfPlayers, int playerID) {
         List<Player> players = new ArrayList<>();
         List<Ghost> ghosts = new ArrayList<>();
         TileType[][] tiles = Maps.getMap1();
 
-        for(int i = 0; i < lobbyHandler.getNrOfPlayers(); i++){
+        for(int i = 0; i < nrOfPlayers; i++){
             Player player = new Player(i);
             player.setPosition(new Position(
                 3 * TILE_SIZE,
                 3 * TILE_SIZE
             ));
             players.add(player);
-            if(i == lobbyHandler.getPlayerID()) localPlayer = player;
+            if(i == playerID) localPlayer = player;
         }
 
         localPlayer = new Player(0);

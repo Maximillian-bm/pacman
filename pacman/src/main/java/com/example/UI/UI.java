@@ -39,7 +39,7 @@ public class UI extends Application {
     
     private ConnectToLobby lobbyHandler = new ConnectToLobby();
 
-    private final ClientGameController gameController = new ClientGameController(lobbyHandler);
+    private final ClientGameController gameController = new ClientGameController();
     private GameState gameState;
 
     private GraphicsContext gc;
@@ -175,6 +175,7 @@ public class UI extends Application {
             List<Action> ActionOfClock = Constants.cleanActions.stream()
                 .filter(e -> e.getClock() == ClientMain.clock)
                 .toList();
+            if (gameState == null) gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
             gameState = gameController.updateGameState(gameState, ActionOfClock);
 
             //Proof that action is sent to game controller
