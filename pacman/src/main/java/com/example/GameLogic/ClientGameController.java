@@ -51,20 +51,23 @@ public class ClientGameController extends GameController {
 
         for(int i = 0; i < nrOfPlayers; i++){
             Player player = new Player(i);
-            player.setPosition(new Position(
-                3 * TILE_SIZE,
-                3 * TILE_SIZE
-            ));
+            
+            Position spawnPosition = new Position();
+            switch (player.getId()) {
+
+                case 0 -> spawnPosition = new Position(1 * TILE_SIZE, 1 * TILE_SIZE);
+                case 1 -> spawnPosition = new Position(1 * TILE_SIZE, 7 * TILE_SIZE);
+                case 2 -> spawnPosition = new Position(13 * TILE_SIZE, 1 * TILE_SIZE);
+                case 3 -> spawnPosition = new Position(13 * TILE_SIZE, 7 * TILE_SIZE);
+            }
+                
+        
+
+
+
             players.add(player);
             if(i == playerID) localPlayer = player;
         }
-
-        localPlayer = new Player(0);
-        localPlayer.setPosition(new Position(
-            3 * TILE_SIZE,
-            3 * TILE_SIZE
-        ));
-        players.add(localPlayer);
 
         Ghost ghost1 = new Ghost(GhostType.RED);
         ghost1.setPosition(
