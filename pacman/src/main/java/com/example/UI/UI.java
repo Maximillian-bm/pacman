@@ -13,27 +13,23 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.util.Pair;
+import javafx.scene.SnapshotParameters;
 
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.geometry.Pos;
-import javafx.geometry.Insets;
 import javafx.scene.control.ChoiceBox;
+import javafx.geometry.Pos;
 
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
-import static com.example.model.Constants.TILE_SIZE;
-import static com.example.model.Constants.TARGET_FPS;
+import static com.example.model.Constants.*;
 
 public class UI extends Application {
     
@@ -46,27 +42,37 @@ public class UI extends Application {
     private GraphicsContext gc;
     private Canvas canvas;
 
-    private Image spriteSheet;
-    private Image wallSheet;
-
-    private long lastTime = 0;
-
-    private long firstTime = 0;
+    private final Image spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
+    private final Image wallSpriteSheet = new Image("./tilesets/chompermazetiles.png");
 
     private KeyHandler keyHandler;
 
+    record TilePos(int x, int y) { }
+
     @Override
     public void start(Stage stage) {
+        stage.setTitle("Pacman");
+        initializeLobby(stage);
+        stage.show();
+    }
 
-        Text header = new Text("Pacman");
-        header.setStyle("-fx-font: 24 arial;");
+    private void initializeLobby(Stage stage) {
+        Canvas backgroundCanvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
+        GraphicsContext bgGc = backgroundCanvas.getGraphicsContext2D();
+        bgGc.setFill(Color.BLACK);
+        bgGc.fillRect(0, 0, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
-        Button joinLobbyButton = new Button("Join Lobby");
-        joinLobbyButton.setPrefSize(200, 60);
+        drawRectangle(bgGc, 0, 0, TILES_WIDE, TILES_TALL);
+
+        Button joinLobbyButton = createTiledButton("Join Lobby", 6, 2);
 
         Text joinedLobbyText = new Text("");
+        joinedLobbyText.setFill(Color.WHITE);
+        joinedLobbyText.setStyle("-fx-font-size: 14px;");
 
         Text playerCountText = new Text("Select number of players:");
+        playerCountText.setFill(Color.WHITE);
+        playerCountText.setStyle("-fx-font-size: 14px;");
         ChoiceBox playerCountChoices = new ChoiceBox();
         playerCountChoices.getItems().add("1");
         playerCountChoices.getItems().add("2");
@@ -78,20 +84,20 @@ public class UI extends Application {
         );
         createLobbyH.setAlignment(Pos.CENTER);
 
-        Button createLobbyButton = new Button("Create Lobby");
-        createLobbyButton.setPrefSize(200, 60);
+        Button createLobbyButton = createTiledButton("Create Lobby", 6, 2);
         VBox createLobbyV = new VBox(
-             createLobbyH,
+            createLobbyH,
             createLobbyButton
         );
         createLobbyV.setAlignment(Pos.CENTER);
 
-        Button startButton = new Button("Start Game");
-        startButton.setPrefSize(200, 60);
+        Button startButton = createTiledButton("Start Game", 6, 2);
 
-        Text LobbyIDText = new Text("Lobby ID:");
+        Text LobbyIDText = new Text("Lobby ID: ");
+        LobbyIDText.setFill(Color.WHITE);
+        LobbyIDText.setStyle("-fx-font-size: 14px;");
         TextField lobbyIDInput = new TextField();
-        lobbyIDInput.setMaxWidth(250);
+        lobbyIDInput.setMaxWidth(6 * TILE_SIZE);
         HBox joinLobbyH = new HBox(
             LobbyIDText,
             lobbyIDInput
@@ -104,16 +110,23 @@ public class UI extends Application {
         );
         joinLobbyV.setAlignment(Pos.CENTER);
 
+        Text header = new Text("Pacman");
+        header.setFill(Color.WHITE);
+        header.setStyle("-fx-font: 48 arial;");
+
         VBox startRoot = new VBox(
             header,
             joinLobbyV,
             createLobbyV
         );
         startRoot.setAlignment(Pos.CENTER);
-        startRoot.setSpacing(50);
+        startRoot.setSpacing(48);
+
+        StackPane root = new StackPane();
+        root.getChildren().addAll(backgroundCanvas, startRoot);
 
         Scene startScene = new Scene(
-            startRoot,
+            root,
             Constants.INIT_SCREEN_WIDTH,
             Constants.INIT_SCREEN_HEIGHT
         );
@@ -148,9 +161,7 @@ public class UI extends Application {
 
         startButton.setOnAction(e -> startLobby(stage));
 
-        stage.setTitle("Pacman");
         stage.setScene(startScene);
-        stage.show();
     }
 
     private void startLobby(Stage stage){
@@ -159,9 +170,6 @@ public class UI extends Application {
     }
 
     private void startGame(Stage stage) {
-        spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
-        wallSheet = new Image("./tilesets/chompermazetiles.png");
-
         final Group root = new Group();
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
@@ -194,7 +202,7 @@ public class UI extends Application {
             }
 
             List<Action> ActionOfClock = Constants.cleanActions.getActions(ClientMain.clock);
-            if (gameState == null) { 
+            if (gameState == null) {
                 gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
                 savedState = gameState;
             }
@@ -247,7 +255,7 @@ public class UI extends Application {
                     switch (tiles[i][j]) {
                         case EMPTY:
                             //gc.setFill(Color.BLACK);
-                            //gc.fillRect(i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            //gc.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case WALL:
                             drawWall(i, j);
@@ -279,8 +287,8 @@ public class UI extends Application {
                     }
 
                     // Show which tile the player is on
-                    /*int finalI = i;
-                    int finalJ = j;
+                    /*int finalI = x;
+                    int finalJ = y;
                     gameState.players().forEach(player -> {
                         Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
                         System.out.println(playerGridPosition.getKey() + " " + playerGridPosition.getValue());
@@ -308,7 +316,7 @@ public class UI extends Application {
                         break;
                 }
 
-                Position playerPos = player.getPosition();
+                Position playerTilePos = player.getPosition();
 
                 int pacmanFrame = (int)(time / 75000000) % 4;
 
@@ -318,30 +326,28 @@ public class UI extends Application {
                     default -> sy + 50;
                 };
 
-                gc.drawImage(spriteSheet, 850, syf, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
+                gc.drawImage(spriteSheet, 850, syf, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
             });
-
-            lastTime = time;
         }
 
         private void drawGhosts() {
             gameState.ghosts().forEach(ghost -> {
-                Position ghostPos = ghost.getPosition();
+                Position ghostTilePos = ghost.getPosition();
                 switch (ghost.getType()) {
                     case RED -> { // ("Blinky"),
-                        gc.drawImage(spriteSheet, 0, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                        gc.drawImage(spriteSheet, 0, 0, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
                     }
                     case PINK -> { // ("Pinky"),
-                        gc.drawImage(spriteSheet, 50, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                        gc.drawImage(spriteSheet, 50, 0, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
                     }
                     case CYAN -> { // ("Inky"),
-                        gc.drawImage(spriteSheet, 100, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                        gc.drawImage(spriteSheet, 100, 0, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
                     }
                     case ORANGE -> { // ("Clyde"),
-                        gc.drawImage(spriteSheet, 150, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                        gc.drawImage(spriteSheet, 150, 0, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
                     }
                     case PURPLE -> { // ("Sue");
-                        gc.drawImage(spriteSheet, 250, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                        gc.drawImage(spriteSheet, 250, 0, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
                     }
 
                 }
@@ -361,26 +367,26 @@ public class UI extends Application {
             if (wWall) {
                 if (sWall) {
                     if (eWall) {
-                        gc.drawImage(wallSheet, 32*6, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        gc.drawImage(wallSpriteSheet, 32*6, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                     } else {
                         if (nWall) {
-                            gc.drawImage(wallSheet, 32*7, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*7, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSheet, 32*0, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*0, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         }
                     }
                 } else {
                     if (eWall) {
                         if (nWall) {
-                            gc.drawImage(wallSheet, 32*6, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*6, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSheet, 32*6, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*6, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         }
                     } else {
                         if (nWall) {
-                            gc.drawImage(wallSheet, 32*0, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*0, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSheet, 32*0, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*0, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         }
                     }
                 }
@@ -388,33 +394,159 @@ public class UI extends Application {
                 if (eWall) {
                     if (nWall) {
                         if (sWall) {
-                            gc.drawImage(wallSheet, 32*9, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*9, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSheet, 32*2, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*2, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         }
                     } else {
                         if (sWall) {
-                            gc.drawImage(wallSheet, 32*2, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*2, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSheet, 32*2, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*2, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         }
                     }
                 } else {
                     if (nWall) {
                         if (sWall) {
-                            gc.drawImage(wallSheet, 32*8, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32*8, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSheet, 32, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32, 32*0, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         }
                     } else {
                         if (sWall) {
-                            gc.drawImage(wallSheet, 32, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32, 32*2, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSheet, 32, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32, 32, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         }
                     }
                 }
             }
         }
+    }
+
+    private void drawTileFromTileset(
+        GraphicsContext gc,
+        Image tileset,
+        int tileX,
+        int tileY,
+        double destX,
+        double destY
+    ) {
+        gc.drawImage(
+            tileset,
+            tileX * 32,
+            tileY * 32,
+            32,
+            32,
+            destX,
+            destY,
+            Constants.TILE_SIZE,
+            Constants.TILE_SIZE
+        );
+    }
+
+    private void drawRectangle(GraphicsContext gc, int x, int y, int width, int height) {
+        for (int i = y; i < y + height; i++) {
+            for (int j = x; j < x + width; j++) {
+                TilePos tileTilePos;
+
+                if (width == 1 && height == 1) {
+                    // Single tile
+                    tileTilePos = new TilePos(7, 1);
+                } else if (width == 1) {
+                    // Single column
+                    if (i == y) {
+                        // Top
+                        tileTilePos = new TilePos(6, 0);
+                    } else if (i == y + height - 1) {
+                        // Bottom
+                        tileTilePos = new TilePos(6, 2);
+                    } else {
+                        // Middle
+                        tileTilePos = new TilePos(6, 1);
+                    }
+                } else if (height == 1) {
+                    // Single row
+                    if (j == x) {
+                        // Left
+                        tileTilePos = new TilePos(7, 0);
+                    } else if (j == x + width - 1) {
+                        // Right
+                        tileTilePos = new TilePos(9, 0);
+                    } else {
+                        // Middle
+                        tileTilePos = new TilePos(8, 0);
+                    }
+                } else {
+                    // Standard 2×2+ rectangles
+                    if (j == x && i == y) {
+                        // Top-left corner
+                        tileTilePos = new TilePos(0, 0);
+                    } else if (j == x + width - 1 && i == y) {
+                        // Top-right corner
+                        tileTilePos = new TilePos(2, 0);
+                    } else if (j == x && i == y + height - 1) {
+                        // Bottom-left corner
+                        tileTilePos = new TilePos(0, 2);
+                    } else if (j == x + width - 1 && i == y + height - 1) {
+                        // Bottom-right corner
+                        tileTilePos = new TilePos(2, 2);
+                    } else if (i == y) {
+                        // Top edge
+                        tileTilePos = new TilePos(1, 0);
+                    } else if (i == y + height - 1) {
+                        // Bottom edge
+                        tileTilePos = new TilePos(1, 2);
+                    } else if (j == x) {
+                        // Left edge
+                        tileTilePos = new TilePos(0, 1);
+                    } else if (j == x + width - 1) {
+                        // Right edge
+                        tileTilePos = new TilePos(2, 1);
+                    } else {
+                        // Center
+                        tileTilePos = new TilePos(1, 1);
+                    }
+                }
+
+                drawTileFromTileset(gc, wallSpriteSheet, tileTilePos.x, tileTilePos.y, j * TILE_SIZE, i * TILE_SIZE);
+            }
+        }
+    }
+
+    private Button createTiledButton(String text, int tilesWide, int tilesTall) {
+        double width = tilesWide * TILE_SIZE;
+        double height = tilesTall * TILE_SIZE;
+
+        Button button = new Button(text);
+        button.setPrefSize(width, height);
+        button.setGraphic(createTiledImageView(width, height));
+        button.setContentDisplay(ContentDisplay.CENTER);
+        button.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;");
+
+        return button;
+    }
+
+    private ImageView createTiledImageView(double width, double height) {
+        Canvas canvas = new Canvas(width, height);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        gc.clearRect(0, 0, width, height);
+
+        int tilesWide = (int) Math.ceil(width / TILE_SIZE);
+        int tilesTall = (int) Math.ceil(height / TILE_SIZE);
+
+        drawRectangle(gc, 0, 0, tilesWide, tilesTall);
+
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        WritableImage snapshot = canvas.snapshot(params, null);
+
+        ImageView imageView = new ImageView(snapshot);
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
+        imageView.setPreserveRatio(false);
+
+        return imageView;
     }
 }
