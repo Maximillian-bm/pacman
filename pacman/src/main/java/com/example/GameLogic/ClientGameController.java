@@ -30,6 +30,18 @@ public class ClientGameController extends GameController {
     private double frightenedTimerSec = 0.0;
     private static final double FRIGHTENED_DURATION_SEC = 8.0;
 
+    public GameState updateGameStateFor(GameState gameState, List<Action> actions, int targetClock){
+        int clock = gameState.clock();
+        while(clock < targetClock){
+            int currentClock = ++clock;
+            List<Action> ActionOfClock = Constants.cleanActions.stream()
+                .filter(e -> e.getClock() == currentClock)
+                .toList();
+            gameState = updateGameState(gameState, ActionOfClock);
+        }
+        return gameState;
+    }
+    
     public GameState updateGameState(GameState gameState, List<Action> actions) {
 
         if (frightenedTimerSec > 0.0) {
