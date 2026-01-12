@@ -47,13 +47,16 @@ public class UI extends Application {
 
     private KeyHandler keyHandler;
 
+    private Runnable createLobby;
+
     record TilePos(int x, int y) { }
 
     @Override
     public void start(Stage stage) {
         stage.setTitle("Pacman");
         initializeLobby(stage);
-        stage.show();
+        createLobby.run();
+        startLobby(stage);
     }
 
     private void initializeLobby(Stage stage) {
@@ -78,6 +81,7 @@ public class UI extends Application {
         playerCountChoices.getItems().add("2");
         playerCountChoices.getItems().add("3");
         playerCountChoices.getItems().add("4");
+        playerCountChoices.setValue("1");
         HBox createLobbyH = new HBox(
             playerCountText,
             playerCountChoices
@@ -143,8 +147,10 @@ public class UI extends Application {
             startRoot.getChildren().add(joinedLobbyText);
         });
 
-        createLobbyButton.setOnAction(e -> {
-            if (playerCountChoices.getValue() == null) { return; }
+        createLobby = () -> {
+            if (playerCountChoices.getValue() == null) {
+                return;
+            }
             String playerCount = playerCountChoices.getValue().toString();
 
             System.out.println("Creating lobby with " + playerCount + " number of player");
@@ -157,11 +163,15 @@ public class UI extends Application {
             joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
             startRoot.getChildren().add(startButton);
             startRoot.getChildren().add(joinedLobbyText);
-        });
+        };
+
+        createLobbyButton.setOnAction(e -> createLobby.run());
 
         startButton.setOnAction(e -> startLobby(stage));
 
         stage.setScene(startScene);
+
+        stage.show();
     }
 
     private void startLobby(Stage stage){
@@ -234,7 +244,7 @@ public class UI extends Application {
 
             drawPlayerPosition(time);
 
-            drawGhosts();
+            drawGhosts(time);
 
             drawPoints();
         }
@@ -303,54 +313,63 @@ public class UI extends Application {
         
         private void drawPlayerPosition(long time) {
             gameState.players().forEach(player -> {
-                int sy = 0;
-                switch (player.getDirection()) {
-                    case WEST:
-                        sy += 50 * 6;
-                        break;
-                    case NORTH:
-                        sy += 50 * 9;
-                        break;
-                    case SOUTH:
-                        sy += 50 * 3;
-                        break;
-                }
-
-                Position playerTilePos = player.getPosition();
+                int sy = switch (player.getDirection()) {
+                    case WEST -> 50 * 6;
+                    case NORTH -> 50 * 9;
+                    case SOUTH -> 50 * 3;
+                    default -> 0;
+                };
 
                 int pacmanFrame = (int)(time / 75000000) % 4;
-
-                int syf = switch (pacmanFrame) {
+                sy = switch (pacmanFrame) {
                     case 0 -> sy;
                     case 2 -> sy + 50 * 2;
                     default -> sy + 50;
                 };
 
-                gc.drawImage(spriteSheet, 850, syf, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                Position playerTilePos = player.getPosition();
+                gc.drawImage(spriteSheet, 850, sy, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
             });
         }
 
-        private void drawGhosts() {
+        private void drawGhosts(long time) {
             gameState.ghosts().forEach(ghost -> {
-                Position ghostTilePos = ghost.getPosition();
-                switch (ghost.getType()) {
-                    case RED -> { // ("Blinky"),
-                        gc.drawImage(spriteSheet, 0, 0, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
-                    }
-                    case PINK -> { // ("Pinky"),
-                        gc.drawImage(spriteSheet, 50, 0, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
-                    }
-                    case CYAN -> { // ("Inky"),
-                        gc.drawImage(spriteSheet, 100, 0, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
-                    }
-                    case ORANGE -> { // ("Clyde"),
-                        gc.drawImage(spriteSheet, 150, 0, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
-                    }
-                    case PURPLE -> { // ("Sue");
-                        gc.drawImage(spriteSheet, 250, 0, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
-                    }
-
+                int sy = 0, sx = 0;
+                switch (ghost.getDirection()) {
+                    case WEST:
+                        sy += 50 * 4;
+                        break;
+                    case NORTH:
+                        sy += 50 * 6;
+                        break;
+                    case SOUTH:
+                        sy += 50 * 2;
+                        break;
                 }
+
+                sx = switch (ghost.getType()) {
+                    case RED -> 0; // ("Blinky"),
+                    case PINK -> 50; // ("Pinky"),
+                    case CYAN -> 100; // ("Inky"),
+                    case ORANGE -> 150; // ("Clyde"),
+                    case PURPLE -> 250; // ("Sue");
+                };
+
+                double fTimer = Ghost.getFrightenedTimerSec();
+
+                if (fTimer > 0) {
+                    sy += 50 * 11;
+                    sx = 0;
+                }
+
+                int ghostFrame = (int) (time / 300000000) % 2;
+                if (ghostFrame == 1) {
+                    sy += 50;
+                    if (fTimer > 0 && fTimer < 2.0) sx += 50;
+                }
+
+                Position ghostTilePos = ghost.getPosition();
+                gc.drawImage(spriteSheet, sx, sy, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
             });
         }
 
