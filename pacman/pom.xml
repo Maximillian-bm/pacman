@@ -124,6 +124,16 @@
           <version>3.0.0</version>
         </plugin>
 
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+                <mainClass>com.example.ServerLogic.ServerController</mainClass>
+                <classpathScope>compile</classpathScope>
+            </configuration>
+        </plugin>
+
       </plugins>
     </pluginManagement>
 
