@@ -34,6 +34,7 @@ public class ServerController {
             try {
                 Object[] lobbyInstruction = space1.get(new FormalField(Integer.class), new FormalField(Integer.class));
                 int lobbyID = (int) lobbyInstruction[0];
+                System.out.println("creating lobby with id: "+lobbyID);
                 int nrOfPlayers = (int) lobbyInstruction[1];
                 rep.add(lobbyID+"sync", new RandomSpace());
                 rep.add(lobbyID+"rawAction", new QueueSpace());
