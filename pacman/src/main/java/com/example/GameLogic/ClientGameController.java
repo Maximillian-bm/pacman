@@ -29,6 +29,8 @@ public class ClientGameController extends GameController {
     
     public GameState updateGameState(GameState gameState, List<Action> actions) {
 
+        updateRespawnTimers(gameState);
+
         if (Ghost.getFrightenedTimerSec() > 0.0) {
             Ghost.setFrightenedTimerSec(Ghost.getFrightenedTimerSec() - (1.0 / TARGET_FPS));
             if (Ghost.getFrightenedTimerSec() < 0.0) Ghost.setFrightenedTimerSec(0.0);
@@ -37,6 +39,7 @@ public class ClientGameController extends GameController {
         handleActions(gameState, actions);
         stepMovement(gameState);
         GhostMovement(gameState);
+        handleGhostPlayerCollisions(gameState);
         handlePlayerGridPosition(gameState);
 
         GameState newGameState = new GameState(
@@ -76,15 +79,20 @@ public class ClientGameController extends GameController {
                 spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
                 break;
          }   
-
-    player.setPosition(spawnPosition);
+    player.setSpawnPosition(spawnPosition);
+    player.setPosition(new Position(spawnPosition.x, spawnPosition.y));
+    player.setLives(PLAYER_LIVES);
+    player.setAlive(true);
+    player.setDirection(Direction.EAST);
+    player.setIntendedDirection(null);
+    player.setRespawnTimer(0.0);
     players.add(player);
+
 
     if (i == playerID) {
         localPlayer = player;
     }
 }
-
 
         Ghost ghost1 = new Ghost(GhostType.RED);
         ghost1.setPosition(
@@ -126,7 +134,25 @@ public class ClientGameController extends GameController {
         ));
         ghosts.add(ghost5);
 
-        
+        ghost1.setSpawnPosition(new Position(3 * TILE_SIZE, TILE_SIZE));
+ghost2.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
+ghost3.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
+ghost4.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
+ghost5.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
+
+ghost1.setRespawnTimer(0.0);
+ghost2.setRespawnTimer(0.0);
+ghost3.setRespawnTimer(0.0);
+ghost4.setRespawnTimer(0.0);
+ghost5.setRespawnTimer(0.0);
+
+ghost1.setDirection(Direction.WEST);
+ghost2.setDirection(Direction.WEST);
+ghost3.setDirection(Direction.WEST);
+ghost4.setDirection(Direction.WEST);
+ghost5.setDirection(Direction.WEST);
+
+
         return new GameState(
             ClientMain.clock,
             players,
@@ -159,6 +185,7 @@ public class ClientGameController extends GameController {
 
     private void stepMovement(GameState gameState) {
         gameState.players().forEach(player -> {
+            if (!player.isAlive()) return;
             Position pos = player.getPosition();
 
             double movementPerFrame = PLAYER_SPEED / TARGET_FPS;
@@ -283,6 +310,7 @@ public class ClientGameController extends GameController {
 
     private void handlePlayerGridPosition(GameState gameState) {
         gameState.players().forEach(player -> {
+        if (player == null || !player.isAlive() || player.getRespawnTimer() > 0.0) return;
             Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
 
             TileType[][] tiles = gameState.tiles();
@@ -565,6 +593,7 @@ public class ClientGameController extends GameController {
     }
 
     private void GhostMovement(GameState gameState) {
+
         if (gameState.ghosts() == null || gameState.ghosts().isEmpty()) return;
         if (gameState.players() == null || gameState.players().isEmpty()) return;
 
@@ -600,6 +629,7 @@ public class ClientGameController extends GameController {
         double movePerFrame = speed / TARGET_FPS;
 
         for (Ghost ghost : gameState.ghosts()) {
+            if (ghost.getRespawnTimer() > 0.0) continue;
             if (ghost == null || ghost.getPosition() == null) continue;
             Player targetPlayer = findNearestPlayer(gameState, ghost);
             if (targetPlayer == null) continue;
@@ -691,4 +721,112 @@ public class ClientGameController extends GameController {
             ghost.setPosition(pos);
         }
     }
+
+private boolean collision(Position pos1, Position pos2) {
+    return pos1.x < pos2.x + TILE_SIZE &&
+           pos1.x + TILE_SIZE > pos2.x &&
+           pos1.y < pos2.y + TILE_SIZE &&
+           pos1.y + TILE_SIZE > pos2.y;
+}
+private void handleGhostPlayerCollisions(GameState gameState) {
+    if (gameState.players() == null || gameState.ghosts() == null) return;
+
+    boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
+
+    for (Player player : gameState.players()) {
+        if (player == null || player.getPosition() == null) continue;
+        if (!player.isAlive()) continue;
+        if (player.getRespawnTimer() > 0.0) continue;
+
+        for (Ghost g : gameState.ghosts()) {
+            if (g == null || g.getPosition() == null) continue;
+            if (g.getRespawnTimer() > 0.0) continue;
+
+            if (!collision(player.getPosition(), g.getPosition())) continue;
+
+            if (frightened) {
+                player.addPoints(200);
+
+                g.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
+                g.setPosition(new Position(-1000, -1000));
+                return;
+            } else {
+                int livesLeft = Math.max(0, player.getLives() - 1);
+                player.setLives(livesLeft);
+
+                Ghost.setFrightenedTimerSec(0.0);
+
+                if (livesLeft <= 0) {
+                    // dead forever (no respawn)
+                    player.setAlive(false);
+                    player.setIntendedDirection(null);
+                    player.setPosition(new Position(-1000, -1000));
+                    return;
+                }
+
+                // start player respawn timer
+                player.setAlive(false);
+                player.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
+                player.setPosition(new Position(-1000, -1000));
+                player.setIntendedDirection(null);
+
+                // optional: reset ghosts with timer too
+                for (Ghost g2 : gameState.ghosts()) {
+                    g2.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
+                    g2.setPosition(new Position(-1000, -1000));
+                }
+
+                return;
+            }
+        }
+    }
+}
+
+private void resetGhost(Ghost ghost) {
+    ghost.setPosition(new Position(3 * TILE_SIZE, 1 * TILE_SIZE));
+    ghost.setDirection(Direction.WEST);
+}
+
+private void resetPlayer(Player player) {
+    player.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
+    player.setDirection(Direction.WEST);
+    player.setIntendedDirection(null);
+}
+private void updateRespawnTimers(GameState gameState) {
+    double dt = 1.0 / TARGET_FPS;
+
+    for (Player p : gameState.players()) {
+        if (p == null) continue;
+
+        if (p.getRespawnTimer() > 0.0) {
+            p.setRespawnTimer(Math.max(0.0, p.getRespawnTimer() - dt));
+
+            if (p.getRespawnTimer() == 0.0 && p.getLives() > 0) {
+                Position sp = p.getSpawnPosition();
+                if (sp != null) {
+                    p.setPosition(new Position(sp.x, sp.y));
+                }
+                p.setAlive(true);
+                p.setDirection(Direction.WEST);
+                p.setIntendedDirection(null);
+            }
+        }
+    }
+
+    for (Ghost g : gameState.ghosts()) {
+        if (g == null) continue;
+
+        if (g.getRespawnTimer() > 0.0) {
+            g.setRespawnTimer(Math.max(0.0, g.getRespawnTimer() - dt));
+
+            if (g.getRespawnTimer() == 0.0) {
+                Position sp = g.getSpawnPosition();
+                if (sp != null) {
+                    g.setPosition(new Position(sp.x, sp.y));
+                }
+                g.setDirection(Direction.WEST);
+            }
+        }
+    }
+}
 }

@@ -15,13 +15,14 @@ public class Constants {
     public final static int TILE_SIZE = 48;
     public final static int PLAYER_LIVES = 3;
     public final static double PLAYER_SPEED = 250;
+    public static final double PLAYER_RESPAWN_DELAY_SEC = 2.0;
 
     public final static int INIT_SCREEN_WIDTH = map1[0].length * TILE_SIZE;
     public final static int INIT_SCREEN_HEIGHT = map1.length * TILE_SIZE;
     public final static long TARGET_FPS = 30;
     public static final double CENTER_EPS_PX = 1.5;
 
-    //Ghost constants
+    public static final double GHOST_RESPAWN_DELAY_SEC  = 3.0;
     public final static double FRIGHTENED_DURATION_SEC = 8.0;
     
 
