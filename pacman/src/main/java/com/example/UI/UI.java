@@ -55,8 +55,8 @@ public class UI extends Application {
     public void start(Stage stage) {
         stage.setTitle("Pacman");
         initializeLobby(stage);
-        createLobby.run();
-        startLobby(stage);
+        //createLobby.run();
+        //startLobby(stage);
     }
 
     private void initializeLobby(Stage stage) {
