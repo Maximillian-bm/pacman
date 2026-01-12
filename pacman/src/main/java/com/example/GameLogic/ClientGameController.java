@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.example.model.Ghost;
+
 import com.example.model.*;
 
 import javafx.util.Pair;
@@ -18,9 +18,7 @@ public class ClientGameController extends GameController {
     private Player localPlayer;
 
     private Map<Integer, Direction> intendedDirections = new HashMap<>();
-    private final Map<Ghost, Direction> ghostDirections = new HashMap<>();
 
-    private static final double CENTER_EPS_PX = 1.5;
 
 
     public GameState updateGameState(GameState gameState, List<Action> actions) {
@@ -69,52 +67,46 @@ public class ClientGameController extends GameController {
         players.add(localPlayer);
 
         Ghost ghost1 = new Ghost(GhostType.RED);
-        ghost1.setPosition(null);
+        ghost1.setPosition(
         new Position(
             3 * TILE_SIZE,
             TILE_SIZE
-        );
+        ));
         ghosts.add(ghost1);
 
         Ghost ghost2 = new Ghost(GhostType.PINK);
-        ghost2.setPosition(null);
+        ghost2.setPosition(
         new Position(
             2 * TILE_SIZE,
             TILE_SIZE
-        );
+        ));
         ghosts.add(ghost2);
 
         Ghost ghost3 = new Ghost(GhostType.CYAN);
-        ghost3.setPosition(null);
+        ghost3.setPosition(
         new Position(
             2 * TILE_SIZE,
             TILE_SIZE
-        );
+        ));
         ghosts.add(ghost3);
 
         Ghost ghost4 = new Ghost(GhostType.ORANGE);
-        ghost4.setPosition(null);
+        ghost4.setPosition(
         new Position(
             2 * TILE_SIZE,
             TILE_SIZE
-        );
+        ));
         ghosts.add(ghost4);
 
         Ghost ghost5 = new Ghost(GhostType.PURPLE);
-        ghost5.setPosition(null);
+        ghost5.setPosition(
         new Position(
             2 * TILE_SIZE,
             TILE_SIZE
-        );
+        ));
         ghosts.add(ghost5);
 
-        // ghost1.get =
-
-        // ghostDirections.put(ghost1, Direction.WEST);
-        // ghostDirections.put(ghost2, Direction.WEST);
-        // ghostDirections.put(ghost3, Direction.WEST);
-        // ghostDirections.put(ghost4, Direction.WEST);
-        // ghostDirections.put(ghost5, Direction.WEST);
+        
         return new GameState(
             ClientMain.clock,
             players,
@@ -284,7 +276,7 @@ public class ClientGameController extends GameController {
             if (isPowerup(tileType)) {
                 Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
                 for (Ghost g : gameState.ghosts()) {
-                    ghostDirections.put(g, oppositeDir(getGhostDir(g)));
+                    g.setDirection(oppositeDir(getGhostDir(g)));
                 }
                 tiles[tileX][tileY] = TileType.EMPTY;
                 return;
@@ -324,8 +316,9 @@ public class ClientGameController extends GameController {
     }
 
     private Direction getGhostDir(Ghost ghost) {
-        return ghostDirections.getOrDefault(ghost, Direction.WEST);
-    }
+    Direction d = ghost.getDirection();
+    return (d != null) ? d : Direction.WEST;
+}
 
     private Direction oppositeDir(Direction dir) {
         return switch (dir) {
@@ -565,13 +558,14 @@ public class ClientGameController extends GameController {
                 Ghost.setGhostScatterMode(false);
                 Ghost.setGhostChaseTimer(0.0);
                 for (Ghost g : gameState.ghosts()) {
-                    ghostDirections.put(g, oppositeDir(getGhostDir(g)));
+                    g.setDirection(oppositeDir(getGhostDir(g)));
+
                 }
             } else if (!Ghost.isGhostScatterMode() && Ghost.getGhostChaseTimer() >= 20.0) {
                 Ghost.setGhostScatterMode(true);
                 Ghost.setGhostChaseTimer(0.0);
                 for (Ghost g : gameState.ghosts()) {
-                    ghostDirections.put(g, oppositeDir(getGhostDir(g)));
+                    g.setDirection(oppositeDir(getGhostDir(g)));
                 }
             }
         }
@@ -618,7 +612,7 @@ public class ClientGameController extends GameController {
                         Pair<Integer, Integer> targetTile = computeGhostTargetTile(gameState, ghost, targetPlayer, blinky);
                         dir = chooseBestDirTowardTarget(tiles, gx, gy, dir, targetTile.getKey(), targetTile.getValue());
                     }
-                    ghostDirections.put(ghost, dir);
+                    ghost.setDirection(dir);
                 }
             } else {
                 if (!isWalkableInDir(tiles, gx, gy, dir)) {

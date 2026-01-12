@@ -8,21 +8,17 @@ import lombok.Setter;
 public class Ghost extends Entity {
     @Getter
     private GhostType type;
-    @Getter
-    @Setter
+    @Getter @Setter
     private Position position;
-    private Direction direction;
-    @Getter
-    @Setter
-    private static double GHOSTSPEED;
-    @Getter
-    @Setter
+    @Getter @Setter
+    private Direction direction = Direction.WEST;
+    @Getter @Setter
+    private static double GHOSTSPEED = PLAYER_SPEED * 0.8;
+    @Getter @Setter
     private static boolean ghostScatterMode = true;
-    @Getter
-    @Setter
+    @Getter @Setter
     private static double ghostChaseTimer = 0.0;
-    @Getter
-    @Setter
+    @Getter @Setter
     private static double frightenedTimerSec = 0.0;
 
     public Ghost(GhostType type) {
