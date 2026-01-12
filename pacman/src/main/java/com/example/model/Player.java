@@ -19,6 +19,9 @@ public class Player extends Entity {
     @Setter
     private Direction direction = Direction.EAST;
 
+    @Getter @Setter
+    private Direction intendedDirection;
+
     private boolean isEnergized;
 
     public Player(int id) {

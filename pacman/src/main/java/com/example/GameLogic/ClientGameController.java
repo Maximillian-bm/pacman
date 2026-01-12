@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.model.*;
 
 import javafx.util.Pair;
@@ -18,23 +17,21 @@ public class ClientGameController extends GameController {
     @Getter
     private Player localPlayer;
 
-    private Map<Integer, Direction> intendedDirections = new HashMap<>();
-    private final Map<Ghost, Direction> ghostDirections = new HashMap<>();
-
-    private double ghostChaseTimer = 0.0;
-    private boolean ghostScatterMode = true;
-
-    private double GHOSTSPEED = PLAYER_SPEED * 0.8;
-    private static final double CENTER_EPS_PX = 1.5;
-
-    private double frightenedTimerSec = 0.0;
-    private static final double FRIGHTENED_DURATION_SEC = 8.0;
-
+    public GameState updateGameStateFor(GameState gameState, int targetClock){
+        int clock = gameState.clock();
+        while(clock < targetClock){
+            int currentClock = ++clock;
+            List<Action> ActionOfClock = Constants.cleanActions.getActions(currentClock);
+            gameState = updateGameState(gameState, ActionOfClock);
+        }
+        return gameState;
+    }
+    
     public GameState updateGameState(GameState gameState, List<Action> actions) {
 
-        if (frightenedTimerSec > 0.0) {
-            frightenedTimerSec -= (1.0 / TARGET_FPS);
-            if (frightenedTimerSec < 0.0) frightenedTimerSec = 0.0;
+        if (Ghost.getFrightenedTimerSec() > 0.0) {
+            Ghost.setFrightenedTimerSec(Ghost.getFrightenedTimerSec() - (1.0 / TARGET_FPS));
+            if (Ghost.getFrightenedTimerSec() < 0.0) Ghost.setFrightenedTimerSec(0.0);
         }
 
         handleActions(gameState, actions);
@@ -58,68 +55,78 @@ public class ClientGameController extends GameController {
         List<Ghost> ghosts = new ArrayList<>();
         TileType[][] tiles = Maps.getMap1();
 
-        for(int i = 0; i < nrOfPlayers; i++){
+        for (int i = 0; i < nrOfPlayers; i++) {
             Player player = new Player(i);
-            player.setPosition(new Position(
-                3 * TILE_SIZE,
-                3 * TILE_SIZE
-            ));
-            players.add(player);
-            if(i == playerID) localPlayer = player;
-        }
+            
+        Position spawnPosition;
+        switch (i) {
+            case 0:
+                spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
+                break;
+            case 1:
+                spawnPosition = new Position(10 * TILE_SIZE, 3 * TILE_SIZE);
+                break;
+            case 2:
+                spawnPosition = new Position(3 * TILE_SIZE, 10 * TILE_SIZE);
+                break;
+            case 3:
+                spawnPosition = new Position(10 * TILE_SIZE, 10 * TILE_SIZE);
+                break;
+            default:
+                spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
+                break;
+         }   
 
-        localPlayer = new Player(0);
-        localPlayer.setPosition(new Position(
-            3 * TILE_SIZE,
-            3 * TILE_SIZE
-        ));
-        players.add(localPlayer);
+    player.setPosition(spawnPosition);
+    players.add(player);
 
-        Ghost ghost1 = new Ghost();
-        ghost1.type = GhostType.RED;
-        ghost1.position = new Position(
+    if (i == playerID) {
+        localPlayer = player;
+    }
+}
+
+
+        Ghost ghost1 = new Ghost(GhostType.RED);
+        ghost1.setPosition(
+        new Position(
             3 * TILE_SIZE,
             TILE_SIZE
-        );
+        ));
         ghosts.add(ghost1);
 
-        Ghost ghost2 = new Ghost();
-        ghost2.type = GhostType.PINK;
-        ghost2.position = new Position(
+        Ghost ghost2 = new Ghost(GhostType.PINK);
+        ghost2.setPosition(
+        new Position(
             2 * TILE_SIZE,
             TILE_SIZE
-        );
+        ));
         ghosts.add(ghost2);
 
-        Ghost ghost3 = new Ghost();
-        ghost3.type = GhostType.CYAN;
-        ghost3.position = new Position(
+        Ghost ghost3 = new Ghost(GhostType.CYAN);
+        ghost3.setPosition(
+        new Position(
             2 * TILE_SIZE,
             TILE_SIZE
-        );
+        ));
         ghosts.add(ghost3);
 
-        Ghost ghost4 = new Ghost();
-        ghost4.type = GhostType.ORANGE;
-        ghost4.position = new Position(
+        Ghost ghost4 = new Ghost(GhostType.ORANGE);
+        ghost4.setPosition(
+        new Position(
             2 * TILE_SIZE,
             TILE_SIZE
-        );
+        ));
         ghosts.add(ghost4);
 
-        Ghost ghost5 = new Ghost();
-        ghost5.type = GhostType.ORANGE;
-        ghost5.position = new Position(
+        Ghost ghost5 = new Ghost(GhostType.PURPLE);
+        ghost5.setPosition(
+        new Position(
             2 * TILE_SIZE,
             TILE_SIZE
-        );
+        ));
         ghosts.add(ghost5);
 
-        ghostDirections.put(ghost1, Direction.WEST);
-        ghostDirections.put(ghost2, Direction.WEST);
-        ghostDirections.put(ghost3, Direction.WEST);
-        ghostDirections.put(ghost4, Direction.WEST);
-        ghostDirections.put(ghost5, Direction.WEST);
+        
         return new GameState(
             ClientMain.clock,
             players,
@@ -144,8 +151,9 @@ public class ClientGameController extends GameController {
 
             Direction d = directionFromMove(a.getMove());
             if (d != null) {
-                intendedDirections.put(player.getId(), d);
-            }
+                player.setIntendedDirection(d);
+}
+
         }
     }
 
@@ -155,7 +163,7 @@ public class ClientGameController extends GameController {
 
             double movementPerFrame = PLAYER_SPEED / TARGET_FPS;
 
-            Direction intendedDir = intendedDirections.get(player.getId());
+            Direction intendedDir = player.getIntendedDirection();
 
             if (intendedDir != null && intendedDir != player.getDirection()) {
                 Pair<Integer, Integer> gridPos = pos.ToGridPosition();
@@ -175,16 +183,16 @@ public class ClientGameController extends GameController {
                             double distanceToCenter = Math.abs(pos.x - gridCenterX);
                             double nextX = pos.x + (player.getDirection() == Direction.EAST ? movementPerFrame : -movementPerFrame);
                             boolean wouldCrossCenter = (pos.x <= gridCenterX && nextX >= gridCenterX) ||
-                                                      (pos.x >= gridCenterX && nextX <= gridCenterX) ||
-                                                      distanceToCenter <= movementPerFrame;
+                                                       (pos.x >= gridCenterX && nextX <= gridCenterX) ||
+                                                       distanceToCenter <= movementPerFrame;
                             shouldTurn = wouldCrossCenter;
                         }
                         case NORTH, SOUTH -> {
                             double distanceToCenter = Math.abs(pos.y - gridCenterY);
                             double nextY = pos.y + (player.getDirection() == Direction.SOUTH ? movementPerFrame : -movementPerFrame);
                             boolean wouldCrossCenter = (pos.y <= gridCenterY && nextY >= gridCenterY) ||
-                                                      (pos.y >= gridCenterY && nextY <= gridCenterY) ||
-                                                      distanceToCenter <= movementPerFrame;
+                                                       (pos.y >= gridCenterY && nextY <= gridCenterY) ||
+                                                       distanceToCenter <= movementPerFrame;
                             shouldTurn = wouldCrossCenter;
                         }
                     }
@@ -287,9 +295,9 @@ public class ClientGameController extends GameController {
             player.addPoints(tileType.points);
 
             if (isPowerup(tileType)) {
-                frightenedTimerSec = FRIGHTENED_DURATION_SEC;
+                Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
                 for (Ghost g : gameState.ghosts()) {
-                    ghostDirections.put(g, oppositeDir(getGhostDir(g)));
+                    g.setDirection(oppositeDir(getGhostDir(g)));
                 }
                 tiles[tileX][tileY] = TileType.EMPTY;
                 return;
@@ -329,8 +337,9 @@ public class ClientGameController extends GameController {
     }
 
     private Direction getGhostDir(Ghost ghost) {
-        return ghostDirections.getOrDefault(ghost, Direction.WEST);
-    }
+    Direction d = ghost.getDirection();
+    return (d != null) ? d : Direction.WEST;
+}
 
     private Direction oppositeDir(Direction dir) {
         return switch (dir) {
@@ -444,9 +453,9 @@ public class ClientGameController extends GameController {
 
     private Player findNearestPlayer(GameState gameState, Ghost ghost) {
         if (gameState.players() == null || gameState.players().isEmpty()) return null;
-        if (ghost == null || ghost.position == null) return null;
+        if (ghost == null || ghost.getPosition() == null) return null;
 
-        Pair<Integer, Integer> g = ghost.position.ToGridPosition();
+        Pair<Integer, Integer> g = ghost.getPosition().ToGridPosition();
         int gx = g.getKey();
         int gy = g.getValue();
 
@@ -492,8 +501,8 @@ public class ClientGameController extends GameController {
         Pair<Integer, Integer> orangeCorner = new Pair<>(0, maxY);
         Pair<Integer, Integer> purpleCorner  = new Pair<>(maxX / 2, maxY / 2);
 
-        if (ghostScatterMode) {
-            return switch (ghost.type) {
+        if (Ghost.isGhostScatterMode()) {
+            return switch (ghost.getType()) {
                 case RED -> redCorner;
                 case PINK -> pinkCorner;
                 case CYAN -> blueCorner;
@@ -503,7 +512,7 @@ public class ClientGameController extends GameController {
             };
         }
 
-        return switch (ghost.type) {
+        return switch (ghost.getType()) {
             case RED -> new Pair<>(px, py);
 
             case PINK -> {
@@ -516,11 +525,11 @@ public class ClientGameController extends GameController {
                 int p2x = px + 2 * (pDir == Direction.EAST ? 1 : pDir == Direction.WEST ? -1 : 0);
                 int p2y = py + 2 * (pDir == Direction.SOUTH ? 1 : pDir == Direction.NORTH ? -1 : 0);
 
-                if (blinky == null || blinky.position == null) {
+                if (blinky == null || blinky.getPosition() == null) {
                     yield new Pair<>(p2x, p2y);
                 }
 
-                Pair<Integer, Integer> blGrid = blinky.position.ToGridPosition();
+                Pair<Integer, Integer> blGrid = blinky.getPosition().ToGridPosition();
                 int bx = blGrid.getKey();
                 int by = blGrid.getValue();
 
@@ -531,7 +540,7 @@ public class ClientGameController extends GameController {
             }
 
             case ORANGE -> {
-                Pair<Integer, Integer> gGrid = ghost.position.ToGridPosition();
+                Pair<Integer, Integer> gGrid = ghost.getPosition().ToGridPosition();
                 int gx = gGrid.getKey();
                 int gy = gGrid.getValue();
 
@@ -562,40 +571,40 @@ public class ClientGameController extends GameController {
         TileType[][] tiles = gameState.tiles();
         if (tiles == null) return;
 
-        boolean frightened = frightenedTimerSec > 0.0;
+        boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
 
         if (!frightened) {
-            ghostChaseTimer += (1.0 / TARGET_FPS);
-            if (ghostScatterMode && ghostChaseTimer >= 7.0) {
-                ghostScatterMode = false;
-                ghostChaseTimer = 0.0;
+            Ghost.setGhostChaseTimer(Ghost.getGhostChaseTimer() + (1.0 / TARGET_FPS));
+            if (Ghost.isGhostScatterMode() && Ghost.getGhostChaseTimer() >= 7.0) {
+                Ghost.setGhostScatterMode(false);
+                Ghost.setGhostChaseTimer(0.0);
                 for (Ghost g : gameState.ghosts()) {
-                    ghostDirections.put(g, oppositeDir(getGhostDir(g)));
+                    g.setDirection(oppositeDir(getGhostDir(g)));
+
                 }
-            } else if (!ghostScatterMode && ghostChaseTimer >= 20.0) {
-                ghostScatterMode = true;
-                ghostChaseTimer = 0.0;
+            } else if (!Ghost.isGhostScatterMode() && Ghost.getGhostChaseTimer() >= 20.0) {
+                Ghost.setGhostScatterMode(true);
+                Ghost.setGhostChaseTimer(0.0);
                 for (Ghost g : gameState.ghosts()) {
-                    ghostDirections.put(g, oppositeDir(getGhostDir(g)));
+                    g.setDirection(oppositeDir(getGhostDir(g)));
                 }
             }
         }
 
         Ghost blinky = gameState.ghosts().stream()
-            .filter(g -> g.type == GhostType.RED)
+            .filter(g -> g.getType() == GhostType.RED)
             .findFirst()
             .orElse(null);
 
-        double speed = frightened ? (GHOSTSPEED * 0.75) : GHOSTSPEED;
+        double speed = frightened ? (Ghost.getGHOSTSPEED() * 0.75) : Ghost.getGHOSTSPEED();
         double movePerFrame = speed / TARGET_FPS;
 
         for (Ghost ghost : gameState.ghosts()) {
-            if (ghost == null || ghost.position == null) continue;
-
+            if (ghost == null || ghost.getPosition() == null) continue;
             Player targetPlayer = findNearestPlayer(gameState, ghost);
             if (targetPlayer == null) continue;
 
-            Position pos = ghost.position;
+            Position pos = ghost.getPosition();
             Direction dir = getGhostDir(ghost);
 
             double mapWidth = tiles.length * TILE_SIZE;
@@ -624,7 +633,7 @@ public class ClientGameController extends GameController {
                         Pair<Integer, Integer> targetTile = computeGhostTargetTile(gameState, ghost, targetPlayer, blinky);
                         dir = chooseBestDirTowardTarget(tiles, gx, gy, dir, targetTile.getKey(), targetTile.getValue());
                     }
-                    ghostDirections.put(ghost, dir);
+                    ghost.setDirection(dir);
                 }
             } else {
                 if (!isWalkableInDir(tiles, gx, gy, dir)) {
@@ -679,7 +688,7 @@ public class ClientGameController extends GameController {
                 pos.y = targetGridY * TILE_SIZE;
             }
 
-            ghost.position = pos;
+            ghost.setPosition(pos);
         }
     }
 }
