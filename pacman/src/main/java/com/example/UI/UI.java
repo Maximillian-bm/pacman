@@ -14,10 +14,19 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.geometry.Insets;
+import javafx.scene.SnapshotParameters;
 
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
@@ -53,7 +62,54 @@ public class UI extends Application {
         initializeLobby(stage);
     }
 
+    private void drawTileFromTileset(GraphicsContext gc, Image tileset, int tileX, int tileY,
+                                      double destX, double destY, double destWidth, double destHeight) {
+        gc.drawImage(tileset, tileX * 32, tileY * 32, 32, 32, destX, destY, destWidth, destHeight);
+    }
+
+    private void setButtonTiledBackground(Button button, Image tileset, int tileX, int tileY, double tileSize) {
+        double width = button.getPrefWidth();
+        double height = button.getPrefHeight();
+
+        Canvas canvas = new Canvas(width, height);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        int tilesX = (int) Math.ceil(width / tileSize);
+        int tilesY = (int) Math.ceil(height / tileSize);
+
+        for (int i = 0; i < tilesX; i++) {
+            for (int j = 0; j < tilesY; j++) {
+                drawTileFromTileset(gc, tileset, tileX, tileY, i * tileSize, j * tileSize, tileSize, tileSize);
+            }
+        }
+
+        WritableImage snapshot = canvas.snapshot(new SnapshotParameters(), null);
+        BackgroundImage backgroundImage = new BackgroundImage(
+            snapshot,
+            BackgroundRepeat.NO_REPEAT,
+            BackgroundRepeat.NO_REPEAT,
+            BackgroundPosition.DEFAULT,
+            BackgroundSize.DEFAULT
+        );
+
+        button.setBackground(new Background(backgroundImage));
+    }
+
     private void initializeLobby(Stage stage) {
+        Image tileImage = new Image("./tilesets/chompermazetiles.png");
+
+        Canvas backgroundCanvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
+        GraphicsContext bgGc = backgroundCanvas.getGraphicsContext2D();
+
+        double tileWidth = Constants.INIT_SCREEN_WIDTH / 8.0;
+        double tileHeight = Constants.INIT_SCREEN_HEIGHT / 8.0;
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                drawTileFromTileset(bgGc, tileImage, 1, 1, i * tileWidth, j * tileHeight, tileWidth, tileHeight);
+            }
+        }
+
         Button joinLobbyButton = new Button("Join Lobby");
         joinLobbyButton.setPrefSize(200, 60);
 
@@ -107,8 +163,11 @@ public class UI extends Application {
         startRoot.setAlignment(Pos.CENTER);
         startRoot.setSpacing(50);
 
+        StackPane root = new StackPane();
+        root.getChildren().addAll(backgroundCanvas, startRoot);
+
         Scene startScene = new Scene(
-            startRoot,
+            root,
             Constants.INIT_SCREEN_WIDTH,
             Constants.INIT_SCREEN_HEIGHT
         );
