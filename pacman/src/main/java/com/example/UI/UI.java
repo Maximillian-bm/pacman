@@ -67,6 +67,8 @@ public class UI extends Application {
         Button joinLobbyButton = createTiledButton("Join Lobby", 6, 2);
 
         Text joinedLobbyText = new Text("");
+        joinedLobbyText.setFill(Color.WHITE);
+        joinedLobbyText.setStyle("-fx-font-size: 14px;");
 
         Text playerCountText = new Text("Select number of players:");
         playerCountText.setFill(Color.WHITE);
