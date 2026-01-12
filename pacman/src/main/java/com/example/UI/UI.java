@@ -63,14 +63,7 @@ public class UI extends Application {
 
         drawRectangle(bgGc, 0, 0, TILES_WIDE, TILES_TALL);
 
-        double buttonWidth = 6 * TILE_SIZE;
-        double buttonHeight = 2 * TILE_SIZE;
-
-        Button joinLobbyButton = new Button("Join Lobby");
-        joinLobbyButton.setPrefSize(buttonWidth, buttonHeight);
-        joinLobbyButton.setGraphic(createTiledImageView(buttonWidth, buttonHeight));
-        joinLobbyButton.setContentDisplay(ContentDisplay.CENTER);
-        joinLobbyButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;");
+        Button joinLobbyButton = createTiledButton("Join Lobby", 6, 2);
 
         Text playerCountText = new Text("Select number of players: ");
         playerCountText.setFill(Color.WHITE);
@@ -86,22 +79,14 @@ public class UI extends Application {
         );
         createLobbyH.setAlignment(Pos.CENTER);
 
-        Button createLobbyButton = new Button("Create Lobby");
-        createLobbyButton.setPrefSize(buttonWidth, buttonHeight);
-        createLobbyButton.setGraphic(createTiledImageView(buttonWidth, buttonHeight));
-        createLobbyButton.setContentDisplay(ContentDisplay.CENTER);
-        createLobbyButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;");
+        Button createLobbyButton = createTiledButton("Create Lobby", 6, 2);
         VBox createLobbyV = new VBox(
             createLobbyH,
             createLobbyButton
         );
         createLobbyV.setAlignment(Pos.CENTER);
 
-        Button startButton = new Button("Start Game");
-        startButton.setPrefSize(buttonWidth, buttonHeight);
-        startButton.setGraphic(createTiledImageView(buttonWidth, buttonHeight));
-        startButton.setContentDisplay(ContentDisplay.CENTER);
-        startButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;");
+        Button startButton = createTiledButton("Start Game", 6, 2);
 
         Text LobbyIDText = new Text("Lobby ID: ");
         LobbyIDText.setFill(Color.WHITE);
@@ -437,38 +422,81 @@ public class UI extends Application {
             for (int j = x; j < x + width; j++) {
                 TilePos tileTilePos;
 
-                if (j == x && i == y) {
-                    // Top-left corner
-                    tileTilePos = new TilePos(0, 0);
-                } else if (j == x + width - 1 && i == y) {
-                    // Top-right corner
-                    tileTilePos = new TilePos(2, 0);
-                } else if (j == x && i == y + height - 1) {
-                    // Bottom-left corner
-                    tileTilePos = new TilePos(0, 2);
-                } else if (j == x + width - 1 && i == y + height - 1) {
-                    // Bottom-right corner
-                    tileTilePos = new TilePos(2, 2);
-                } else if (i == y) {
-                    // Top edge
-                    tileTilePos = new TilePos(1, 0);
-                } else if (i == y + height - 1) {
-                    // Bottom edge
-                    tileTilePos = new TilePos(1, 2);
-                } else if (j == x) {
-                    // Left edge
-                    tileTilePos = new TilePos(0, 1);
-                } else if (j == x + width - 1) {
-                    // Right edge
-                    tileTilePos = new TilePos(2, 1);
+                if (width == 1 && height == 1) {
+                    // Single tile
+                    tileTilePos = new TilePos(7, 1);
+                } else if (width == 1) {
+                    // Single column
+                    if (i == y) {
+                        // Top
+                        tileTilePos = new TilePos(6, 0);
+                    } else if (i == y + height - 1) {
+                        // Bottom
+                        tileTilePos = new TilePos(6, 2);
+                    } else {
+                        // Middle
+                        tileTilePos = new TilePos(6, 1);
+                    }
+                } else if (height == 1) {
+                    // Single row
+                    if (j == x) {
+                        // Left
+                        tileTilePos = new TilePos(7, 0);
+                    } else if (j == x + width - 1) {
+                        // Right
+                        tileTilePos = new TilePos(9, 0);
+                    } else {
+                        // Middle
+                        tileTilePos = new TilePos(8, 0);
+                    }
                 } else {
-                    // Center
-                    tileTilePos = new TilePos(1, 1);
+                    // Standard 2×2+ rectangles
+                    if (j == x && i == y) {
+                        // Top-left corner
+                        tileTilePos = new TilePos(0, 0);
+                    } else if (j == x + width - 1 && i == y) {
+                        // Top-right corner
+                        tileTilePos = new TilePos(2, 0);
+                    } else if (j == x && i == y + height - 1) {
+                        // Bottom-left corner
+                        tileTilePos = new TilePos(0, 2);
+                    } else if (j == x + width - 1 && i == y + height - 1) {
+                        // Bottom-right corner
+                        tileTilePos = new TilePos(2, 2);
+                    } else if (i == y) {
+                        // Top edge
+                        tileTilePos = new TilePos(1, 0);
+                    } else if (i == y + height - 1) {
+                        // Bottom edge
+                        tileTilePos = new TilePos(1, 2);
+                    } else if (j == x) {
+                        // Left edge
+                        tileTilePos = new TilePos(0, 1);
+                    } else if (j == x + width - 1) {
+                        // Right edge
+                        tileTilePos = new TilePos(2, 1);
+                    } else {
+                        // Center
+                        tileTilePos = new TilePos(1, 1);
+                    }
                 }
 
                 drawTileFromTileset(gc, wallSpriteSheet, tileTilePos.x, tileTilePos.y, j * TILE_SIZE, i * TILE_SIZE);
             }
         }
+    }
+
+    private Button createTiledButton(String text, int tilesWide, int tilesTall) {
+        double width = tilesWide * TILE_SIZE;
+        double height = tilesTall * TILE_SIZE;
+
+        Button button = new Button(text);
+        button.setPrefSize(width, height);
+        button.setGraphic(createTiledImageView(width, height));
+        button.setContentDisplay(ContentDisplay.CENTER);
+        button.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;");
+
+        return button;
     }
 
     private ImageView createTiledImageView(double width, double height) {
