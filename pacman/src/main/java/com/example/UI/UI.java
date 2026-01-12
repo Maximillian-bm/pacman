@@ -14,6 +14,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
@@ -27,6 +28,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.geometry.Pos;
 import javafx.geometry.Insets;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.ChoiceBox;
 
 import java.util.EnumSet;
@@ -319,6 +321,19 @@ public class UI extends Application {
                     case 2 -> sy + 50 * 2;
                     default -> sy + 50;
                 };
+
+                PixelReader reader = spriteSheet.getPixelReader();
+                WritableImage playerImage = new WritableImage(850, syf, 50, 50);
+
+                // ImageView playerImage = new ImageView(spriteSheet);
+                // Rectangle2D viewportRect = new Rectangle2D(850, syf, 50, 50);
+                // playerImage.setViewport(viewportRect);
+                // gc.drawImage(playerImage);
+
+                // switch (player.getId()) {
+                //     case 0: ; break;
+                //     case 1: ; break;
+                // }
 
                 gc.drawImage(spriteSheet, 850, syf, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
             });

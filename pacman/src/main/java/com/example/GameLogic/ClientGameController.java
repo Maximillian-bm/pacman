@@ -61,15 +61,7 @@ public class ClientGameController extends GameController {
                 3 * TILE_SIZE
             ));
             players.add(player);
-            // if(i == playerID) localPlayer = player;
         }
-
-        // localPlayer = new Player(0);
-        // localPlayer.setPosition(new Position(
-        //     3 * TILE_SIZE,
-        //     3 * TILE_SIZE
-        // ));
-        // players.add(localPlayer);
 
         Ghost ghost1 = new Ghost(GhostType.RED);
         ghost1.setPosition(
