@@ -20,7 +20,7 @@ public class ServerController {
     private static Space space1 = new RandomSpace();
 
     public static void main(String[] arg){
-        rep.addGate(Constants.GATE_URI);
+        rep.addGate(Constants.REMOTE_PUBLIC_URI);
         rep.add("space1", space1);
         for(int i = 0; i < Constants.NR_OF_LOBBYS_CAP; i++){
             try {
