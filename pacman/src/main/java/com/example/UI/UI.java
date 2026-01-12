@@ -14,23 +14,17 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-import javafx.util.Pair;
 
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.geometry.Pos;
-import javafx.geometry.Insets;
 import javafx.scene.control.ChoiceBox;
 
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
 import static com.example.model.Constants.TILE_SIZE;
 import static com.example.model.Constants.TARGET_FPS;
@@ -56,10 +50,10 @@ public class UI extends Application {
 
     @Override
     public void start(Stage stage) {
+        initializeLobby(stage);
+    }
 
-        Text header = new Text("Pacman");
-        header.setStyle("-fx-font: 24 arial;");
-
+    private void initializeLobby(Stage stage) {
         Button joinLobbyButton = new Button("Join Lobby");
         joinLobbyButton.setPrefSize(200, 60);
 
@@ -78,7 +72,7 @@ public class UI extends Application {
         Button createLobbyButton = new Button("Create Lobby");
         createLobbyButton.setPrefSize(200, 60);
         VBox createLobbyV = new VBox(
-             createLobbyH,
+            createLobbyH,
             createLobbyButton
         );
         createLobbyV.setAlignment(Pos.CENTER);
@@ -100,6 +94,9 @@ public class UI extends Application {
             joinLobbyButton
         );
         joinLobbyV.setAlignment(Pos.CENTER);
+
+        Text header = new Text("Pacman");
+        header.setStyle("-fx-font: 24 arial;");
 
         VBox startRoot = new VBox(
             header,
