@@ -30,6 +30,11 @@ public class ServerController {
             }
         }
 
+        LobbyCleaner lobbyCleaner = new LobbyCleaner(lobbys, space1);
+        Thread cleanerThread = new Thread(lobbyCleaner);
+        cleanerThread.setDaemon(true);
+        cleanerThread.start();
+
         while(true){
             try {
                 Object[] lobbyInstruction = space1.get(new FormalField(Integer.class), new FormalField(Integer.class));
@@ -39,7 +44,7 @@ public class ServerController {
                 rep.add(lobbyID+"sync", new RandomSpace());
                 rep.add(lobbyID+"rawAction", new QueueSpace());
                 rep.add(lobbyID+"cleanAction", new PileSpace());
-                Lobby lobby = new Lobby(rep, nrOfPlayers, lobbyID);
+                Lobby lobby = new Lobby(rep, nrOfPlayers, lobbyID, System.currentTimeMillis());
                 space1.put(lobbyID, nrOfPlayers, "OK");
                 lobby.start();
                 lobbys.add(lobby);
