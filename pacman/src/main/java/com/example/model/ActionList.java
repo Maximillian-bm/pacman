@@ -22,7 +22,7 @@ public class ActionList {
             : List.of();
         if(!actionsOfClock.isEmpty() && actionsOfClock.get(0).getIndex() > nrOfActionsCalled){
             missedAction = true;
-        }else{
+        }else if(!actionsOfClock.isEmpty()){
             nrOfActionsCalled = actionsOfClock.getLast().getIndex() + 1;
         }
         return actionsOfClock;
