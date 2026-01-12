@@ -67,14 +67,14 @@ public class UI extends Application {
         Text joinedLobbyText = new Text("");
 
         Text playerCountText = new Text("Select number of players:");
-        ChoiceBox playerCount = new ChoiceBox();
-        playerCount.getItems().add("1");
-        playerCount.getItems().add("2");
-        playerCount.getItems().add("3");
-        playerCount.getItems().add("4");
+        ChoiceBox playerCountChoices = new ChoiceBox();
+        playerCountChoices.getItems().add("1");
+        playerCountChoices.getItems().add("2");
+        playerCountChoices.getItems().add("3");
+        playerCountChoices.getItems().add("4");
         HBox createLobbyH = new HBox(
             playerCountText,
-            playerCount
+            playerCountChoices
         );
         createLobbyH.setAlignment(Pos.CENTER);
 
@@ -131,9 +131,12 @@ public class UI extends Application {
         });
 
         createLobbyButton.setOnAction(e -> {
-            System.out.println("Creating lobby with " + playerCount.getValue() + " number of player");
+            if (playerCountChoices.getValue() == null) { return; }
+            String playerCount = playerCountChoices.getValue().toString();
 
-            lobbyHandler.createLobby(Integer.parseInt(playerCount.getValue().toString()));
+            System.out.println("Creating lobby with " + playerCount + " number of player");
+
+            lobbyHandler.createLobby(Integer.parseInt(playerCount));
 
             startRoot.getChildren().remove(joinLobbyV);
             startRoot.getChildren().remove(createLobbyV);
