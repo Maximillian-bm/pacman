@@ -17,10 +17,6 @@ public class ClientGameController extends GameController {
     @Getter
     private Player localPlayer;
 
-    private Map<Integer, Direction> intendedDirections = new HashMap<>();
-
-
-
     public GameState updateGameStateFor(GameState gameState, int targetClock){
         int clock = gameState.clock();
         while(clock < targetClock){
@@ -59,22 +55,36 @@ public class ClientGameController extends GameController {
         List<Ghost> ghosts = new ArrayList<>();
         TileType[][] tiles = Maps.getMap1();
 
-        for(int i = 0; i < nrOfPlayers; i++){
+        for (int i = 0; i < nrOfPlayers; i++) {
             Player player = new Player(i);
-            player.setPosition(new Position(
-                3 * TILE_SIZE,
-                3 * TILE_SIZE
-            ));
-            players.add(player);
-            if(i == playerID) localPlayer = player;
-        }
+            
+        Position spawnPosition;
+        switch (i) {
+            case 0:
+                spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
+                break;
+            case 1:
+                spawnPosition = new Position(10 * TILE_SIZE, 3 * TILE_SIZE);
+                break;
+            case 2:
+                spawnPosition = new Position(3 * TILE_SIZE, 10 * TILE_SIZE);
+                break;
+            case 3:
+                spawnPosition = new Position(10 * TILE_SIZE, 10 * TILE_SIZE);
+                break;
+            default:
+                spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
+                break;
+         }   
 
-        localPlayer = new Player(0);
-        localPlayer.setPosition(new Position(
-            3 * TILE_SIZE,
-            3 * TILE_SIZE
-        ));
-        players.add(localPlayer);
+    player.setPosition(spawnPosition);
+    players.add(player);
+
+    if (i == playerID) {
+        localPlayer = player;
+    }
+}
+
 
         Ghost ghost1 = new Ghost(GhostType.RED);
         ghost1.setPosition(
@@ -141,8 +151,9 @@ public class ClientGameController extends GameController {
 
             Direction d = directionFromMove(a.getMove());
             if (d != null) {
-                intendedDirections.put(player.getId(), d);
-            }
+                player.setIntendedDirection(d);
+}
+
         }
     }
 
@@ -152,7 +163,7 @@ public class ClientGameController extends GameController {
 
             double movementPerFrame = PLAYER_SPEED / TARGET_FPS;
 
-            Direction intendedDir = intendedDirections.get(player.getId());
+            Direction intendedDir = player.getIntendedDirection();
 
             if (intendedDir != null && intendedDir != player.getDirection()) {
                 Pair<Integer, Integer> gridPos = pos.ToGridPosition();
@@ -172,16 +183,16 @@ public class ClientGameController extends GameController {
                             double distanceToCenter = Math.abs(pos.x - gridCenterX);
                             double nextX = pos.x + (player.getDirection() == Direction.EAST ? movementPerFrame : -movementPerFrame);
                             boolean wouldCrossCenter = (pos.x <= gridCenterX && nextX >= gridCenterX) ||
-                                                      (pos.x >= gridCenterX && nextX <= gridCenterX) ||
-                                                      distanceToCenter <= movementPerFrame;
+                                                       (pos.x >= gridCenterX && nextX <= gridCenterX) ||
+                                                       distanceToCenter <= movementPerFrame;
                             shouldTurn = wouldCrossCenter;
                         }
                         case NORTH, SOUTH -> {
                             double distanceToCenter = Math.abs(pos.y - gridCenterY);
                             double nextY = pos.y + (player.getDirection() == Direction.SOUTH ? movementPerFrame : -movementPerFrame);
                             boolean wouldCrossCenter = (pos.y <= gridCenterY && nextY >= gridCenterY) ||
-                                                      (pos.y >= gridCenterY && nextY <= gridCenterY) ||
-                                                      distanceToCenter <= movementPerFrame;
+                                                       (pos.y >= gridCenterY && nextY <= gridCenterY) ||
+                                                       distanceToCenter <= movementPerFrame;
                             shouldTurn = wouldCrossCenter;
                         }
                     }
