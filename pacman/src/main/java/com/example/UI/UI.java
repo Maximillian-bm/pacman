@@ -63,6 +63,8 @@ public class UI extends Application {
         Button joinLobbyButton = new Button("Join Lobby");
         joinLobbyButton.setPrefSize(200, 60);
 
+        Text joinedLobbyText = new Text("");
+
         Text playerCountText = new Text("Select number of players:");
         ChoiceBox playerCount = new ChoiceBox();
         playerCount.getItems().add("1");
@@ -104,8 +106,7 @@ public class UI extends Application {
         VBox startRoot = new VBox(
             header,
             joinLobbyV,
-            createLobbyV,
-            startButton
+            createLobbyV
         );
         startRoot.setAlignment(Pos.CENTER);
         startRoot.setSpacing(50);
@@ -118,12 +119,27 @@ public class UI extends Application {
 
         joinLobbyButton.setOnAction(e -> {
             System.out.println("Connecting to: " + lobbyIDInput.getText());
+
             lobbyHandler.joinLobby(lobbyIDInput.getText());
+
+            startRoot.getChildren().remove(joinLobbyV);
+            startRoot.getChildren().remove(createLobbyV);
+            joinedLobbyText.setText("Joined lobby with ID: " + lobbyIDInput.getText());
+            startRoot.getChildren().add(startButton);
+            startRoot.getChildren().add(joinedLobbyText);
         });
 
         createLobbyButton.setOnAction(e -> {
             System.out.println("Creating lobby with " + playerCount.getValue() + " number of player");
+
             lobbyHandler.createLobby(Integer.parseInt(playerCount.getValue().toString()));
+
+            startRoot.getChildren().remove(joinLobbyV);
+            startRoot.getChildren().remove(createLobbyV);
+
+            joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
+            startRoot.getChildren().add(startButton);
+            startRoot.getChildren().add(joinedLobbyText);
         });
 
         startButton.setOnAction(e -> startLobby(stage));
