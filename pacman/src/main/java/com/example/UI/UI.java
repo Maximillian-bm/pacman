@@ -451,8 +451,6 @@ public class UI extends Application {
                         if (sWall) {
                             gc.drawImage(wallSpriteSheet, 32 * 8, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         } else {
-                            //gc.drawImage(wallSpriteSheet, 32*1, 32*1, 32, 32, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                            //gc.drawImage(wallSpriteSheet, 32*4, 32*0+16, 32, 32-16, i*TILE_SIZE, j*TILE_SIZE+TILE_SIZE/2.0, TILE_SIZE, TILE_SIZE-TILE_SIZE/2.0);
                             gc.drawImage(wallSpriteSheet, 32 * 4, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                         }
                     } else {
