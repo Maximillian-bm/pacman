@@ -314,7 +314,7 @@ public class UI extends Application {
                         gc.drawImage(spriteSheet, 150, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
                     }
                     case PURPLE -> { // ("Sue");
-                        gc.drawImage(spriteSheet, 200, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                        gc.drawImage(spriteSheet, 250, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
                     }
 
                 }
