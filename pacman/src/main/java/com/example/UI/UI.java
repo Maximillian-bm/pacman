@@ -324,6 +324,7 @@ public class UI extends Application {
 
                 PixelReader reader = spriteSheet.getPixelReader();
                 WritableImage playerImage = new WritableImage(850, syf, 50, 50);
+                Image abc = playerImage.getImage();
 
                 // ImageView playerImage = new ImageView(spriteSheet);
                 // Rectangle2D viewportRect = new Rectangle2D(850, syf, 50, 50);
