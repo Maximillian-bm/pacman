@@ -21,6 +21,16 @@ public class ClientGameController extends GameController {
 
 
 
+    public GameState updateGameStateFor(GameState gameState, int targetClock){
+        int clock = gameState.clock();
+        while(clock < targetClock){
+            int currentClock = ++clock;
+            List<Action> ActionOfClock = Constants.cleanActions.getActions(currentClock);
+            gameState = updateGameState(gameState, ActionOfClock);
+        }
+        return gameState;
+    }
+    
     public GameState updateGameState(GameState gameState, List<Action> actions) {
 
         if (Ghost.getFrightenedTimerSec() > 0.0) {

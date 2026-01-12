@@ -41,6 +41,7 @@ public class UI extends Application {
 
     private final ClientGameController gameController = new ClientGameController();
     private GameState gameState;
+    private GameState savedState;
 
     private GraphicsContext gc;
     private Canvas canvas;
@@ -173,11 +174,18 @@ public class UI extends Application {
                 return;
             }
 
-            List<Action> ActionOfClock = Constants.cleanActions.stream()
-                .filter(e -> e.getClock() == ClientMain.clock)
-                .toList();
-            if (gameState == null) gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
-            gameState = gameController.updateGameState(gameState, ActionOfClock);
+            List<Action> ActionOfClock = Constants.cleanActions.getActions(ClientMain.clock);
+            if (gameState == null) { 
+                gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
+                savedState = gameState;
+            }
+            if(Constants.cleanActions.missedAction()){
+                gameState = gameController.updateGameStateFor(savedState, ClientMain.clock);
+                Constants.cleanActions.fixedMissedAction();
+            }else{
+                if(!ActionOfClock.isEmpty()) savedState = gameState;
+                gameState = gameController.updateGameState(gameState, ActionOfClock);
+            }
 
             //Proof that action is sent to game controller
             /*if(ActionOfClock.size() != 0){
