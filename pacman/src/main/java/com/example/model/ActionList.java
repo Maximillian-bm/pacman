@@ -20,7 +20,7 @@ public class ActionList {
         List<Action> actionsOfClock = actions.containsKey(clock)
             ? List.copyOf(actions.get(clock))
             : List.of();
-        if(actionsOfClock.get(0).getIndex() > nrOfActionsCalled){
+        if(!actionsOfClock.isEmpty() && actionsOfClock.get(0).getIndex() > nrOfActionsCalled){
             missedAction = true;
         }else{
             nrOfActionsCalled = actionsOfClock.getLast().getIndex() + 1;
