@@ -41,6 +41,7 @@ public class UI extends Application {
 
     private final ClientGameController gameController = new ClientGameController();
     private GameState gameState;
+    private GameState savedState;
 
     private GraphicsContext gc;
     private Canvas canvas;
@@ -63,15 +64,17 @@ public class UI extends Application {
         Button joinLobbyButton = new Button("Join Lobby");
         joinLobbyButton.setPrefSize(200, 60);
 
+        Text joinedLobbyText = new Text("");
+
         Text playerCountText = new Text("Select number of players:");
-        ChoiceBox playerCount = new ChoiceBox();
-        playerCount.getItems().add("1");
-        playerCount.getItems().add("2");
-        playerCount.getItems().add("3");
-        playerCount.getItems().add("4");
+        ChoiceBox playerCountChoices = new ChoiceBox();
+        playerCountChoices.getItems().add("1");
+        playerCountChoices.getItems().add("2");
+        playerCountChoices.getItems().add("3");
+        playerCountChoices.getItems().add("4");
         HBox createLobbyH = new HBox(
             playerCountText,
-            playerCount
+            playerCountChoices
         );
         createLobbyH.setAlignment(Pos.CENTER);
 
@@ -104,8 +107,7 @@ public class UI extends Application {
         VBox startRoot = new VBox(
             header,
             joinLobbyV,
-            createLobbyV,
-            startButton
+            createLobbyV
         );
         startRoot.setAlignment(Pos.CENTER);
         startRoot.setSpacing(50);
@@ -118,12 +120,30 @@ public class UI extends Application {
 
         joinLobbyButton.setOnAction(e -> {
             System.out.println("Connecting to: " + lobbyIDInput.getText());
+
             lobbyHandler.joinLobby(lobbyIDInput.getText());
+
+            startRoot.getChildren().remove(joinLobbyV);
+            startRoot.getChildren().remove(createLobbyV);
+            joinedLobbyText.setText("Joined lobby with ID: " + lobbyIDInput.getText());
+            startRoot.getChildren().add(startButton);
+            startRoot.getChildren().add(joinedLobbyText);
         });
 
         createLobbyButton.setOnAction(e -> {
-            System.out.println("Creating lobby with " + playerCount.getValue() + " number of player");
-            lobbyHandler.createLobby(Integer.parseInt(playerCount.getValue().toString()));
+            if (playerCountChoices.getValue() == null) { return; }
+            String playerCount = playerCountChoices.getValue().toString();
+
+            System.out.println("Creating lobby with " + playerCount + " number of player");
+
+            lobbyHandler.createLobby(Integer.parseInt(playerCount));
+
+            startRoot.getChildren().remove(joinLobbyV);
+            startRoot.getChildren().remove(createLobbyV);
+
+            joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
+            startRoot.getChildren().add(startButton);
+            startRoot.getChildren().add(joinedLobbyText);
         });
 
         startButton.setOnAction(e -> startLobby(stage));
@@ -173,11 +193,18 @@ public class UI extends Application {
                 return;
             }
 
-            List<Action> ActionOfClock = Constants.cleanActions.stream()
-                .filter(e -> e.getClock() == ClientMain.clock)
-                .toList();
-            if (gameState == null) gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
-            gameState = gameController.updateGameState(gameState, ActionOfClock);
+            List<Action> ActionOfClock = Constants.cleanActions.getActions(ClientMain.clock);
+            if (gameState == null) { 
+                gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
+                savedState = gameState;
+            }
+            if(Constants.cleanActions.missedAction()){
+                gameState = gameController.updateGameStateFor(savedState, ClientMain.clock);
+                Constants.cleanActions.fixedMissedAction();
+            }else{
+                if(!ActionOfClock.isEmpty()) savedState = gameState;
+                gameState = gameController.updateGameState(gameState, ActionOfClock);
+            }
 
             //Proof that action is sent to game controller
             /*if(ActionOfClock.size() != 0){

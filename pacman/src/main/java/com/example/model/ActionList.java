@@ -7,6 +7,8 @@ import java.util.Map;
 
 public class ActionList {
     private final Map<Integer, List<Action>> actions = new HashMap<>();
+    private int nrOfActionsCalled = 0;
+    private boolean missedAction = false;
 
     public void addAction(Action action) {
         actions
@@ -15,8 +17,22 @@ public class ActionList {
     }
 
     public List<Action> getActions(int clock) {
-        return actions.containsKey(clock)
+        List<Action> actionsOfClock = actions.containsKey(clock)
             ? List.copyOf(actions.get(clock))
             : List.of();
+        if(!actionsOfClock.isEmpty() && actionsOfClock.get(0).getIndex() > nrOfActionsCalled){
+            missedAction = true;
+        }else if(!actionsOfClock.isEmpty()){
+            nrOfActionsCalled = actionsOfClock.getLast().getIndex() + 1;
+        }
+        return actionsOfClock;
+    }
+
+    public boolean missedAction(){
+        return missedAction;
+    }
+
+    public void fixedMissedAction(){
+        missedAction = false;
     }
 }

@@ -16,18 +16,18 @@ public class KeyHandler {
     }
 
     public void moveUp() {
-        Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 3));
+        Constants.cleanActions.addAction(new Action(0, ClientMain.clock + 2, 3));
     }
 
     public void moveDown() {
-        Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 4));
+        Constants.cleanActions.addAction(new Action(0, ClientMain.clock + 2, 4));
     }
 
     public void moveLeft() {
-        Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 1));
+        Constants.cleanActions.addAction(new Action(0, ClientMain.clock + 2, 1));
     }
 
     public void moveRight() {
-        Constants.cleanActions.add(new Action(0, ClientMain.clock + 2, 2));
+        Constants.cleanActions.addAction(new Action(0, ClientMain.clock + 2, 2));
     }
 }
