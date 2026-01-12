@@ -165,11 +165,12 @@ public class UI extends Application {
     }
 
     private class GameAnimator extends AnimationTimer {
-        long prevTime = 0;
+        long startTime = 0;
 
         @Override
         public void handle(long time) {
-            if (prevTime != 0 && (time - prevTime) < (1000000000 / TARGET_FPS)) {
+            if (startTime == 0) {startTime = time;}
+            if (time-startTime < ClientMain.clock*(1000000000/TARGET_FPS)) {
                 return;
             }
 
@@ -196,8 +197,6 @@ public class UI extends Application {
             draw(time);
 
             ClientMain.clock++;
-
-            prevTime = time;
         }
 
         private void draw(long time) {
@@ -323,7 +322,7 @@ public class UI extends Application {
                         gc.drawImage(spriteSheet, 150, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
                     }
                     case PURPLE -> { // ("Sue");
-                        gc.drawImage(spriteSheet, 200, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
+                        gc.drawImage(spriteSheet, 250, 0, 50, 50, ghostPos.x, ghostPos.y, TILE_SIZE, TILE_SIZE);
                     }
 
                 }
