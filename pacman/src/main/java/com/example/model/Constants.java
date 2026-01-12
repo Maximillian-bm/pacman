@@ -9,7 +9,7 @@ import static com.example.model.Maps.map1;
 public class Constants {
     public final static int NR_OF_LOBBYS_CAP = 4;
     public final static ActionList cleanActions = new ActionList();
-    public final static String REMOTE_PUBLIC_URI = "tcp://127.0.0.1:50000/?keep";
+    public final static String REMOTE_PUBLIC_URI = "tcp://pacman.maximillian.info:50000/?keep";
     public final static String GATE_URI = "tcp://127.0.0.1:50000/?keep";
 
     public final static int TILE_SIZE = 48;
