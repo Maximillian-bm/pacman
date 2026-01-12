@@ -16,7 +16,9 @@ public class Constants {
     public final static int PLAYER_LIVES = 3;
     public final static double PLAYER_SPEED = 250;
 
-    public final static int INIT_SCREEN_WIDTH = map1[0].length * TILE_SIZE;
-    public final static int INIT_SCREEN_HEIGHT = map1.length * TILE_SIZE;
+    public final static int TILES_WIDE = map1[0].length;
+    public final static int TILES_TALL = map1.length;
+    public final static int INIT_SCREEN_WIDTH = TILES_WIDE * TILE_SIZE;
+    public final static int INIT_SCREEN_HEIGHT = TILES_TALL * TILE_SIZE;
     public final static int TARGET_FPS = 30;
 }
