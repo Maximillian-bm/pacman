@@ -27,4 +27,12 @@ public class ActionList {
         }
         return actionsOfClock;
     }
+
+    public boolean missedAction(){
+        return missedAction;
+    }
+
+    public void fixedMissedAction(){
+        missedAction = false;
+    }
 }
