@@ -59,25 +59,36 @@ public class ClientGameController extends GameController {
         List<Ghost> ghosts = new ArrayList<>();
         TileType[][] tiles = Maps.getMap1();
 
-        for(int i = 0; i < nrOfPlayers; i++){
-            Player player = new Player(i);
-            
-            Position spawnPosition = new Position();
-            switch (player.getId()) {
+        for (int i = 0; i < nrOfPlayers; i++) {
+    Player player = new Player(i);
 
-                case 0 -> spawnPosition = new Position(1 * TILE_SIZE, 1 * TILE_SIZE);
-                case 1 -> spawnPosition = new Position(1 * TILE_SIZE, 7 * TILE_SIZE);
-                case 2 -> spawnPosition = new Position(13 * TILE_SIZE, 1 * TILE_SIZE);
-                case 3 -> spawnPosition = new Position(13 * TILE_SIZE, 7 * TILE_SIZE);
-            }
-                
-        
+    Position spawnPosition;
+    switch (i) {
+        case 0:
+            spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
+            break;
+        case 1:
+            spawnPosition = new Position(10 * TILE_SIZE, 3 * TILE_SIZE);
+            break;
+        case 2:
+            spawnPosition = new Position(3 * TILE_SIZE, 10 * TILE_SIZE);
+            break;
+        case 3:
+            spawnPosition = new Position(10 * TILE_SIZE, 10 * TILE_SIZE);
+            break;
+        default:
+            spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
+            break;
+    }
 
+    player.setPosition(spawnPosition);
+    players.add(player);
 
+    if (i == playerID) {
+        localPlayer = player;
+    }
+}
 
-            players.add(player);
-            if(i == playerID) localPlayer = player;
-        }
 
         Ghost ghost1 = new Ghost(GhostType.RED);
         ghost1.setPosition(
