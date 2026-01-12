@@ -1,20 +1,23 @@
 package com.example.GameLogic;
 
+import java.io.IOException;
+
+import org.jspace.FormalField;
+import org.jspace.RemoteSpace;
+import org.jspace.Space;
+
+import com.example.model.Constants;
+
 public class test {
     public static void main(String[] arg){
-        String local = "tcp://127.0.0.1:50000/?keep";
-        String remote = "tcp://pacman.maximillian.info:50000/?keep";
-
-        System.out.println(URIUtil.getSpace1URI(local));
-        System.out.println(URIUtil.getSyncURI(local, 0));
-        System.out.println(URIUtil.getRawActionURI(local, 0));
-        System.out.println(URIUtil.getCleanActionURI(local, 0));
-        System.out.println(URIUtil.getLobbyID(URIUtil.getSyncURI(local, 0)));
-
-        System.out.println(URIUtil.getSpace1URI(remote));
-        System.out.println(URIUtil.getSyncURI(remote, 0));
-        System.out.println(URIUtil.getRawActionURI(remote, 0));
-        System.out.println(URIUtil.getCleanActionURI(remote, 0));
-        System.out.println(URIUtil.getLobbyID(URIUtil.getSyncURI(remote, 0)));
+        try {
+            String space1URI = URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI);
+            System.out.println("connecting to "+space1URI);
+            Space space1 = new RemoteSpace(space1URI);
+            int lobbyID = (int) space1.get(new FormalField(Integer.class))[0];
+            System.out.println("Asked for lobby id and got "+lobbyID);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

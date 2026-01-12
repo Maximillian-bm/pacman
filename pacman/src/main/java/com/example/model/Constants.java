@@ -10,7 +10,7 @@ public class Constants {
     public final static int NR_OF_LOBBYS_CAP = 4;
     public final static ActionList cleanActions = new ActionList();
     public final static String REMOTE_PUBLIC_URI = "tcp://pacman.maximillian.info:50000/?keep";
-    public final static String LOCAL_GATE = "tcp://127.0.0.1:50000/?keep";
+    public final static String LOCAL_GATE = "tcp://192.168.1.112:50000/?keep";
 
     public final static int TILE_SIZE = 48;
     public final static int PLAYER_LIVES = 3;
