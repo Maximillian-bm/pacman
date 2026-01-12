@@ -172,9 +172,7 @@ public class UI extends Application {
                 return;
             }
 
-            List<Action> ActionOfClock = Constants.cleanActions.stream()
-                .filter(e -> e.getClock() == ClientMain.clock)
-                .toList();
+            List<Action> ActionOfClock = Constants.cleanActions.getActions(ClientMain.clock);
             if (gameState == null) gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
             gameState = gameController.updateGameState(gameState, ActionOfClock);
 

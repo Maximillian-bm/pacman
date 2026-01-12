@@ -32,7 +32,7 @@ public class Reader implements Runnable {
                 Space remoteActions = new RemoteSpace(URIUtil.getCleanActionURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
                 while(true) {
                     Action action = ActionUtil.convertObjToAction(remoteActions.query(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new ActualField(nrOfActions)));
-                    Constants.cleanActions.add(action);
+                    Constants.cleanActions.addAction(action);
                     nrOfActions++;
                 }
             } catch (UnknownHostException e) {
