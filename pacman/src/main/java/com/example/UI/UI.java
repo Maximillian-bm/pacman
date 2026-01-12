@@ -13,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
@@ -60,16 +61,20 @@ public class UI extends Application {
         bgGc.setFill(Color.BLACK);
         bgGc.fillRect(0, 0, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
-        //drawRectangle(bgGc, 0, 0, TILES_WIDE, TILES_TALL);
+        drawRectangle(bgGc, 0, 0, TILES_WIDE, TILES_TALL);
 
-        Button joinLobbyButton = new Button("Join Lobby");
         double buttonWidth = 6 * TILE_SIZE;
         double buttonHeight = 2 * TILE_SIZE;
+
+        Button joinLobbyButton = new Button("Join Lobby");
         joinLobbyButton.setPrefSize(buttonWidth, buttonHeight);
         joinLobbyButton.setGraphic(createTiledImageView(buttonWidth, buttonHeight));
-        joinLobbyButton.setStyle("-fx-background-color: transparent;");
+        joinLobbyButton.setContentDisplay(ContentDisplay.CENTER);
+        joinLobbyButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;");
 
-        Text playerCountText = new Text("Select number of players:");
+        Text playerCountText = new Text("Select number of players: ");
+        playerCountText.setFill(Color.WHITE);
+        playerCountText.setStyle("-fx-font-size: 14px;");
         ChoiceBox playerCount = new ChoiceBox();
         playerCount.getItems().add("1");
         playerCount.getItems().add("2");
@@ -84,7 +89,8 @@ public class UI extends Application {
         Button createLobbyButton = new Button("Create Lobby");
         createLobbyButton.setPrefSize(buttonWidth, buttonHeight);
         createLobbyButton.setGraphic(createTiledImageView(buttonWidth, buttonHeight));
-        createLobbyButton.setStyle("-fx-background-color: transparent;");
+        createLobbyButton.setContentDisplay(ContentDisplay.CENTER);
+        createLobbyButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;");
         VBox createLobbyV = new VBox(
             createLobbyH,
             createLobbyButton
@@ -94,9 +100,12 @@ public class UI extends Application {
         Button startButton = new Button("Start Game");
         startButton.setPrefSize(buttonWidth, buttonHeight);
         startButton.setGraphic(createTiledImageView(buttonWidth, buttonHeight));
-        startButton.setStyle("-fx-background-color: transparent;");
+        startButton.setContentDisplay(ContentDisplay.CENTER);
+        startButton.setStyle("-fx-background-color: transparent; -fx-text-fill: white; -fx-font-size: 18px;");
 
-        Text LobbyIDText = new Text("Lobby ID:");
+        Text LobbyIDText = new Text("Lobby ID: ");
+        LobbyIDText.setFill(Color.WHITE);
+        LobbyIDText.setStyle("-fx-font-size: 14px;");
         TextField lobbyIDInput = new TextField();
         lobbyIDInput.setMaxWidth(6 * TILE_SIZE);
         HBox joinLobbyH = new HBox(
@@ -112,7 +121,8 @@ public class UI extends Application {
         joinLobbyV.setAlignment(Pos.CENTER);
 
         Text header = new Text("Pacman");
-        header.setStyle("-fx-font: 24 arial;");
+        header.setFill(Color.WHITE);
+        header.setStyle("-fx-font: 48 arial;");
 
         VBox startRoot = new VBox(
             header,
@@ -426,15 +436,33 @@ public class UI extends Application {
         for (int i = y; i < y + height; i++) {
             for (int j = x; j < x + width; j++) {
                 TilePos tileTilePos;
+
                 if (j == x && i == y) {
+                    // Top-left corner
                     tileTilePos = new TilePos(0, 0);
                 } else if (j == x + width - 1 && i == y) {
+                    // Top-right corner
                     tileTilePos = new TilePos(2, 0);
                 } else if (j == x && i == y + height - 1) {
+                    // Bottom-left corner
                     tileTilePos = new TilePos(0, 2);
                 } else if (j == x + width - 1 && i == y + height - 1) {
+                    // Bottom-right corner
                     tileTilePos = new TilePos(2, 2);
+                } else if (i == y) {
+                    // Top edge
+                    tileTilePos = new TilePos(1, 0);
+                } else if (i == y + height - 1) {
+                    // Bottom edge
+                    tileTilePos = new TilePos(1, 2);
+                } else if (j == x) {
+                    // Left edge
+                    tileTilePos = new TilePos(0, 1);
+                } else if (j == x + width - 1) {
+                    // Right edge
+                    tileTilePos = new TilePos(2, 1);
                 } else {
+                    // Center
                     tileTilePos = new TilePos(1, 1);
                 }
 
