@@ -14,6 +14,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -53,85 +54,20 @@ public class UI extends Application {
         stage.show();
     }
 
-    private void drawTileFromTileset(
-        GraphicsContext gc,
-        Image tileset,
-        int tileX,
-        int tileY,
-        double destX,
-        double destY
-    ) {
-        gc.drawImage(
-            tileset,
-            tileX * 32,
-            tileY * 32,
-            32,
-            32,
-            destX,
-            destY,
-            Constants.TILE_SIZE,
-            Constants.TILE_SIZE
-        );
-    }
-
-    private void drawRectangle(GraphicsContext gc, int x, int y, int width, int height) {
-        for (int i = y; i < y + height; i++) {
-            for (int j = x; j < x + width; j++) {
-                TilePos tileTilePos;
-                if (j == x && i == y) {
-                    tileTilePos = new TilePos(0, 0);
-                } else if (j == x + width - 1 && i == y) {
-                    tileTilePos = new TilePos(2, 0);
-                } else if (j == x && i == y + height - 1) {
-                    tileTilePos = new TilePos(0, 2);
-                } else if (j == x + width - 1 && i == y + height - 1) {
-                    tileTilePos = new TilePos(2, 2);
-                } else {
-                    tileTilePos = new TilePos(1, 1);
-                }
-
-                drawTileFromTileset(gc, wallSpriteSheet, tileTilePos.x, tileTilePos.y, j * TILE_SIZE, i * TILE_SIZE);
-            }
-        }
-    }
-
-    private void setRegionTiledBackground(Region region) {
-        double width = region.getPrefWidth();
-        double height = region.getPrefHeight();
-
-        Canvas canvas = new Canvas(width, height);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-
-        int tilesWide = (int) Math.ceil(width / TILE_SIZE);
-        int tilesTall = (int) Math.ceil(height / TILE_SIZE);
-        int tileX = (int) Math.ceil(region.getLayoutX() / TILE_SIZE);
-        int tileY = (int) Math.ceil(region.getLayoutY() / TILE_SIZE);
-
-        drawRectangle(gc, tileX, tileY, tilesWide, tilesTall);
-
-        WritableImage snapshot = canvas.snapshot(new SnapshotParameters(), null);
-        BackgroundImage backgroundImage = new BackgroundImage(
-            snapshot,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundRepeat.NO_REPEAT,
-            BackgroundPosition.DEFAULT,
-            BackgroundSize.DEFAULT
-        );
-
-        region.setBackground(new Background(backgroundImage));
-    }
-
     private void initializeLobby(Stage stage) {
         Canvas backgroundCanvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
         GraphicsContext bgGc = backgroundCanvas.getGraphicsContext2D();
         bgGc.setFill(Color.BLACK);
         bgGc.fillRect(0, 0, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
-        drawRectangle(bgGc, 0, 0, TILES_WIDE, TILES_TALL);
+        //drawRectangle(bgGc, 0, 0, TILES_WIDE, TILES_TALL);
 
         Button joinLobbyButton = new Button("Join Lobby");
-        joinLobbyButton.setPrefSize(6 * TILE_SIZE, 2 * TILE_SIZE);
-        setRegionTiledBackground(joinLobbyButton);
+        double buttonWidth = 6 * TILE_SIZE;
+        double buttonHeight = 2 * TILE_SIZE;
+        joinLobbyButton.setPrefSize(buttonWidth, buttonHeight);
+        joinLobbyButton.setGraphic(createTiledImageView(buttonWidth, buttonHeight));
+        joinLobbyButton.setStyle("-fx-background-color: transparent;");
 
         Text playerCountText = new Text("Select number of players:");
         ChoiceBox playerCount = new ChoiceBox();
@@ -146,8 +82,9 @@ public class UI extends Application {
         createLobbyH.setAlignment(Pos.CENTER);
 
         Button createLobbyButton = new Button("Create Lobby");
-        createLobbyButton.setPrefSize(6 * TILE_SIZE, 2 * TILE_SIZE);
-        setRegionTiledBackground(createLobbyButton);
+        createLobbyButton.setPrefSize(buttonWidth, buttonHeight);
+        createLobbyButton.setGraphic(createTiledImageView(buttonWidth, buttonHeight));
+        createLobbyButton.setStyle("-fx-background-color: transparent;");
         VBox createLobbyV = new VBox(
             createLobbyH,
             createLobbyButton
@@ -155,8 +92,9 @@ public class UI extends Application {
         createLobbyV.setAlignment(Pos.CENTER);
 
         Button startButton = new Button("Start Game");
-        startButton.setPrefSize(6 * TILE_SIZE, 2 * TILE_SIZE);
-        setRegionTiledBackground(startButton);
+        startButton.setPrefSize(buttonWidth, buttonHeight);
+        startButton.setGraphic(createTiledImageView(buttonWidth, buttonHeight));
+        startButton.setStyle("-fx-background-color: transparent;");
 
         Text LobbyIDText = new Text("Lobby ID:");
         TextField lobbyIDInput = new TextField();
@@ -461,5 +399,70 @@ public class UI extends Application {
                 }
             }
         }
+    }
+
+    private void drawTileFromTileset(
+        GraphicsContext gc,
+        Image tileset,
+        int tileX,
+        int tileY,
+        double destX,
+        double destY
+    ) {
+        gc.drawImage(
+            tileset,
+            tileX * 32,
+            tileY * 32,
+            32,
+            32,
+            destX,
+            destY,
+            Constants.TILE_SIZE,
+            Constants.TILE_SIZE
+        );
+    }
+
+    private void drawRectangle(GraphicsContext gc, int x, int y, int width, int height) {
+        for (int i = y; i < y + height; i++) {
+            for (int j = x; j < x + width; j++) {
+                TilePos tileTilePos;
+                if (j == x && i == y) {
+                    tileTilePos = new TilePos(0, 0);
+                } else if (j == x + width - 1 && i == y) {
+                    tileTilePos = new TilePos(2, 0);
+                } else if (j == x && i == y + height - 1) {
+                    tileTilePos = new TilePos(0, 2);
+                } else if (j == x + width - 1 && i == y + height - 1) {
+                    tileTilePos = new TilePos(2, 2);
+                } else {
+                    tileTilePos = new TilePos(1, 1);
+                }
+
+                drawTileFromTileset(gc, wallSpriteSheet, tileTilePos.x, tileTilePos.y, j * TILE_SIZE, i * TILE_SIZE);
+            }
+        }
+    }
+
+    private ImageView createTiledImageView(double width, double height) {
+        Canvas canvas = new Canvas(width, height);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        gc.clearRect(0, 0, width, height);
+
+        int tilesWide = (int) Math.ceil(width / TILE_SIZE);
+        int tilesTall = (int) Math.ceil(height / TILE_SIZE);
+
+        drawRectangle(gc, 0, 0, tilesWide, tilesTall);
+
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        WritableImage snapshot = canvas.snapshot(params, null);
+
+        ImageView imageView = new ImageView(snapshot);
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
+        imageView.setPreserveRatio(false);
+
+        return imageView;
     }
 }
