@@ -57,7 +57,7 @@ public class UI extends Application {
         initializeLobby(stage);
         //createLobby.run();
         //startLobby(stage);
-        startGame(stage);
+        //startGame(stage);
     }
 
     private void initializeLobby(Stage stage) {
