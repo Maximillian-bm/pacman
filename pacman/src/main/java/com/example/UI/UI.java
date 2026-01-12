@@ -125,6 +125,7 @@ public class UI extends Application {
         Canvas backgroundCanvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
         GraphicsContext bgGc = backgroundCanvas.getGraphicsContext2D();
         bgGc.setFill(Color.BLACK);
+        bgGc.fillRect(0, 0, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
         drawRectangle(bgGc, 0, 0, TILES_WIDE, TILES_TALL);
 
