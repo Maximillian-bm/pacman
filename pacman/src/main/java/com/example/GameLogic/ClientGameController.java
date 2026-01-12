@@ -14,12 +14,7 @@ import static com.example.model.Constants.*;
 
 public class ClientGameController extends GameController {
 
-    @Getter
-    private Player localPlayer;
-
     private Map<Integer, Direction> intendedDirections = new HashMap<>();
-
-
 
     public GameState updateGameStateFor(GameState gameState, int targetClock){
         int clock = gameState.clock();
@@ -54,7 +49,7 @@ public class ClientGameController extends GameController {
         return newGameState;
     }
 
-    public GameState initializeGameState(int nrOfPlayers, int playerID) {
+    public GameState initializeGameState(int nrOfPlayers) {
         List<Player> players = new ArrayList<>();
         List<Ghost> ghosts = new ArrayList<>();
         TileType[][] tiles = Maps.getMap1();
@@ -66,15 +61,15 @@ public class ClientGameController extends GameController {
                 3 * TILE_SIZE
             ));
             players.add(player);
-            if(i == playerID) localPlayer = player;
+            // if(i == playerID) localPlayer = player;
         }
 
-        localPlayer = new Player(0);
-        localPlayer.setPosition(new Position(
-            3 * TILE_SIZE,
-            3 * TILE_SIZE
-        ));
-        players.add(localPlayer);
+        // localPlayer = new Player(0);
+        // localPlayer.setPosition(new Position(
+        //     3 * TILE_SIZE,
+        //     3 * TILE_SIZE
+        // ));
+        // players.add(localPlayer);
 
         Ghost ghost1 = new Ghost(GhostType.RED);
         ghost1.setPosition(

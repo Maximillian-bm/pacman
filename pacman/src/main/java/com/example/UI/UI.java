@@ -20,6 +20,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import java.util.List;
 
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
@@ -195,7 +196,8 @@ public class UI extends Application {
 
             List<Action> ActionOfClock = Constants.cleanActions.getActions(ClientMain.clock);
             if (gameState == null) { 
-                gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
+                // gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
+                gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
                 savedState = gameState;
             }
             if(Constants.cleanActions.missedAction()){
@@ -224,7 +226,7 @@ public class UI extends Application {
 
             drawMap();
 
-            drawPlayerPosition(time);
+            drawPlayers(time);
 
             drawGhosts();
 
@@ -232,11 +234,11 @@ public class UI extends Application {
         }
 
         private void drawPoints() {
-            Player localPlayer = gameController.getLocalPlayer();
-            if (localPlayer != null) {
+            List<Player> players = gameState.players();
+            for (int i = 0; i < players.size(); i++) {
                 gc.setFill(Color.WHITE);
                 gc.setFont(new javafx.scene.text.Font(20));
-                gc.fillText("Score: " + localPlayer.getPoints(), 10, 25);
+                gc.fillText("Score: " + players.get(i).getPoints(), (i+1)*10, 25);
             }
         }
 
@@ -293,7 +295,7 @@ public class UI extends Application {
             }
         }
         
-        private void drawPlayerPosition(long time) {
+        private void drawPlayers(long time) {
             gameState.players().forEach(player -> {
                 int sy = 0;
                 switch (player.getDirection()) {
