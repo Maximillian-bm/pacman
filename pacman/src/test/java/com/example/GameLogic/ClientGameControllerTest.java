@@ -1,12 +1,24 @@
 package com.example.GameLogic;
 
-import com.example.model.*;
+import static com.example.model.Constants.TILE_SIZE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import com.example.model.Action;
+import com.example.model.Constants;
+import com.example.model.Direction;
+import com.example.model.GameState;
+import com.example.model.Ghost;
+import com.example.model.GhostType;
+import com.example.model.Player;
+import com.example.model.Position;
+import com.example.model.TileType;
+import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
-import java.util.ArrayList;
-
-import static org.junit.Assert.*;
-import static com.example.model.Constants.TILE_SIZE;
 
 public class ClientGameControllerTest {
 
@@ -23,7 +35,7 @@ public class ClientGameControllerTest {
         ClientMain.clock = 0;
 
         // Initialize for 1 player, ID 0
-        initialState = controller.initializeGameState(1, 0);
+        initialState = controller.initializeGameState(1);
 
         // For tests that require specific ghost setups, we'll clear and add manually.
         // For general tests, the default initialization is fine.
@@ -31,7 +43,7 @@ public class ClientGameControllerTest {
 
     @Test
     public void testInitializeGameState() {
-        GameState state = controller.initializeGameState(1, 0);
+        GameState state = controller.initializeGameState(1);
         assertNotNull(state);
         assertEquals(1, state.players().size());
         assertEquals(5, state.ghosts().size());
