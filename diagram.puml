@@ -1,104 +1,276 @@
 @startuml
-
-  package "model" {
-    abstract Entity {
-      + update(): void
-      - position: int
-      - direction: int
+package "GameLogic" {
+    class ActionUtil {
+      + convertObjToAction(t: Object): Action
+      + registerRawAction(action: Action, remoteRawActions: Space): void
+      + handleRawAction(lastActionsClock: int, index: int, action: Action, cleanActions: Space): void
+  }
+    class ClientGameController extends GameController {
+      + updateGameStateFor(gameState: GameState, targetClock: int): GameState
+      + updateGameState(gameState: GameState, actions: List): GameState
+      + initializeGameState(nrOfPlayers: int): GameState
+      - handleActions(gameState: GameState, actions: List): void
+      - stepMovement(gameState: GameState): void
+      - handlePlayerGridPosition(gameState: GameState): void
+      - isPowerup(t: TileType): boolean
+      - directionFromMove(move: int): Direction
+      - isWall(tiles: TileType, x: double, y: double): boolean
+      - getGhostDir(ghost: Ghost): Direction
+      - oppositeDir(dir: Direction): Direction
+      - countWalkableNeighbors(tiles: TileType, x: int, y: int): int
+      - isWalkable(tiles: TileType, x: int, y: int): boolean
+      - isWalkableInDir(tiles: TileType, x: int, y: int, d: Direction): boolean
+      - chooseBestDirTowardTarget(tiles: TileType, gx: int, gy: int, currentDir: Direction, targetX: int, targetY: int): Direction
+      - chooseBestDirAwayFromPlayer(tiles: TileType, gx: int, gy: int, currentDir: Direction, playerX: int, playerY: int): Direction
+      - findNearestPlayer(gameState: GameState, ghost: Ghost): Player
+      - computeGhostTargetTile(gameState: GameState, ghost: Ghost, pac: Player, blinky: Ghost): Pair
+      - GhostMovement(gameState: GameState): void
+      - collision(pos1: Position, pos2: Position): boolean
+      - handleGhostPlayerCollisions(gameState: GameState): void
+      - updateRespawnTimers(gameState: GameState): void
+  }
+    class ClientMain {
+      + clock: int
+      + main(args: String): void
+  }
+    abstract GameController {
+      + updateGameState(gameState: GameState, actions: List): GameState
+      - update(): void
+  }
+    abstract ServerGameController extends GameController {
+  }
+    class URIUtil {
+      + getLobbyID(lobbySpecificURI: String): int
+      + getSyncURI(baseURI: String, lobbyId: int): String
+      + getRawActionURI(baseURI: String, lobbyId: int): String
+      + getCleanActionURI(baseURI: String, lobbyId: int): String
+      + getSpace1URI(baseURI: String): String
+      - buildLobbyURI(baseURI: String, lobbyId: int, actionSuffix: String): String
+      - parse(uri: String): URI
+      - buildLobbyURI(baseURI: String, actionSuffix: String): String
+  }
+  package "ClientComs" {
+        class ConnectToLobby {
+        - nrOfPlayers: int
+        - playerID: int
+        - lobbyID: int
+        - sync: Space
+        + createLobby(nrOfPlayers: int): void
+        + joinLobby(lobbyID: String): void
+        + startGame(): void
+        + getLobbyID(): int
+        + getNrOfPlayers(): int
+        + getPlayerID(): int
     }
-
-    class Player extends Entity {
-      + updateDir(dir: int): void
-      - id: int
-      - points: int
-      - hearts: int
+        class KeyHandler {
+        + move(key: KeyCode): void
+        + moveUp(): void
+        + moveDown(): void
+        + moveLeft(): void
+        + moveRight(): void
     }
-
-    class Ghost extends Entity {
-      + type: GhostType
+        class KeyHandlerOnline extends KeyHandler {
+        - rawActions: Space
+        - playerID: int
+        + move(key: KeyCode): void
+        + moveUp(): void
+        + moveDown(): void
+        + moveLeft(): void
+        + moveRight(): void
     }
-
-    enum GhostType {
-      PINK
-      GREEN
-      BLUE
-      ORANGE
-      RED
+        class Reader implements Runnable {
+        - lobbyID: int
+        + run(): void
     }
-
+  }
+  package "ClientThreads" {
+  }
+}
+package "model" {
     class Action {
       - playerId: int
       - clock: int
       - move: int
-    }
-
-    class GameState {
-      - players: List
-      - ghosts: List
-    }
+      - index: int
+      + getPlayerId(): int
+      + getClock(): int
+      + getMove(): int
+      + getIndex(): int
+      + setClock(clock: int): void
   }
-  package "UI" {
-    class UI {
-
-    }
+    class ActionList {
+      - actions: Map
+      - nrOfActionsCalled: int
+      - missedAction: boolean
+      + addAction(action: Action): void
+      + getActions(clock: int): List
+      + missedAction(): boolean
+      + fixedMissedAction(): void
   }
-  package "ServerLogic" {
-    class ServerController {
-      - lobby: List
-    }
-    class Lobby {
-      - saveState: GameState
-      - serverGameController: ServerGameController
+    class Constants {
+      + NR_OF_LOBBYS_CAP: int
+      + cleanActions: ActionList
+      + REMOTE_PUBLIC_URI: String
+      + LOCAL_GATE: String
+      + TILE_SIZE: int
+      + TILES_WIDE: int
+      + TILES_TALL: int
+      + INIT_SCREEN_WIDTH: int
+      + INIT_SCREEN_HEIGHT: int
+      + PLAYER_RESPAWN_DELAY_SEC: double
+      + TARGET_FPS: long
+      + CENTER_EPS_PX: double
+      + PLAYER_LIVES: int
+      + PLAYER_SPEED: double
+      + GHOST_RESPAWN_DELAY_SEC: double
+      + FRIGHTENED_DURATION_SEC: double
+  }
+    enum Direction {
+      NORTH
+      EAST
+      SOUTH
+      WEST
+  }
+    abstract Entity {
+      - position: int
+      - direction: int
+      + update(): void
+  }
+    class Unknown {
+  }
+    class Ghost extends Entity {
+      - type: GhostType
+      - position: Position
+      - direction: Direction
+      - GHOSTSPEED: double
+      - ghostScatterMode: boolean
+      - ghostChaseTimer: double
+      - frightenedTimerSec: double
+      - spawnPosition: Position
+      - respawnTimer: double
+  }
+    enum GhostType {
+      RED
+      PINK
+      CYAN
+      ORANGE
+      PURPLE
+      + name: String
+  }
+    class Maps {
+      + map1: int
+      + getMap1(): TileType
+  }
+    class Player extends Entity {
       - id: int
-    }
+      - points: int
+      - lives: int
+      - position: Position
+      - direction: Direction
+      - intendedDirection: Direction
+      - respawnTimer: double
+      - alive: boolean
+      - spawnPosition: Position
+      - isEnergized: boolean
+      - ghostsEatenThisEnergizer: int
+      + isAlive(): boolean
+      + setAlive(alive: boolean): void
+      + addPoints(points: int): void
+      + eatGhost(): void
+      + loseLife(): void
+      + isDead(): boolean
   }
-  package "GameLogic" {
-
-    abstract GameController {
-      - update(): void
-    }
-
-    class ServerGameController extends GameController {
-
-    }
-
-    class ClientMain {
-      - rawAction: jSpaceStack
-      - cleanAction: jSpaceStack
-      + nrOfActions: int
-      + clock: int
+    class Position {
+      + x: double
+      + y: double
+      + ToGridPosition(): Pair
+      + ToScreenPosition(): Pair
+  }
+    enum TileType {
+      EMPTY
+      WALL
+      PAC_DOT
+      ENERGIZER
+      CHERRY
+      STRAWBERRY
+      ORANGE
+      APPLE
+      MELON
+      GALAXIAN
+      BELL
+      KEY
+      WALL10
+      WALL11
+      WALL12
+      + points: int
+  }
+}
+package "ServerLogic" {
+    class Lobby implements Runnable {
+      - rep: SpaceRepository
+      - nrOfPlayers: int
+      - actionHandler: LobbyActionHandler
+      - lobbyID: int
+      - timeOfCreation: long
+      + run(): void
+      + getTimeOfCreation(): long
+      + getLobbyID(): int
+      + stop(): void
+  }
+    class LobbyActionHandler implements Runnable {
+      + repository: SpaceRepository
+      + lobbyID: int
+      + running: boolean
+      + run(): void
+      + stop(): void
+  }
+    class LobbyCleaner implements Runnable {
+      - lobbys: List
+      - space1: Space
+      - running: boolean
+      - toBeAdded: List
+      + run(): void
+      + stop(): void
+      + addLobby(lobby: Lobby): void
+  }
+    class ServerController {
+      - lobbys: List
+      - rep: SpaceRepository
+      - space1: Space
+      + main(arg: String): void
+  }
+}
+package "UI" {
+    class UI extends Application {
+      - lobbyHandler: ConnectToLobby
+      - gameController: ClientGameController
       - gameState: GameState
-      - saveState: GameState
-      - ClientGameController: gameController
-    }
-
-    class ClientGameController extends GameController {
-      - UI: UI
-    }
-
-    package "ClientThreads" {
-      class Reader implements Runnable {
-
-      }
-
-      class HandleActions implements Runnable {
-
-      }
-
-      class KeyHandler implements Runnable {
-
-      }
-    }
+      - savedState: GameState
+      - gc: GraphicsContext
+      - canvas: Canvas
+      - spriteSheet: Image
+      - wallSpriteSheet: Image
+      - keyHandler: KeyHandler
+      - createLobby: Runnable
+      + TilePos(x: int, y: int): record
+      + start(stage: Stage): void
+      - initializeLobby(stage: Stage): void
+      - startLobby(stage: Stage): void
+      - startGame(stage: Stage): void
+      - drawTileFromTileset(gc: GraphicsContext, tileset: Image, tileX: int, tileY: int, destX: double, destY: double): void
+      - drawRectangle(gc: GraphicsContext, x: int, y: int, width: int, height: int): void
+      - createTiledButton(text: String, tilesWide: int, tilesTall: int): Button
+      - createTiledImageView(width: double, height: double): ImageView
   }
-ClientGameController o-- UI: contains
-Lobby o-- ServerGameController: contains
-GameState "1" o-- "many" Ghost: contains
-GameState "1" o-- "many" Player: contains
-ClientMain "1" o-- "2" GameState: contains
-Lobby o-- GameState: contains
-ClientMain o-- ClientGameController: contains
-ServerController "1" o-- "many" Lobby: contains
-ClientMain "1" o-- "many" Action: contains
-Ghost o-- GhostType: contains
-
+}
+  Constants o-- ActionList: contains
+  Ghost o-- GhostType: contains
+  Ghost "1" o-- "many" Position: contains
+  Ghost o-- Direction: contains
+  Player "1" o-- "many" Position: contains
+  Player "1" o-- "many" Direction: contains
+  Lobby o-- LobbyActionHandler: contains
+  UI o-- ConnectToLobby: contains
+  UI o-- ClientGameController: contains
+  UI o-- KeyHandler: contains
 @enduml

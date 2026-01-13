@@ -8,7 +8,7 @@ import org.jspace.SpaceRepository;
 
 import com.example.GameLogic.*;
 
-public class Lobby {
+public class Lobby implements Runnable{
 
     private SpaceRepository rep;
     private int nrOfPlayers;
@@ -24,7 +24,8 @@ public class Lobby {
         this.timeOfCreation = timeOfCreation;
     }
 
-    public void start(){
+    @Override
+    public void run(){
         Thread actionThread = new Thread(actionHandler);
         actionThread.setDaemon(true);
         actionThread.start();

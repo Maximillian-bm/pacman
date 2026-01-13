@@ -46,7 +46,9 @@ public class ServerController {
                 rep.add(lobbyID+"cleanAction", new PileSpace());
                 Lobby lobby = new Lobby(rep, nrOfPlayers, lobbyID, System.currentTimeMillis());
                 space1.put(lobbyID, nrOfPlayers, "OK");
-                lobby.start();
+                Thread lobbyThread = new Thread(lobby);
+                lobbyThread.setDaemon(true);
+                lobbyThread.start();
                 lobbyCleaner.addLobby(lobby);
             } catch (InterruptedException e) {
                 e.printStackTrace();
