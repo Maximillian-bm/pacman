@@ -7,7 +7,7 @@ public class Player extends Entity {
     @Getter
     private final int id;
 
-    @Getter
+    @Getter @Setter
     private int
         points = 0,
         lives = Constants.PLAYER_LIVES;
@@ -19,12 +19,30 @@ public class Player extends Entity {
     @Setter
     private Direction direction = Direction.EAST;
 
+    @Getter @Setter
+    private Direction intendedDirection;
+    @Getter @Setter
+    private double respawnTimer = 0.0;
+    private boolean alive;
+
+    @Getter @Setter
+    private Position spawnPosition;
     private boolean isEnergized;
 
     public Player(int id) {
         this.id = id;
+        this.alive = true;
+        this.lives = Constants.PLAYER_LIVES;
+        this.direction = Direction.EAST;
+        this.respawnTimer = 0.0;
+    }
+    public boolean isAlive() {
+        return alive;
     }
 
+    public void setAlive(boolean alive) {
+        this.alive = alive;
+    }   
     /*
      * From: "https://pacman.fandom.com/wiki/Power_Pellet"
      * If consecutive ghosts are eaten during the same Energizer effect, they will give out 400, 800 and 1,600 point bonuses for each of the consecutive ghosts in order.

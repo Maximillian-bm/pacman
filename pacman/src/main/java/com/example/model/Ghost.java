@@ -21,6 +21,12 @@ public class Ghost extends Entity {
     @Getter @Setter
     private static double frightenedTimerSec = 0.0;
 
+    @Getter @Setter
+    private Position spawnPosition; 
+
+    @Getter @Setter
+    private double respawnTimer = 0.0;
+
     public Ghost(GhostType type) {
         this.type = type;
     }
