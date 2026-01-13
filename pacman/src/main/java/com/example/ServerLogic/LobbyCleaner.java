@@ -50,6 +50,7 @@ public class LobbyCleaner implements Runnable{
                     System.out.println("Lobby "+lobby.getLobbyID()+" is active");
                     }
                 }
+                System.out.println("All lobbys have been displayed");
                 showActiveLobbys = false;
             }
             if(closeAllLobbys){
@@ -58,6 +59,7 @@ public class LobbyCleaner implements Runnable{
                 lobby.stop();
                 toBeRemoved.add(lobby);
                 }
+                System.out.println("All lobbys have been closed");
                 closeAllLobbys = false;
             }
             lobbys.removeAll(toBeRemoved);
@@ -67,12 +69,12 @@ public class LobbyCleaner implements Runnable{
     }
 
     public void closeAllLobbys(){
-        System.out.println("Closing all lobbys lobbys");
+        System.out.println("Closing all lobbys...");
         closeAllLobbys = true;
     }
 
     public void showActiveLobbys(){
-        System.out.println("Loading active lobbys");
+        System.out.println("Loading active lobbys...");
         showActiveLobbys = true;
     }
 
