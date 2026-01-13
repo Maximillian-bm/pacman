@@ -2,6 +2,7 @@ package com.example.GameLogic;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.Reader;
+import com.example.common.BaseTest;
 import org.junit.Test;
 import java.util.concurrent.TimeoutException;
 

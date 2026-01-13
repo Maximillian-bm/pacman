@@ -3,6 +3,7 @@ package com.example.GameLogic;
 import static com.example.model.Constants.TILE_SIZE;
 import static org.junit.Assert.assertEquals;
 
+import com.example.common.BaseTest;
 import com.example.model.GameState;
 import com.example.model.Ghost;
 import com.example.model.Position;

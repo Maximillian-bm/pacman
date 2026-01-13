@@ -1,8 +1,8 @@
 package com.example.GameLogic;
 
-import static com.example.model.Constants.TARGET_FPS;
 import static org.junit.Assert.assertTrue;
 
+import com.example.common.BaseTest;
 import com.example.model.Action;
 import com.example.model.GameState;
 import com.example.model.Ghost;

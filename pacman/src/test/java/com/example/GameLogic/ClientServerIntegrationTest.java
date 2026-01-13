@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
+import com.example.common.BaseTest;
 import org.junit.Test;
 
 public class ClientServerIntegrationTest extends BaseTest {

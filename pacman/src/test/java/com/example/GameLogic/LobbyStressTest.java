@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
+import com.example.common.BaseTest;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;

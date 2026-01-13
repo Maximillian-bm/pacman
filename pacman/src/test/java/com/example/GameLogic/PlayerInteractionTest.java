@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.example.common.BaseTest;
 import com.example.model.Action;
 import com.example.model.Direction;
 import com.example.model.GameState;
@@ -13,7 +14,6 @@ import com.example.model.Ghost;
 import com.example.model.GhostType;
 import com.example.model.Player;
 import com.example.model.Position;
-import com.example.model.TileType;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;

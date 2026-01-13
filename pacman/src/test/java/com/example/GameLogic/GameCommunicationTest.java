@@ -1,9 +1,8 @@
 package com.example.GameLogic;
 
-import com.example.GameLogic.ClientComs.Reader;
+import com.example.common.BaseTest;
 import com.example.model.Action;
 import com.example.model.ActionList;
-import com.example.model.Constants;
 import org.junit.Test;
 import java.util.List;
 import static org.junit.Assert.*;

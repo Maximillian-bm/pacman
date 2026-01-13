@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.example.common.BaseTest;
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.Direction;
