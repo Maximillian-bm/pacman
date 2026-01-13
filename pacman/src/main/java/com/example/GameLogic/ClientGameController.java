@@ -54,7 +54,7 @@ public class ClientGameController extends GameController {
         handlePlayerGridPosition(gameState);
 
         GameState newGameState = new GameState(
-            ClientMain.clock,
+            Constants.clock,
             gameState.players(),
             gameState.ghosts(),
             gameState.tiles(),
@@ -160,7 +160,7 @@ ghost5.setDirection(Direction.WEST);
 
 
         return new GameState(
-            ClientMain.clock,
+            Constants.clock,
             players,
             ghosts,
             tiles,

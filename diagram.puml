@@ -86,6 +86,29 @@ package "GameLogic" {
   package "ClientThreads" {
   }
 }
+package "GUI" {
+    class UI extends Application {
+      - lobbyHandler: ConnectToLobby
+      - gameController: ClientGameController
+      - gameState: GameState
+      - savedState: GameState
+      - gc: GraphicsContext
+      - canvas: Canvas
+      - spriteSheet: Image
+      - wallSpriteSheet: Image
+      - keyHandler: KeyHandler
+      - createLobby: Runnable
+      + TilePos(x: int, y: int): record
+      + start(stage: Stage): void
+      - initializeLobby(stage: Stage): void
+      - startLobby(stage: Stage): void
+      - startGame(stage: Stage): void
+      - drawTileFromTileset(gc: GraphicsContext, tileset: Image, tileX: int, tileY: int, destX: double, destY: double): void
+      - drawRectangle(gc: GraphicsContext, x: int, y: int, width: int, height: int): void
+      - createTiledButton(text: String, tilesWide: int, tilesTall: int): Button
+      - createTiledImageView(width: double, height: double): ImageView
+  }
+}
 package "model" {
     class Action {
       - playerId: int
@@ -240,29 +263,9 @@ package "ServerLogic" {
       + main(arg: String): void
   }
 }
-package "UI" {
-    class UI extends Application {
-      - lobbyHandler: ConnectToLobby
-      - gameController: ClientGameController
-      - gameState: GameState
-      - savedState: GameState
-      - gc: GraphicsContext
-      - canvas: Canvas
-      - spriteSheet: Image
-      - wallSpriteSheet: Image
-      - keyHandler: KeyHandler
-      - createLobby: Runnable
-      + TilePos(x: int, y: int): record
-      + start(stage: Stage): void
-      - initializeLobby(stage: Stage): void
-      - startLobby(stage: Stage): void
-      - startGame(stage: Stage): void
-      - drawTileFromTileset(gc: GraphicsContext, tileset: Image, tileX: int, tileY: int, destX: double, destY: double): void
-      - drawRectangle(gc: GraphicsContext, x: int, y: int, width: int, height: int): void
-      - createTiledButton(text: String, tilesWide: int, tilesTall: int): Button
-      - createTiledImageView(width: double, height: double): ImageView
-  }
-}
+  UI o-- ConnectToLobby: contains
+  UI o-- ClientGameController: contains
+  UI o-- KeyHandler: contains
   Constants o-- ActionList: contains
   Ghost o-- GhostType: contains
   Ghost "1" o-- "many" Position: contains
@@ -270,7 +273,4 @@ package "UI" {
   Player "1" o-- "many" Position: contains
   Player "1" o-- "many" Direction: contains
   Lobby o-- LobbyActionHandler: contains
-  UI o-- ConnectToLobby: contains
-  UI o-- ClientGameController: contains
-  UI o-- KeyHandler: contains
 @enduml
