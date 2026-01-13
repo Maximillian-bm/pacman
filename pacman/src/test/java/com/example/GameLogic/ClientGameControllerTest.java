@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.example.common.BaseTest;
 import com.example.model.Action;
+import com.example.model.ActionList;
 import com.example.model.Constants;
 import com.example.model.Direction;
 import com.example.model.GameState;
@@ -707,5 +708,218 @@ public class ClientGameControllerTest extends BaseTest {
 
         assertTrue("Player should have teleported to left", p.getPosition().x < TILE_SIZE);
         assertEquals("Player should be at the far left after wrapping", 0.1, p.getPosition().x, 0.5);
+    }
+
+    @Test
+    public void testUpdateGameStateForBasicMovement() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(1);
+        Player player = initialState.players().getFirst();
+        player.setPosition(new Position(TILE_SIZE, TILE_SIZE));
+        player.setDirection(Direction.EAST);
+        
+        // At clock 1, move EAST
+        Constants.cleanActions.addAction(new Action(0, 1, 2, 0)); // 2 = EAST
+        
+        GameState finalState = controller.updateGameStateFor(initialState, 5);
+        
+        assertEquals(5, finalState.clock());
+        assertTrue("Player should have moved EAST from resimulation", finalState.players().getFirst().getPosition().x > TILE_SIZE);
+        double expectedX = TILE_SIZE + 4 * (Constants.PLAYER_SPEED / Constants.TARGET_FPS);
+        assertEquals("Player should be at expected X after 4 ticks of movement", expectedX, finalState.players().getFirst().getPosition().x, 0.001);
+    }
+
+    @Test
+    public void testUpdateGameStateForMultipleActions() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(1);
+        Player player = initialState.players().getFirst();
+        player.setPosition(new Position(TILE_SIZE, TILE_SIZE));
+        player.setDirection(Direction.EAST);
+
+        // Clock 1: EAST (already moving East)
+        Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
+        // Clock 3: SOUTH (at TILE_SIZE, TILE_SIZE it should be able to turn if it's an intersection, 
+        // but let's assume it's moving and we want to see it change direction)
+        // We'll place it at an intersection for easier testing
+        player.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
+        Constants.cleanActions.addAction(new Action(0, 3, 4, 1)); // 4 = SOUTH
+
+        GameState finalState = controller.updateGameStateFor(initialState, 6);
+
+        assertEquals(6, finalState.clock());
+        Player finalPlayer = finalState.players().getFirst();
+        assertEquals("Player should be facing SOUTH after resimulation", Direction.SOUTH, finalPlayer.getDirection());
+        assertTrue("Player should have moved SOUTH", finalPlayer.getPosition().y > 3 * TILE_SIZE);
+    }
+
+    @Test
+    public void testUpdateGameStateForGhostCollision() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(1);
+        Player player = initialState.players().getFirst();
+        player.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
+        player.setLives(3);
+
+        Ghost ghost = initialState.ghosts().getFirst();
+        ghost.setPosition(new Position(5 * TILE_SIZE, 3 * TILE_SIZE));
+        ghost.setDirection(Direction.WEST);
+        
+        // Player moves EAST towards ghost
+        player.setDirection(Direction.EAST);
+        Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
+
+        // Resimulate long enough for them to collide
+        GameState finalState = controller.updateGameStateFor(initialState, 20);
+
+        assertTrue("Player should have lost a life during resimulation", finalState.players().getFirst().getLives() < 3);
+        assertFalse("Player should be dead or respawning", finalState.players().getFirst().isAlive());
+    }
+
+    @Test
+    public void testUpdateGameStateForEnergizerEffect() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(1);
+        Player player = initialState.players().getFirst();
+        player.setPosition(new Position(2 * TILE_SIZE, 3 * TILE_SIZE));
+        player.setDirection(Direction.EAST);
+
+        TileType[][] tiles = initialState.tiles();
+        tiles[3][3] = TileType.ENERGIZER;
+        
+        Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
+
+        // Resimulate over eating the energizer
+        GameState finalState = controller.updateGameStateFor(initialState, 10);
+
+        assertTrue("Ghosts should be frightened after eating energizer in resimulation", Ghost.getFrightenedTimerSec() > 0);
+    }
+
+    @Test
+    public void testUpdateGameStateForImmutability() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(1);
+        int initialClock = initialState.clock();
+        Position initialPos = new Position(initialState.players().getFirst().getPosition().x, initialState.players().getFirst().getPosition().y);
+
+        Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
+        
+        GameState finalState = controller.updateGameStateFor(initialState, 10);
+
+        assertNotEquals("Final state should be different from initial state", initialClock, finalState.clock());
+        assertEquals("Initial state clock should NOT have changed", initialClock, initialState.clock());
+        assertEquals("Initial state position should NOT have changed", initialPos.x, initialState.players().getFirst().getPosition().x, 0.001);
+    }
+
+    @Test
+    public void testUpdateGameStateForConsistency() {
+        Constants.cleanActions = new ActionList();
+        GameState state1 = controller.initializeGameState(1);
+        GameState state2 = controller.initializeGameState(1);
+        
+        // Manually update state1 5 times with no actions
+        for(int i = 1; i <= 5; i++) {
+            state1 = controller.updateGameState(state1, new ArrayList<>());
+        }
+        
+        // Resimulate state2 for 5 ticks
+        state2 = controller.updateGameStateFor(state2, 5);
+        
+        assertEquals("States should have same clock", state1.clock(), state2.clock());
+        assertEquals("Player X should be same", state1.players().getFirst().getPosition().x, state2.players().getFirst().getPosition().x, 0.001);
+        assertEquals("Player Y should be same", state1.players().getFirst().getPosition().y, state2.players().getFirst().getPosition().y, 0.001);
+    }
+
+    @Test
+    public void testUpdateGameStateForLargeClockJump() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(1);
+        
+        // Resimulate 100 ticks
+        GameState finalState = controller.updateGameStateFor(initialState, 100);
+        
+        assertEquals(100, finalState.clock());
+    }
+
+    @Test
+    public void testUpdateGameStateForClockRegression() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(1);
+        GameState futureState = new GameState(10, initialState.players(), initialState.ghosts(), initialState.tiles(), null);
+        
+        // targetClock (5) < futureState.clock() (10)
+        GameState resultState = controller.updateGameStateFor(futureState, 5);
+        
+        assertEquals("Clock should not regress and state should remain unchanged", 10, resultState.clock());
+    }
+
+    @Test
+    public void testUpdateGameStateForFutureActionsIgnored() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(1);
+        Player player = initialState.players().getFirst();
+        player.setPosition(new Position(TILE_SIZE, TILE_SIZE));
+        player.setDirection(Direction.EAST);
+
+        // Action at clock 10 (beyond target clock 5)
+        Constants.cleanActions.addAction(new Action(0, 10, 4, 0)); // 4 = SOUTH
+        
+        GameState finalState = controller.updateGameStateFor(initialState, 5);
+        
+        assertEquals(5, finalState.clock());
+        assertEquals("Direction should still be EAST", Direction.EAST, finalState.players().getFirst().getDirection());
+    }
+
+    @Test
+    public void testUpdateGameStateForMultiplePlayersOverlappingActions() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(2);
+        Player p0 = initialState.players().getFirst();
+        Player p1 = initialState.players().get(1);
+        
+        p0.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
+        p1.setPosition(new Position(10 * TILE_SIZE, 3 * TILE_SIZE));
+        
+        // Both move at clock 1
+        Constants.cleanActions.addAction(new Action(0, 1, 1, 0)); // P0 WEST
+        Constants.cleanActions.addAction(new Action(1, 1, 2, 1)); // P1 EAST
+        
+        GameState finalState = controller.updateGameStateFor(initialState, 5);
+        
+        assertTrue("P0 should have moved WEST", finalState.players().getFirst().getPosition().x < 3 * TILE_SIZE);
+        assertTrue("P1 should have moved EAST", finalState.players().get(1).getPosition().x > 10 * TILE_SIZE);
+    }
+
+    @Test
+    public void testUpdateGameStateForMissedActionDetection() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(1);
+        
+        // Add action with index 0 at clock 1
+        Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
+        // Add action with index 5 at clock 2 (indices 1, 2, 3, 4 are missing)
+        Constants.cleanActions.addAction(new Action(0, 2, 2, 5));
+        
+        Constants.cleanActions.fixedMissedAction();
+        assertFalse(Constants.cleanActions.missedAction());
+        
+        controller.updateGameStateFor(initialState, 3);
+        
+        assertTrue("Missed action should be detected during resimulation", Constants.cleanActions.missedAction());
+    }
+
+    @Test
+    public void testUpdateGameStateForEnergizerExpiration() {
+        Constants.cleanActions = new ActionList();
+        initialState = controller.initializeGameState(1);
+        
+        // Set frightened timer to very low value (e.g., 2 frames worth)
+        Ghost.setFrightenedTimerSec(2.0 / Constants.TARGET_FPS);
+        assertTrue(Ghost.getFrightenedTimerSec() > 0);
+        
+        // Resimulate 5 ticks
+        controller.updateGameStateFor(initialState, 5);
+        
+        assertEquals("Frightened timer should have expired during resimulation", 0.0, Ghost.getFrightenedTimerSec(), 0.001);
     }
 }
