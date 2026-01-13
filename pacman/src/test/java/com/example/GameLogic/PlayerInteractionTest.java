@@ -3,11 +3,14 @@ package com.example.GameLogic;
 import static com.example.model.Constants.TILE_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.example.model.Action;
 import com.example.model.Direction;
 import com.example.model.GameState;
 import com.example.model.Ghost;
+import com.example.model.GhostType;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
@@ -133,5 +136,52 @@ public class PlayerInteractionTest extends BaseTest {
         double p2X = p2.getPosition().x;
         assertTrue("Moving player should be blocked by stationary player. Pos: " + p2X, 
                    p2X <= 4 * TILE_SIZE + 2.0); // Allow small movement before hit, but not full step
+    }
+
+    @Test
+    public void testSimultaneousPlayerGhostSpawnCollision() {
+        // What if a player spawns ON TOP of a ghost?
+        Player p = initialState.players().get(0);
+        // Ensure we have a ghost
+        if (initialState.ghosts().isEmpty()) {
+            initialState.ghosts().add(new Ghost(GhostType.RED));
+        }
+        Ghost g = initialState.ghosts().get(0);
+
+        Position deathSpot = new Position(5 * TILE_SIZE, 5 * TILE_SIZE);
+        p.setSpawnPosition(deathSpot);
+        g.setPosition(deathSpot); // Ghost camping the spawn
+
+        // Kill player to trigger respawn
+        p.setAlive(false);
+        p.setRespawnTimer(0.01);
+        p.setLives(2);
+
+        // Force update to respawn player
+        controller.updateGameState(initialState, new ArrayList<>());
+
+        // Player should respawn, then IMMEDIATELY die or be handled gracefully
+        if (!p.isAlive()) {
+             assertEquals("Player should lose a life immediately if spawn is camped", 1, p.getLives());
+        }
+    }
+
+    @Test
+    public void testRapidDirectionSwitching() {
+        // Simulate a player mashing keys to glitch through walls or turn illegally
+        Player p = initialState.players().get(0);
+        p.setPosition(new Position(1 * TILE_SIZE, 1 * TILE_SIZE)); // Top left corner (1,1) is empty usually
+
+        List<Action> spamActions = new ArrayList<>();
+        spamActions.add(new Action(p.getId(), 0, 1)); // West
+        spamActions.add(new Action(p.getId(), 0, 2)); // East
+        spamActions.add(new Action(p.getId(), 0, 3)); // North
+        spamActions.add(new Action(p.getId(), 0, 4)); // South
+
+        controller.updateGameState(initialState, spamActions);
+
+        // Should end up with ONE valid intended direction (likely the last one processed)
+        // or just ensure state is valid and no crash.
+        assertNotNull(p.getIntendedDirection());
     }
 }

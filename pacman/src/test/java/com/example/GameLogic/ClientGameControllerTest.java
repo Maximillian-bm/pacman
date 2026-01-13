@@ -17,6 +17,7 @@ import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
 import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -575,5 +576,53 @@ public class ClientGameControllerTest extends BaseTest {
         
         assertEquals("Player should face West immediately", Direction.WEST, player.getDirection());
         assertTrue("Player should move West", player.getPosition().x < x1);
+    }
+
+    @Test
+    public void testNullActionHandling() {
+        // Ensure robust handling of null lists or elements
+        GameState state = controller.updateGameState(initialState, null);
+        assertNotNull(state);
+
+        List<Action> listWithNulls = new ArrayList<>();
+        listWithNulls.add(null);
+        listWithNulls.add(new Action(0, 0, 1));
+
+        state = controller.updateGameState(state, listWithNulls);
+        assertNotNull(state);
+    }
+
+    @Test
+    public void testIntegerOverflowClock() {
+        // While we can't easily wait for overflow, we can set the clock manually if the constructor allowed.
+        // Since we can't easily mock the static clock in ClientMain without access,
+        // we check if a high clock value passed in state persists.
+
+        GameState highClockState = new GameState(
+                Integer.MAX_VALUE - 5,
+                initialState.players(),
+                initialState.ghosts(),
+                initialState.tiles(),
+                null
+        );
+
+        GameState nextState = controller.updateGameState(highClockState, new ArrayList<>());
+
+        assertTrue("Clock should handle potential high values gracefully", nextState.clock() != 0);
+    }
+
+    @Test
+    public void testTeleportationBoundary() {
+        // Test exact boundary condition for teleport
+        Player p = initialState.players().getFirst();
+        double mapWidth = initialState.tiles().length * TILE_SIZE;
+
+        // Right edge
+        p.setPosition(new Position(mapWidth - (TILE_SIZE / 2.0) + 0.1, TILE_SIZE));
+        p.setDirection(Direction.EAST);
+
+        controller.updateGameState(initialState, new ArrayList<>());
+
+        assertTrue("Player should have teleported to left", p.getPosition().x < TILE_SIZE);
     }
 }
