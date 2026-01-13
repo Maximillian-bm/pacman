@@ -13,6 +13,7 @@ public class LobbyCleaner implements Runnable{
     private Space space1;
     private boolean running = true;
     private List<Lobby> toBeAdded = new ArrayList<>();
+    private boolean showActiveLobbys = false;
 
     public LobbyCleaner(List<Lobby> lobbys, Space space1){
         this.lobbys = lobbys;
@@ -29,7 +30,6 @@ public class LobbyCleaner implements Runnable{
             }
             List<Lobby> toBeRemoved = new ArrayList<>();
             for (Lobby lobby : lobbys) {
-                System.out.println("Lobby "+lobby.getLobbyID()+" is active");
                 if(System.currentTimeMillis() - lobby.getTimeOfCreation() > Constants.LOBBY_TTL){
                     int lobbyID = lobby.getLobbyID();
                     lobby.stop();
@@ -41,10 +41,25 @@ public class LobbyCleaner implements Runnable{
                     }
                 }
             }
+            if(showActiveLobbys){
+                if(lobbys.isEmpty()){
+                    System.out.println("No active lobbys");
+                }else{
+                    for(Lobby lobby : lobbys) {
+                    System.out.println("Lobby "+lobby.getLobbyID()+" is active");
+                    }
+                }
+                showActiveLobbys = false;
+            }
             lobbys.removeAll(toBeRemoved);
             lobbys.addAll(toBeAdded);
             toBeAdded.removeAll(toBeAdded);
         }
+    }
+
+    public void showActiveLobbys(){
+        System.out.println("Loading active lobbys");
+        showActiveLobbys = true;
     }
 
     public void stop(){
