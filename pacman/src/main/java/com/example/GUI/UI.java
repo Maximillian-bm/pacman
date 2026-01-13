@@ -1,6 +1,7 @@
 package com.example.GUI;
 
 import java.util.List;
+import java.lang.StringBuilder;
 
 import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
@@ -270,9 +271,18 @@ public class UI extends Application {
         private void drawPoints() {
             List<Player> players = gameState.players();
             for (int i = 0; i < players.size(); i++) {
-                gc.setFill(Color.WHITE);
+                gc.setFill(players.get(i).getColor());
                 gc.setFont(new javafx.scene.text.Font(20));
-                gc.fillText("Score: " + players.get(i).getPoints(), (i+1)*10, 25);
+
+                StringBuilder hearts = new StringBuilder("");
+                for (int j = 0; j < players.get(i).getLives(); j++) {
+                    hearts.append("❤️");
+                }
+                for (int j = 0; j < 5 - players.get(i).getLives(); j++) {
+                    hearts.append("   ");
+                }
+
+                gc.fillText(hearts + " Score: " + players.get(i).getPoints(), 10, (i+1)*20);
             }
         }
 
@@ -345,14 +355,7 @@ public class UI extends Application {
                     default -> sy + 50;
                 };
 
-                Image coloredPlayer;
-                switch (player.getId()) {
-                    case 1: coloredPlayer = colorPlayer(255,0,0) ; break;
-                    case 2: coloredPlayer = colorPlayer(0,255,0) ; break;
-                    case 3: coloredPlayer = colorPlayer(0,0,255) ; break;
-                    default: coloredPlayer = spriteSheet ; break;
-                }
-
+                Image coloredPlayer = colorPlayer(player.getColor());
                 Position playerTilePos = player.getPosition();
                 gc.drawImage(coloredPlayer, 850, sy, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
             });
@@ -360,18 +363,22 @@ public class UI extends Application {
 
         // Modified function from:
         // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
-        public Image colorPlayer(int nr, int ng, int nb) {
+        public Image colorPlayer(Color color) {
+        // public Image colorPlayer(int nr, int ng, int nb) {
             int W = (int)spriteSheet.getWidth();
             int H = (int)spriteSheet.getHeight();
             WritableImage outputImage = new WritableImage(W, H);
             PixelReader reader = spriteSheet.getPixelReader();
             PixelWriter writer = outputImage.getPixelWriter();
+            int nr = (int)(color.getRed()*255);
+            int ng = (int)(color.getGreen()*255);
+            int nb = (int)(color.getBlue()*255);
             // Yellow (the player)
             int or= 255;
             int og= 241;
             int ob= 0;
             for (int y = 0; y < H; y++) {
-                for (int x = 0; x < W; x++) {
+                for (int x = 850; x < 900; x++) {
                     int argb = reader.getArgb(x, y);
                     int a = (argb >> 24) & 0xFF;
                     int r = (argb >> 16) & 0xFF;
