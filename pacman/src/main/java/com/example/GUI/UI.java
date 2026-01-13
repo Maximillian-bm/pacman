@@ -223,7 +223,7 @@ public class UI extends Application {
         @Override
         public void handle(long time) {
             if (startTime == 0) {startTime = time;}
-            if (Constants.timeOffset+time-startTime < Constants.clock*(1000000000/TARGET_FPS)) {
+            if (time-(startTime+Constants.timeOffset) < Constants.clock*(1000000000/TARGET_FPS)) {
                 return;
             }
 
