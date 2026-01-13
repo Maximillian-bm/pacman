@@ -1,39 +1,38 @@
 package com.example.UI;
 
+import static com.example.model.Constants.TARGET_FPS;
+import static com.example.model.Constants.TILE_SIZE;
+
+import java.util.List;
+
 import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
 import com.example.GameLogic.ClientComs.KeyHandlerOnline;
-import com.example.model.*;
+import com.example.model.Action;
+import com.example.model.Constants;
+import com.example.model.GameState;
+import com.example.model.Player;
+import com.example.model.Position;
+import com.example.model.TileType;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
-import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import javafx.util.Pair;
-
-import javafx.scene.control.TextField;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.geometry.Pos;
-import javafx.geometry.Insets;
 import javafx.scene.control.ChoiceBox;
-
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-
-import static com.example.model.Constants.TILE_SIZE;
-import static com.example.model.Constants.TARGET_FPS;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
 public class UI extends Application {
     

@@ -1,16 +1,30 @@
 package com.example.GameLogic;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static com.example.model.Constants.CENTER_EPS_PX;
+import static com.example.model.Constants.FRIGHTENED_DURATION_SEC;
+import static com.example.model.Constants.GHOST_RESPAWN_DELAY_SEC;
+import static com.example.model.Constants.PLAYER_LIVES;
+import static com.example.model.Constants.PLAYER_RESPAWN_DELAY_SEC;
+import static com.example.model.Constants.PLAYER_SPEED;
+import static com.example.model.Constants.TARGET_FPS;
+import static com.example.model.Constants.TILE_SIZE;
 
-import com.example.model.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.example.model.Action;
+import com.example.model.Constants;
+import com.example.model.Direction;
+import com.example.model.GameState;
+import com.example.model.Ghost;
+import com.example.model.GhostType;
+import com.example.model.Maps;
+import com.example.model.Player;
+import com.example.model.Position;
+import com.example.model.TileType;
 
 import javafx.util.Pair;
 import lombok.Getter;
-
-import static com.example.model.Constants.*;
 
 public class ClientGameController extends GameController {
 
@@ -311,26 +325,23 @@ ghost5.setDirection(Direction.WEST);
     private void handlePlayerGridPosition(GameState gameState) {
         gameState.players().forEach(player -> {
         if (player == null || !player.isAlive() || player.getRespawnTimer() > 0.0) return;
-            Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
+        Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
 
-            TileType[][] tiles = gameState.tiles();
+        TileType[][] tiles = gameState.tiles();
+        int tileX = playerGridPosition.getKey();
+        int tileY = playerGridPosition.getValue();
 
-            int tileX = playerGridPosition.getKey();
-            int tileY = playerGridPosition.getValue();
+        TileType tileType = tiles[tileX][tileY];
+        player.addPoints(tileType.points);
 
-            TileType tileType = tiles[tileX][tileY];
-
-            player.addPoints(tileType.points);
-
-            if (isPowerup(tileType)) {
-                Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
-                for (Ghost g : gameState.ghosts()) {
-                    g.setDirection(oppositeDir(getGhostDir(g)));
-                }
-                tiles[tileX][tileY] = TileType.EMPTY;
-                return;
+        if (isPowerup(tileType)) {
+            Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
+            for (Ghost g : gameState.ghosts()) {
+                g.setDirection(oppositeDir(getGhostDir(g)));
             }
-
+            tiles[tileX][tileY] = TileType.EMPTY;
+            return;
+        }
             switch (tileType) {
                 case EMPTY -> { }
                 case WALL -> { }
@@ -728,6 +739,7 @@ private boolean collision(Position pos1, Position pos2) {
            pos1.y < pos2.y + TILE_SIZE &&
            pos1.y + TILE_SIZE > pos2.y;
 }
+
 private void handleGhostPlayerCollisions(GameState gameState) {
     if (gameState.players() == null || gameState.ghosts() == null) return;
 
@@ -738,60 +750,42 @@ private void handleGhostPlayerCollisions(GameState gameState) {
         if (!player.isAlive()) continue;
         if (player.getRespawnTimer() > 0.0) continue;
 
-        for (Ghost g : gameState.ghosts()) {
-            if (g == null || g.getPosition() == null) continue;
-            if (g.getRespawnTimer() > 0.0) continue;
+        for (Ghost ghost : gameState.ghosts()) {
+            if (ghost == null || ghost.getPosition() == null) continue;
+            if (ghost.getRespawnTimer() > 0.0) continue;
 
-            if (!collision(player.getPosition(), g.getPosition())) continue;
+            if (!collision(player.getPosition(), ghost.getPosition())) continue;
 
             if (frightened) {
+                // Player eats ghost (only this ghost is affected)
                 player.addPoints(200);
-
-                g.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
-                g.setPosition(new Position(-1000, -1000));
+                ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
+                ghost.setPosition(new Position(-1000, -1000));
                 return;
             } else {
+                // Ghost kills this player (only this player is affected)
                 int livesLeft = Math.max(0, player.getLives() - 1);
                 player.setLives(livesLeft);
 
-                Ghost.setFrightenedTimerSec(0.0);
-
                 if (livesLeft <= 0) {
-                    // dead forever (no respawn)
+                    // Dead forever (no respawn)
                     player.setAlive(false);
                     player.setIntendedDirection(null);
                     player.setPosition(new Position(-1000, -1000));
                     return;
                 }
 
-                // start player respawn timer
+                // Start respawn timer for THIS player only
                 player.setAlive(false);
                 player.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
-                player.setPosition(new Position(-1000, -1000));
+                player.setPosition(new Position(-1000, -1000)); // hide during timer
                 player.setIntendedDirection(null);
-
-                // optional: reset ghosts with timer too
-                for (Ghost g2 : gameState.ghosts()) {
-                    g2.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
-                    g2.setPosition(new Position(-1000, -1000));
-                }
-
                 return;
             }
         }
     }
 }
 
-private void resetGhost(Ghost ghost) {
-    ghost.setPosition(new Position(3 * TILE_SIZE, 1 * TILE_SIZE));
-    ghost.setDirection(Direction.WEST);
-}
-
-private void resetPlayer(Player player) {
-    player.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
-    player.setDirection(Direction.WEST);
-    player.setIntendedDirection(null);
-}
 private void updateRespawnTimers(GameState gameState) {
     double dt = 1.0 / TARGET_FPS;
 
