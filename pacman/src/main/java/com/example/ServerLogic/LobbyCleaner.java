@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.jspace.Space;
 
+import com.example.model.Constants;
+
 public class LobbyCleaner implements Runnable{
 
     private List<Lobby> lobbys;
@@ -28,7 +30,7 @@ public class LobbyCleaner implements Runnable{
             List<Lobby> toBeRemoved = new ArrayList<>();
             for (Lobby lobby : lobbys) {
                 System.out.println("Lobby "+lobby.getLobbyID()+" is active");
-                if(System.currentTimeMillis() - lobby.getTimeOfCreation() > 300000){
+                if(System.currentTimeMillis() - lobby.getTimeOfCreation() > Constants.LOBBY_TTL){
                     int lobbyID = lobby.getLobbyID();
                     lobby.stop();
                     toBeRemoved.add(lobby);
