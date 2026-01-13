@@ -17,9 +17,11 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.testfx.framework.junit.ApplicationTest;
 import org.testfx.util.WaitForAsyncUtils;
 
+@DisplayName("User Interface and Frontend Interaction Tests")
 public class UITest extends ApplicationTest {
 
     @BeforeClass
@@ -41,6 +43,7 @@ public class UITest extends ApplicationTest {
     }
 
     @Test
+    @DisplayName("Main menu buttons and title should be visible on startup")
     public void testLobbyUIComponentsVisible() {
         verifyThat("Join Lobby", isVisible());
         verifyThat("Create Lobby", isVisible());
@@ -48,6 +51,7 @@ public class UITest extends ApplicationTest {
     }
 
     @Test
+    @DisplayName("UI thread must remain responsive and unblocked during network join requests")
     public void testUIResponsivenessDuringJoin() {
 
         TextField lobbyIdInput = lookup(".text-field").queryAs(TextField.class);
@@ -79,6 +83,7 @@ public class UITest extends ApplicationTest {
     }
 
     @Test
+    @DisplayName("Buttons should be scaled proportionally to the TILE_SIZE")
     public void testButtonScaling() {
 
         Button joinButton = lookup("Join Lobby").queryButton();
@@ -87,6 +92,7 @@ public class UITest extends ApplicationTest {
     }
 
     @Test
+    @DisplayName("Invalid lobby ID input should display a clear error message")
     public void testInvalidLobbyIdHandling() {
 
         TextField lobbyIdInput = lookup(".text-field").queryAs(TextField.class);
@@ -100,6 +106,7 @@ public class UITest extends ApplicationTest {
     }
 
     @Test
+    @DisplayName("Game clock should advance smoothly via the AnimationTimer after starting")
     public void testSmoothAnimationLoop() {
 
         int initialClock = Constants.clock;

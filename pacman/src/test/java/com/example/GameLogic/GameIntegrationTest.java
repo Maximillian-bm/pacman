@@ -16,7 +16,9 @@ import com.example.model.Constants;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Game Systems Integration and Utility Tests")
 public class GameIntegrationTest extends BaseTest {
 
     @Override
@@ -30,6 +32,7 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("ActionUtil should correctly convert valid object arrays to Action objects")
     public void testActionUtilConversionValid() {
         Object[] input = new Object[]{1, 100, 2, 5};
         Action action = ActionUtil.convertObjToAction(input);
@@ -41,6 +44,7 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    @DisplayName("ActionUtil should throw exception for invalid input length")
     public void testActionUtilConversionInvalidLength() {
         Object[] input = new Object[]{1, 100};
         Action action = ActionUtil.convertObjToAction(input);
@@ -48,6 +52,7 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("URIUtil should extract lobby ID from valid synchronization URIs")
     public void testURIUtilGetLobbyID() {
         String baseUri = Constants.REMOTE_PUBLIC_URI;
         String uri = baseUri.replace("/?", "/123sync?");
@@ -56,11 +61,13 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    @DisplayName("URIUtil should throw exception for URIs without lobby IDs")
     public void testURIUtilInvalidURI() {
         URIUtil.getLobbyID(Constants.REMOTE_PUBLIC_URI);
     }
 
     @Test
+    @DisplayName("ActionList should store and retrieve actions by clock tick")
     public void testActionListLogic() {
         ActionList list = new ActionList();
         Action a1 = new Action(1, 10, 2, 1);
@@ -73,6 +80,7 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("ActionList should detect missing intermediate actions")
     public void testActionListMissedActionLogic() {
         ActionList list = new ActionList();
         Action a1 = new Action(1, 10, 2, 5);
@@ -86,6 +94,7 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Client should successfully create a new lobby on the server")
     public void testCreateLobbySuccess() {
         ConnectToLobby client = new ConnectToLobby();
         client.createLobby(2);
@@ -94,6 +103,7 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Client should successfully join an existing lobby")
     public void testJoinLobbySuccess() {
         ConnectToLobby creator = new ConnectToLobby();
         creator.createLobby(2);
@@ -108,12 +118,14 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test(expected = NumberFormatException.class)
+    @DisplayName("Joining a lobby with non-numeric ID should throw exception")
     public void testJoinLobbyInvalidIdFormat() {
         ConnectToLobby client = new ConnectToLobby();
         client.joinLobby("invalid-id");
     }
 
     @Test
+    @DisplayName("Joining a non-existent lobby should fail gracefully")
     public void testJoinNonExistentLobby() {
         ConnectToLobby client = new ConnectToLobby();
         client.joinLobby("999999");
@@ -122,6 +134,7 @@ public class GameIntegrationTest extends BaseTest {
 
     @Test
     @OptimalTimeoutMillis(3000)
+    @DisplayName("Lobby creator should wait for other players or start game correctly")
     public void testStartGameWait() throws InterruptedException {
         ConnectToLobby creator = new ConnectToLobby();
         creator.createLobby(1);
@@ -134,6 +147,7 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Multiple clients should be able to create unique lobbies simultaneously")
     public void testMultipleLobbyCreation() {
         ConnectToLobby client1 = new ConnectToLobby();
         client1.createLobby(2);
@@ -145,6 +159,7 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Joining a full lobby should be prevented")
     public void testLobbyCapacityLimit() {
         ConnectToLobby creator = new ConnectToLobby();
         creator.createLobby(1);
@@ -156,12 +171,14 @@ public class GameIntegrationTest extends BaseTest {
     }
 
     @Test(expected = TimeoutException.class)
+    @DisplayName("Joining a lobby should timeout if the server does not respond")
     public void testJoinLobbyTimeout() throws Throwable {
         ConnectToLobby client = new ConnectToLobby();
         client.joinLobby("12345", 500);
     }
 
     @Test
+    @DisplayName("Reader should correctly identify and handle socket disconnections")
     public void testReaderHandleDisconnect() throws InterruptedException {
         Reader reader = new Reader(999);
         Thread t = new Thread(reader);

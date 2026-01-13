@@ -22,7 +22,9 @@ import java.util.Collections;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Player Game Logic and Lobby Interaction Tests")
 public class PlayerLogicTest extends BaseTest {
 
     private ClientGameController controller;
@@ -50,6 +52,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Energized player should eat other players and gain points")
     public void testPlayerEatsPlayerWithEnergizer() {
         Player predator = initialState.players().getFirst();
         Player prey = initialState.players().get(1);
@@ -72,6 +75,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Non-energized players should collide and block each other")
     public void testPlayerCollisionNoEnergizer() {
         Player p1 = initialState.players().getFirst();
         Player p2 = initialState.players().get(1);
@@ -96,6 +100,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Moving player should be blocked by stationary player")
     public void testPlayerCollisionSameSpot() {
         Player p1 = initialState.players().getFirst();
         Player p2 = initialState.players().get(1);
@@ -112,6 +117,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should lose life if spawning directly on a ghost")
     public void testSimultaneousPlayerGhostSpawnCollision() {
         Player p = initialState.players().getFirst();
         Ghost g = new Ghost(GhostType.RED);
@@ -133,6 +139,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Rapid direction switching should maintain intended direction")
     public void testRapidDirectionSwitching() {
         Player p = initialState.players().getFirst();
         p.setPosition(new Position(TILE_SIZE, TILE_SIZE));
@@ -149,6 +156,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Score should handle potential integer overflow")
     public void testScoreCap() {
         Player p = initialState.players().getFirst();
         p.addPoints(Integer.MAX_VALUE - 5);
@@ -158,6 +166,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Lobby should manage player joining and leaving correctly")
     public void testPlayerJoinAndLeaveLobby() {
         host.createLobby(3);
         int lobbyId = host.getLobbyID();
@@ -176,6 +185,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Lobby should remain stable during rapid player join/leave cycles")
     public void testRapidJoinLeaveChurn() {
         host.createLobby(10);
         int lobbyId = host.getLobbyID();
@@ -195,6 +205,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Leaving during game start should remove player from active game")
     public void testLeaveDuringGameStart() {
         host.createLobby(2);
         String lobbyId = String.valueOf(host.getLobbyID());
@@ -215,6 +226,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Lobby should accept new players once a spot is freed in a full lobby")
     public void testFullLobbyJoinLeaveCycle() {
         int maxPlayers = 3;
         host.createLobby(maxPlayers);
@@ -244,6 +256,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Mid-game disconnect should remove player from game state")
     public void testDisconnectMidGame() {
         host.createLobby(2);
         ConnectToLobby p2 = new ConnectToLobby();
@@ -260,6 +273,7 @@ public class PlayerLogicTest extends BaseTest {
 
     @Test
     @OptimalTimeoutMillis(3000)
+    @DisplayName("Lobby should handle simultaneous connections and assign unique IDs")
     public void testSimultaneousConnections() throws InterruptedException {
         int numberOfPlayers = 10;
         host.createLobby(numberOfPlayers);

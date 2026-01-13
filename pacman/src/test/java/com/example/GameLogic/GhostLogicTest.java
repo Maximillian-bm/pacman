@@ -17,7 +17,9 @@ import com.example.model.TileType;
 import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Ghost AI and Movement Logic Tests")
 public class GhostLogicTest extends BaseTest {
 
     private ClientGameController controller;
@@ -43,6 +45,7 @@ public class GhostLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Ghost should remain stationary when trapped in a 1x1 empty space surrounded by walls")
     public void testGhostTrappedInBox() {
 
         TileType[][] boxMap = new TileType[5][5];
@@ -71,6 +74,7 @@ public class GhostLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should be able to eat multiple ghosts in one state update")
     public void testDoubleGhostEat() {
         state.ghosts().clear();
 
@@ -97,6 +101,7 @@ public class GhostLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Ghost respawn timer should decrement and cap at zero")
     public void testGhostRespawnTimerReset() {
         Ghost g = state.ghosts().getFirst();
         g.setRespawnTimer(0.0000001);
@@ -107,6 +112,7 @@ public class GhostLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Multiple ghosts should be able to respawn simultaneously")
     public void testSimultaneousGhostRespawn() {
         for (Ghost g : state.ghosts()) {
             g.setRespawnTimer(0.001);
@@ -115,12 +121,13 @@ public class GhostLogicTest extends BaseTest {
         controller.updateGameState(state, new ArrayList<>());
 
         for (Ghost g : state.ghosts()) {
-            assertEquals("All ghosts should have respawned at their spawn points", 0.0, g.getRespawnTimer(), 0.001);
+            assertEquals("All ghosts should have respawned at their base points", 0.0, g.getRespawnTimer(), 0.001);
             assertNotEquals("Ghost should not be at 'hidden' position", -1000, g.getPosition().x, 0.1);
         }
     }
 
     @Test
+    @DisplayName("Ghost should ignore respawning players when selecting a target")
     public void testGhostDoesNotTargetRespawningPlayer() {
         Player p1 = state.players().get(0);
         Player p2 = state.players().get(1);
@@ -144,6 +151,7 @@ public class GhostLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Ghost should ignore dead players when selecting a target")
     public void testGhostDoesNotTargetDeadPlayer() {
         Player p1 = state.players().get(0);
         Player p2 = state.players().get(1);
@@ -159,7 +167,6 @@ public class GhostLogicTest extends BaseTest {
 
         p2.setAlive(false);
         p2.setLives(0);
-        p2.setRespawnTimer(0.0);
         p2.setPosition(new Position(-1000, -1000));
 
         controller.updateGameState(state, new ArrayList<>());
@@ -168,6 +175,7 @@ public class GhostLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Ghost should retreat to its home corner if no players are alive")
     public void testGhostGoesToCornerWhenNoAlivePlayers() {
         Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
             .orElseThrow(() -> new AssertionError("Blinky not found"));
@@ -192,6 +200,7 @@ public class GhostLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Frightened ghost should flee from alive players and ignore dead ones")
     public void testFrightenedGhostFleesFromAlivePlayerIgnoringDeadOnes() {
         Player p1 = state.players().get(0);
         Player p2 = state.players().get(1);
@@ -219,6 +228,7 @@ public class GhostLogicTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Ghost should immediately update its target when the primary player dies")
     public void testGhostChangesTargetImmediatelyWhenPlayerDies() {
         Player p1 = state.players().get(0);
         Player p2 = state.players().get(1);

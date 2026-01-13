@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Client Game Controller Logic and State Management Tests")
 public class ClientGameControllerTest extends BaseTest {
 
     private ClientGameController controller;
@@ -52,6 +54,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Initial game state should correctly place players and ghosts at their spawn positions")
     public void testInitializeGameState() {
         GameState state = controller.initializeGameState(1);
         assertNotNull(state);
@@ -71,6 +74,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should move freely in an empty corridor")
     public void testPlayerMovementFree() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
@@ -87,6 +91,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should be stopped by wall collisions")
     public void testPlayerWallCollision() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
@@ -101,6 +106,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should ignore turn requests into walls and continue forward")
     public void testPlayerCannotTurnIntoWall() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
@@ -117,6 +123,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should wrap around to the opposite side of the map when exiting boundaries")
     public void testMapWrapAround() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
@@ -133,6 +140,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should consume pellets and gain points")
     public void testPelletConsumption() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
@@ -149,6 +157,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Consuming an energizer should trigger frightened mode for ghosts")
     public void testPowerPelletConsumption() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
@@ -164,6 +173,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Consuming another energizer while already powered up should reset the duration")
     public void testPowerUpExtension() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
@@ -181,6 +191,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Game should declare a winner when all pellets are consumed")
     public void testWinCondition() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
@@ -204,6 +215,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Fruit should spawn after a certain number of dots are consumed")
     public void testFruitSpawning() {
 
         initialState.ghosts().clear();
@@ -246,6 +258,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Map and players should reset correctly upon winning a level")
     public void testMapResetOnWin() {
 
         initialState.ghosts().clear();
@@ -279,6 +292,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Ghost speed should increase when progressing to higher levels")
     public void testGhostSpeedIncreaseOnLevelUp() {
 
         double initialSpeed = Ghost.getGHOSTSPEED();
@@ -297,6 +311,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Game should advance to the next level when all pellets are cleared")
     public void testLevelProgression() {
 
         initialState.ghosts().clear();
@@ -326,6 +341,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Collision with a normal ghost should result in losing a life")
     public void testGhostPlayerCollisionNormal() {
         initialState.ghosts().clear();
         Ghost ghost = new Ghost(GhostType.RED);
@@ -347,6 +363,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Simultaneous collisions with multiple ghosts should only consume one life")
     public void testSimultaneousGhostCollision() {
         initialState.ghosts().clear();
         Ghost g1 = new Ghost(GhostType.RED);
@@ -369,6 +386,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Collision with a frightened ghost should eat the ghost instead of killing the player")
     public void testGhostPlayerCollisionFrightened() {
         initialState.ghosts().clear();
         Ghost ghost = new Ghost(GhostType.RED);
@@ -391,6 +409,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should be immune to ghost collisions while respawning")
     public void testRespawnImmunity() {
         initialState.ghosts().clear();
         Ghost ghost = new Ghost(GhostType.RED);
@@ -410,6 +429,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should lose a life if respawning directly on top of a ghost")
     public void testRespawnOnGhost() {
         initialState.ghosts().clear();
         Ghost ghost = new Ghost(GhostType.RED);
@@ -432,6 +452,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Ghosts should be able to pass through each other")
     public void testGhostPassThroughGhost() {
         initialState.ghosts().clear();
         Ghost g1 = new Ghost(GhostType.RED);
@@ -453,6 +474,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Ghosts should switch between scatter and chase modes based on timers")
     public void testScatterChaseModeSwitch() {
         Ghost.setGhostScatterMode(true);
         Ghost.setGhostChaseTimer(6.99);
@@ -464,6 +486,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Game should end when player lives reach zero")
     public void testGameOver() {
         initialState.ghosts().clear();
         Ghost ghost = new Ghost(GhostType.RED);
@@ -484,6 +507,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Ghost should reappear at its spawn position after being eaten")
     public void testGhostRespawnAtSpawnPosition() {
         initialState.ghosts().clear();
         Ghost ghost = new Ghost(GhostType.RED);
@@ -517,6 +541,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Game engine should not modify the existing state objects in place (Immutability check)")
     public void testStateImmutability() {
 
         initialState.ghosts().clear();
@@ -533,6 +558,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Ghost collision should take precedence over consuming an energizer in the same tick")
     public void testSimultaneousEnergizerAndGhostCollision() {
 
         initialState.ghosts().clear();
@@ -558,6 +584,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should be able to reverse direction 180 degrees instantly")
     public void testPlayerReversingDirection() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
@@ -578,6 +605,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Game controller should handle null or empty action lists without crashing")
     public void testNullActionHandling() {
 
         GameState state = controller.updateGameState(initialState, null);
@@ -592,6 +620,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Clock should handle potential integer overflow during state updates")
     public void testIntegerOverflowClock() {
 
         GameState highClockState = new GameState(
@@ -608,6 +637,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Winner should be declared correctly based on map state")
     public void testWinConditionLogic() {
 
         initialState.ghosts().clear();
@@ -625,6 +655,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Fruits should spawn correctly when pellet count reaches specific thresholds")
     public void testFruitSpawnLogic() {
 
         initialState.ghosts().clear();
@@ -678,6 +709,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Input buffering should maintain intended direction until the player reaches a tile center")
     public void testInputBufferingPrecision() {
 
         Player p = initialState.players().getFirst();
@@ -696,6 +728,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should correctly teleport across boundary tunnels")
     public void testTeleportationBoundary() {
 
         Player p = initialState.players().getFirst();
@@ -711,6 +744,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Resimulation should correctly update player position for a given clock target")
     public void testUpdateGameStateForBasicMovement() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
@@ -730,6 +764,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Resimulation should handle multiple sequential actions correctly")
     public void testUpdateGameStateForMultipleActions() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
@@ -754,6 +789,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Resimulation should correctly detect ghost collisions during the resimulated window")
     public void testUpdateGameStateForGhostCollision() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
@@ -777,6 +813,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Resimulation should correctly process energizer effects and point gains")
     public void testUpdateGameStateForEnergizerEffect() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
@@ -799,6 +836,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Resimulation engine should not modify the initial state provided (Immutability check)")
     public void testUpdateGameStateForImmutability() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
@@ -815,6 +853,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Iterative updates and batch resimulation should produce consistent results")
     public void testUpdateGameStateForConsistency() {
         Constants.cleanActions = new ActionList();
         GameState state1 = controller.initializeGameState(1);
@@ -834,6 +873,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Resimulation should handle large clock jumps efficiently")
     public void testUpdateGameStateForLargeClockJump() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
@@ -845,6 +885,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Resimulation should not allow the game clock to regress")
     public void testUpdateGameStateForClockRegression() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
@@ -857,6 +898,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Resimulation should ignore actions that occur after the target clock")
     public void testUpdateGameStateForFutureActionsIgnored() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
@@ -874,6 +916,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Resimulation should handle overlapping actions from multiple players correctly")
     public void testUpdateGameStateForMultiplePlayersOverlappingActions() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(2);
@@ -894,6 +937,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Resimulation engine should detect if intermediate actions were missed")
     public void testUpdateGameStateForMissedActionDetection() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
@@ -912,6 +956,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Frightened mode should expire correctly during resimulation")
     public void testUpdateGameStateForEnergizerExpiration() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
@@ -929,6 +974,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Multi-client state consistency should be maintained regardless of processing batch size")
     public void testMultiClientResyncConsistency() {
         // Shared sequence of actions for 2 players
         List<Action> sharedActionsList = new ArrayList<>();
@@ -977,6 +1023,7 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Late action discovery should correctly trigger a rollback and resimulation to ensure state consistency")
     public void testResyncAfterRollback() {
         // Scenario: Client is at clock 15, then discovers an action from another player happened at clock 10.
         // It must resimulate from the last known good state (clock 9) up to 15.

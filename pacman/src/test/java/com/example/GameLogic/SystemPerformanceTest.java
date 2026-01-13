@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
+@DisplayName("Game Performance, Scalability and Concurrency Tests")
 public class SystemPerformanceTest extends BaseTest {
 
     private ClientGameController controller;
@@ -33,6 +35,7 @@ public class SystemPerformanceTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Game update loop should be fast enough for high FPS")
     public void testUpdateLoopSmoothness() {
         int iterations = 5000;
         long startTime = System.nanoTime();
@@ -55,6 +58,7 @@ public class SystemPerformanceTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Catch-up mechanism should resimulate lag frames within latency limits")
     public void testCatchUpLag() {
         int lagFrames = 60;
         int targetClock = initialState.clock() + lagFrames;
@@ -69,6 +73,7 @@ public class SystemPerformanceTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Collision detection should scale efficiently with many entities")
     public void testStressTestEntityCollision() {
         GameState stressState = controller.initializeGameState(1);
         try {
@@ -90,6 +95,7 @@ public class SystemPerformanceTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("System should handle multiple concurrent lobbies starting and joining")
     public void testConcurrentLobbyLifecycles() throws InterruptedException {
         int playersPerLobby = 3;
         ConnectToLobby hostA = new ConnectToLobby();
@@ -160,6 +166,7 @@ public class SystemPerformanceTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Lobby should remain stable under rapid join/leave churn")
     public void testJoinLeaveLoopInLobby() {
         ConnectToLobby host = new ConnectToLobby();
         host.createLobby(5);
@@ -174,6 +181,7 @@ public class SystemPerformanceTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Different lobbies should maintain isolated game states")
     public void testMixedGameStatesInMultipleLobbies() {
         ConnectToLobby host1 = new ConnectToLobby();
         host1.createLobby(4);
@@ -197,6 +205,7 @@ public class SystemPerformanceTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Player should be able to rejoin the same lobby rapidly")
     public void testRapidRejoiningSameLobby() {
         ConnectToLobby host = new ConnectToLobby();
         host.createLobby(2);
@@ -213,6 +222,7 @@ public class SystemPerformanceTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Leaving while a game is starting should be handled safely")
     public void testLeaveWhileStarting() throws InterruptedException {
         ConnectToLobby host = new ConnectToLobby();
         host.createLobby(2);
@@ -232,6 +242,7 @@ public class SystemPerformanceTest extends BaseTest {
     }
 
     @Test
+    @DisplayName("Late joiners should be blocked from entering already started games")
     public void testLateJoinerToStartedGame() throws InterruptedException {
         ConnectToLobby host = new ConnectToLobby();
         host.createLobby(1);
