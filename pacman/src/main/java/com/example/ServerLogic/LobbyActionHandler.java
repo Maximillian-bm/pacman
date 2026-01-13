@@ -11,6 +11,7 @@ public class LobbyActionHandler implements Runnable{
 
     SpaceRepository repository;
     int lobbyID;
+    boolean running = true;
 
     public LobbyActionHandler(SpaceRepository repository, int lobbyID){
         this.repository = repository;
@@ -23,7 +24,7 @@ public class LobbyActionHandler implements Runnable{
         Space cleanActions = repository.get(lobbyID+"cleanAction");
         int actionCount = 0;
         int clock = 0;
-        while(true) {
+        while(running) {
             try {
                 Action rawAction = ActionUtil.convertObjToAction(rawActions.get(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class)));
                 int tempClock = rawAction.getClock();
@@ -34,6 +35,10 @@ public class LobbyActionHandler implements Runnable{
                 e.printStackTrace();
             }
         }
+    }
+
+    public void stop() {
+        running = false;
     }
     
 }

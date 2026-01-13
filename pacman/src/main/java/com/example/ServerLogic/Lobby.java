@@ -14,12 +14,14 @@ public class Lobby {
     private int nrOfPlayers;
     private LobbyActionHandler actionHandler;
     private int lobbyID;
+    private long timeOfCreation;
 
-    public Lobby(SpaceRepository rep, int nrOfPlayers, int lobbyID){
+    public Lobby(SpaceRepository rep, int nrOfPlayers, int lobbyID, long timeOfCreation){
         this.lobbyID = lobbyID;
         this.rep = rep;
         this.nrOfPlayers = nrOfPlayers;
         this.actionHandler = new LobbyActionHandler(rep, lobbyID);
+        this.timeOfCreation = timeOfCreation;
     }
 
     public void start(){
@@ -50,6 +52,18 @@ public class Lobby {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public long getTimeOfCreation(){
+        return timeOfCreation;
+    }
+
+    public int getLobbyID(){
+        return lobbyID;
+    }
+
+    public void stop(){
+        actionHandler.stop();
     }
 
 }
