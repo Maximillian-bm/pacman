@@ -34,6 +34,10 @@ public class ServerController {
         Thread cleanerThread = new Thread(lobbyCleaner);
         cleanerThread.setDaemon(true);
         cleanerThread.start();
+        ServerIO serverIO = new ServerIO(lobbyCleaner);
+        Thread serverIOThread = new Thread(serverIO);
+        serverIOThread.setDaemon(true);
+        serverIOThread.start();
 
         while(true){
             try {
