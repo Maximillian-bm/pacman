@@ -23,6 +23,11 @@ public class ActionList {
             : List.of();
         if(!actionsOfClock.isEmpty() && actionsOfClock.get(0).getIndex() > nrOfActionsCalled){
             missedAction = true;
+            if(actionsOfClock.get(0).getPlayerId() == playerID){
+                Constants.actionOffset++;
+            }else{
+                Constants.timeOffset = Constants.timeOffset + (500000000/Constants.TARGET_FPS);
+            }
         }else if(!actionsOfClock.isEmpty()){
             nrOfActionsCalled = actionsOfClock.getLast().getIndex() + 1;
         }
