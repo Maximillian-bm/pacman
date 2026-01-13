@@ -1,6 +1,10 @@
 package com.example.GameLogic;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.common.BaseTest;
@@ -30,10 +34,9 @@ public class SystemPerformanceTest extends BaseTest {
     @Before
     public void setUp() {
         controller = new ClientGameController();
-        initialState = controller.initializeGameState(4); 
+        initialState = controller.initializeGameState(4);
     }
 
-    // --- Logic Performance (from LogicPerformanceTest) ---
 
     @Test
     public void testUpdateLoopSmoothness() {
@@ -41,7 +44,7 @@ public class SystemPerformanceTest extends BaseTest {
         long startTime = System.nanoTime();
 
         GameState currentState = initialState;
-        List<Action> actions = new ArrayList<>(); 
+        List<Action> actions = new ArrayList<>();
 
         for (int i = 0; i < iterations; i++) {
             currentState = controller.updateGameState(currentState, actions);
@@ -66,7 +69,7 @@ public class SystemPerformanceTest extends BaseTest {
 
         assertTrue("Catch-up mechanism is too slow, UI will freeze. Took: " + durationMs + "ms", durationMs < 20);
     }
-    
+
     @Test
     public void testStressTestEntityCollision() {
         GameState stressState = controller.initializeGameState(1);
@@ -83,12 +86,11 @@ public class SystemPerformanceTest extends BaseTest {
         long startTime = System.nanoTime();
         controller.updateGameState(stressState, new ArrayList<>());
         long endTime = System.nanoTime();
-        
+
         double durationMs = (endTime - startTime) / 1_000_000.0;
         assertTrue("Collision detection scaling is poor: " + durationMs + "ms", durationMs < 5.0);
     }
 
-    // --- Lobby Stress (from LobbyStressTest) ---
 
     @Test
     public void testConcurrentLobbyLifecycles() throws InterruptedException {
@@ -113,7 +115,9 @@ public class SystemPerformanceTest extends BaseTest {
                 p.joinLobby(String.valueOf(lobbyIdA));
                 assertTrue(p.getPlayerID() > 0);
             } catch (Exception e) {
-                synchronized (exceptions) { exceptions.add(e); }
+                synchronized (exceptions) {
+                    exceptions.add(e);
+                }
             }
         };
 
@@ -123,7 +127,9 @@ public class SystemPerformanceTest extends BaseTest {
                 p.joinLobby(String.valueOf(lobbyIdB));
                 assertTrue(p.getPlayerID() > 0);
             } catch (Exception e) {
-                synchronized (exceptions) { exceptions.add(e); }
+                synchronized (exceptions) {
+                    exceptions.add(e);
+                }
             }
         };
 
@@ -136,7 +142,9 @@ public class SystemPerformanceTest extends BaseTest {
             tB.start();
         }
 
-        for (Thread t : threads) t.join(5000);
+        for (Thread t : threads) {
+            t.join(5000);
+        }
 
         if (!exceptions.isEmpty()) {
             fail("Exceptions during concurrent joining: " + exceptions.get(0).getMessage());
@@ -144,14 +152,14 @@ public class SystemPerformanceTest extends BaseTest {
 
         Thread startA = new Thread(hostA::startGame);
         Thread startB = new Thread(hostB::startGame);
-        
+
         startA.start();
         startB.start();
 
         startA.join(2000);
         startB.join(2000);
 
-        assertTrue(startA.isAlive() || !exceptions.isEmpty()); 
+        assertTrue(startA.isAlive() || !exceptions.isEmpty());
     }
 
     @Test
@@ -164,7 +172,7 @@ public class SystemPerformanceTest extends BaseTest {
             ConnectToLobby p = new ConnectToLobby();
             p.joinLobby(lobbyId);
             assertTrue("Player should connect", p.getPlayerID() > 0);
-            p.leaveLobby(); 
+            p.leaveLobby();
         }
     }
 
@@ -182,11 +190,11 @@ public class SystemPerformanceTest extends BaseTest {
 
         ConnectToLobby host3 = new ConnectToLobby();
         host3.createLobby(10);
-        
+
         ConnectToLobby traveler = new ConnectToLobby();
         traveler.joinLobby(String.valueOf(host3.getLobbyID()));
         traveler.leaveLobby();
-        
+
         traveler.joinLobby(String.valueOf(host1.getLobbyID()));
         assertEquals("Traveler should now be in Lobby 1", host1.getLobbyID(), traveler.getLobbyID());
     }
@@ -198,8 +206,8 @@ public class SystemPerformanceTest extends BaseTest {
         String lobbyId = String.valueOf(host.getLobbyID());
 
         ConnectToLobby p2 = new ConnectToLobby();
-        
-        for(int i=0; i<5; i++) {
+
+        for (int i = 0; i < 5; i++) {
             p2.joinLobby(lobbyId);
             int pid = p2.getPlayerID();
             assertTrue(pid > 0);
@@ -224,7 +232,7 @@ public class SystemPerformanceTest extends BaseTest {
         try {
             p2.leaveLobby();
         } catch (UnsupportedOperationException e) {
-            throw e; 
+            throw e;
         }
 
         assertFalse("Player 2 should be removed from game state", host.isPlayerInGame(p2.getPlayerID()));
@@ -233,7 +241,7 @@ public class SystemPerformanceTest extends BaseTest {
     @Test
     public void testLateJoinerToStartedGame() throws InterruptedException {
         ConnectToLobby host = new ConnectToLobby();
-        host.createLobby(1); 
+        host.createLobby(1);
         Thread t = new Thread(host::startGame);
         t.start();
         t.join(1000);
@@ -243,7 +251,7 @@ public class SystemPerformanceTest extends BaseTest {
             intruder.joinLobby(String.valueOf(host.getLobbyID()));
             fail("Should not be able to join a started game as regular player");
         } catch (Exception e) {
-            // Expected
+
         }
     }
 }

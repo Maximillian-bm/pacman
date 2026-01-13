@@ -1,5 +1,10 @@
 package com.example.GameLogic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.Reader;
 import com.example.common.BaseTest;
@@ -7,10 +12,9 @@ import com.example.common.OptimalTimeoutMillis;
 import com.example.model.Action;
 import com.example.model.ActionList;
 import com.example.model.Constants;
-import org.junit.Test;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class GameIntegrationTest extends BaseTest {
 
@@ -24,13 +28,12 @@ public class GameIntegrationTest extends BaseTest {
         return 2000;
     }
 
-    // --- Communication Utilities (from GameCommunicationTest) ---
 
     @Test
     public void testActionUtilConversionValid() {
-        Object[] input = new Object[]{1, 100, 2, 5}; 
+        Object[] input = new Object[]{1, 100, 2, 5};
         Action action = ActionUtil.convertObjToAction(input);
-        
+
         assertEquals(1, action.getPlayerId());
         assertEquals(100, action.getClock());
         assertEquals(2, action.getMove());
@@ -61,27 +64,26 @@ public class GameIntegrationTest extends BaseTest {
         ActionList list = new ActionList();
         Action a1 = new Action(1, 10, 2, 1);
         list.addAction(a1);
-        
+
         List<Action> actions = list.getActions(10);
         assertFalse(actions.isEmpty());
         assertEquals(1, actions.size());
-        assertEquals(10, actions.get(0).getClock());
+        assertEquals(10, actions.getFirst().getClock());
     }
-    
+
     @Test
     public void testActionListMissedActionLogic() {
         ActionList list = new ActionList();
         Action a1 = new Action(1, 10, 2, 5);
         list.addAction(a1);
-        
+
         list.getActions(10);
         assertTrue("Should have missed action", list.missedAction());
-        
+
         list.fixedMissedAction();
         assertFalse(list.missedAction());
     }
 
-    // --- Client-Server Integration (from ClientServerIntegrationTest) ---
 
     @Test
     public void testCreateLobbySuccess() {
@@ -122,12 +124,12 @@ public class GameIntegrationTest extends BaseTest {
     @OptimalTimeoutMillis(3000)
     public void testStartGameWait() throws InterruptedException {
         ConnectToLobby creator = new ConnectToLobby();
-        creator.createLobby(1); 
-        
+        creator.createLobby(1);
+
         Thread gameThread = new Thread(creator::startGame);
         gameThread.start();
-        gameThread.join(2000); 
-        
+        gameThread.join(2000);
+
         assertTrue(gameThread.isAlive());
     }
 
@@ -135,30 +137,29 @@ public class GameIntegrationTest extends BaseTest {
     public void testMultipleLobbyCreation() {
         ConnectToLobby client1 = new ConnectToLobby();
         client1.createLobby(2);
-        
+
         ConnectToLobby client2 = new ConnectToLobby();
         client2.createLobby(2);
-        
+
         assertNotEquals("Lobby IDs should be unique", client1.getLobbyID(), client2.getLobbyID());
     }
-    
+
     @Test
     public void testLobbyCapacityLimit() {
         ConnectToLobby creator = new ConnectToLobby();
         creator.createLobby(1);
-        
+
         ConnectToLobby joiner = new ConnectToLobby();
         joiner.joinLobby(String.valueOf(creator.getLobbyID()));
-        
+
         assertNotEquals("Should not be able to join full lobby", creator.getLobbyID(), joiner.getLobbyID());
     }
 
-    // --- Network Failure (from NetworkFailureTest) ---
 
     @Test(expected = TimeoutException.class)
     public void testJoinLobbyTimeout() throws Throwable {
         ConnectToLobby client = new ConnectToLobby();
-        client.joinLobby("12345", 500); 
+        client.joinLobby("12345", 500);
     }
 
     @Test
@@ -166,9 +167,9 @@ public class GameIntegrationTest extends BaseTest {
         Reader reader = new Reader(999);
         Thread t = new Thread(reader);
         t.start();
-        
+
         t.join(100);
-        
+
         if (reader.isConnected()) {
             throw new RuntimeException("Reader should report disconnected");
         }

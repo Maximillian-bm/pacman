@@ -40,17 +40,15 @@ public class ClientGameControllerTest extends BaseTest {
     @Before
     public void setUp() {
         controller = new ClientGameController();
-        // Reset static state
+
         Ghost.setFrightenedTimerSec(0.0);
         Ghost.setGhostChaseTimer(0.0);
         Ghost.setGhostScatterMode(true);
         ClientMain.clock = 0;
 
-        // Initialize for 1 player, ID 0
         initialState = controller.initializeGameState(1);
 
-        // For tests that require specific ghost setups, we'll clear and add manually.
-        // For general tests, the default initialization is fine.
+
     }
 
     @Test
@@ -63,7 +61,7 @@ public class ClientGameControllerTest extends BaseTest {
 
     @Test
     public void testPlayerMovementFree() {
-        initialState.ghosts().clear(); // Avoid interference
+        initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
         player.setDirection(Direction.EAST);
         player.setAlive(true);
@@ -81,7 +79,7 @@ public class ClientGameControllerTest extends BaseTest {
     public void testPlayerWallCollision() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
-        // Put him at (TILE_SIZE, TILE_SIZE) facing WEST (0, TILE_SIZE is a wall)
+
         player.setPosition(new Position(TILE_SIZE, TILE_SIZE));
         player.setDirection(Direction.WEST);
 
@@ -98,7 +96,7 @@ public class ClientGameControllerTest extends BaseTest {
 
         player.setPosition(new Position(TILE_SIZE, TILE_SIZE));
         player.setDirection(Direction.EAST);
-        player.setIntendedDirection(Direction.NORTH); // Invalid turn
+        player.setIntendedDirection(Direction.NORTH);
 
         controller.updateGameState(initialState, new ArrayList<>());
 
@@ -114,7 +112,6 @@ public class ClientGameControllerTest extends BaseTest {
         TileType[][] tiles = initialState.tiles();
         double mapWidth = tiles.length * TILE_SIZE;
 
-        // Use row 8 (y = 8 * TILE_SIZE) which is likely a tunnel
         player.setPosition(new Position(-20, 8 * TILE_SIZE));
         player.setDirection(Direction.WEST);
 
@@ -164,7 +161,6 @@ public class ClientGameControllerTest extends BaseTest {
         tiles[3][3] = TileType.ENERGIZER;
         player.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
 
-        // Assume already active for 2 seconds (so 6 seconds left)
         Ghost.setFrightenedTimerSec(Constants.FRIGHTENED_DURATION_SEC - 2.0);
 
         controller.updateGameState(initialState, new ArrayList<>());
@@ -179,7 +175,6 @@ public class ClientGameControllerTest extends BaseTest {
         Player player = initialState.players().getFirst();
         TileType[][] tiles = initialState.tiles();
 
-        // Clear all dots manually
         for (int x = 0; x < tiles.length; x++) {
             for (int y = 0; y < tiles[0].length; y++) {
                 if (tiles[x][y] == TileType.PAC_DOT || tiles[x][y] == TileType.ENERGIZER) {
@@ -188,7 +183,6 @@ public class ClientGameControllerTest extends BaseTest {
             }
         }
 
-        // Add one last dot right in front of player
         tiles[5][5] = TileType.PAC_DOT;
         player.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE));
 
@@ -200,13 +194,11 @@ public class ClientGameControllerTest extends BaseTest {
 
     @Test
     public void testFruitSpawning() {
-        // EDGE CASE: Verify fruit spawns DYNAMICALLY.
-        // It should NOT be there initially.
+
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
         TileType[][] tiles = initialState.tiles();
 
-        // 1. Check no fruit initially
         boolean foundFruit = false;
         for (TileType[] tile : tiles) {
             for (int y = 0; y < tiles[0].length; y++) {
@@ -218,7 +210,6 @@ public class ClientGameControllerTest extends BaseTest {
         }
         assertFalse("Fruit (Cherry) should NOT be on the map initially", foundFruit);
 
-        // 2. Eat dots to trigger spawn
         int dotsEaten = 0;
         for (int x = 0; x < tiles.length && dotsEaten < 70; x++) {
             for (int y = 0; y < tiles[0].length && dotsEaten < 70; y++) {
@@ -232,7 +223,6 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        // 3. Check fruit appeared
         for (TileType[] tile : tiles) {
             for (int y = 0; y < tiles[0].length; y++) {
                 if (tile[y] == TileType.CHERRY) {
@@ -246,12 +236,11 @@ public class ClientGameControllerTest extends BaseTest {
 
     @Test
     public void testMapResetOnWin() {
-        // EDGE CASE: Map should be reset (refilled with pellets) after a level is won.
+
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
         TileType[][] tiles = initialState.tiles();
 
-        // Clear all dots to trigger win
         for (int x = 0; x < tiles.length; x++) {
             for (int y = 0; y < tiles[0].length; y++) {
                 tiles[x][y] = TileType.EMPTY;
@@ -259,8 +248,7 @@ public class ClientGameControllerTest extends BaseTest {
         }
 
         GameState nextState = controller.updateGameState(initialState, new ArrayList<>());
-        
-        // Check if map is refilled
+
         boolean foundPellet = false;
         for (TileType[] row : nextState.tiles()) {
             for (TileType tile : row) {
@@ -275,7 +263,7 @@ public class ClientGameControllerTest extends BaseTest {
 
     @Test
     public void testGhostSpeedIncreaseOnLevelUp() {
-        // EDGE CASE: Ghost speed should increase after a level is won.
+
         double initialSpeed = Ghost.getGHOSTSPEED();
 
         initialState.ghosts().clear();
@@ -287,17 +275,16 @@ public class ClientGameControllerTest extends BaseTest {
         }
 
         controller.updateGameState(initialState, new ArrayList<>());
-        
+
         assertTrue("Ghost speed should increase on level up", Ghost.getGHOSTSPEED() > initialSpeed);
     }
 
     @Test
     public void testLevelProgression() {
-        // EDGE CASE: Winning should increment level/difficulty.
+
         initialState.ghosts().clear();
         TileType[][] tiles = initialState.tiles();
 
-        // Clear all dots
         for (int x = 0; x < tiles.length; x++) {
             for (int y = 0; y < tiles[0].length; y++) {
                 tiles[x][y] = TileType.EMPTY;
@@ -307,9 +294,8 @@ public class ClientGameControllerTest extends BaseTest {
         GameState nextState = controller.updateGameState(initialState, new ArrayList<>());
 
         assertNotNull("Winner should be set", nextState.winner());
-        
-        // This is a generic test that currently expects 'something' to indicate a win.
-        // It fails because 'winner' is null in the implementation.
+
+
     }
 
     @Test
@@ -479,20 +465,17 @@ public class ClientGameControllerTest extends BaseTest {
         initialState.ghosts().add(ghost);
 
         Player player = initialState.players().getFirst();
-        player.setPosition(new Position(1 * TILE_SIZE, 1 * TILE_SIZE));
-        ghost.setPosition(new Position(1 * TILE_SIZE, 1 * TILE_SIZE));
+        player.setPosition(new Position(TILE_SIZE, TILE_SIZE));
+        ghost.setPosition(new Position(TILE_SIZE, TILE_SIZE));
 
-        // 1. Eat ghost
         Ghost.setFrightenedTimerSec(10.0);
         controller.updateGameState(initialState, new ArrayList<>());
 
         assertTrue("Ghost should be on respawn timer", ghost.getRespawnTimer() > 0);
         assertEquals("Ghost should be hidden", -1000, ghost.getPosition().x, 0.1);
 
-        // 2. Wait for respawn (force timer to near completion)
         ghost.setRespawnTimer(0.001);
-        
-        // Disable movement for this tick to check exact respawn position
+
         double originalSpeed = Ghost.getGHOSTSPEED();
         Ghost.setGHOSTSPEED(0.0);
         try {
@@ -508,30 +491,23 @@ public class ClientGameControllerTest extends BaseTest {
 
     @Test
     public void testStateImmutability() {
-        // Verify if updateGameState modifies the passed state in-place (Side Effect).
-        // Functional design would prefer it doesn't, but game loops often do.
+
         initialState.ghosts().clear();
         Ghost ghost = new Ghost(GhostType.RED);
         ghost.setPosition(new Position(100, 100));
         initialState.ghosts().add(ghost);
-        
+
         double startX = ghost.getPosition().x;
-        
+
         controller.updateGameState(initialState, new ArrayList<>());
-        
-        // If the state is mutable, the object in the list changed.
-        // If immutable, startX should match ghost.getPosition().x (reference equality check issue?)
-        // actually we hold a reference 'ghost'.
-        
-        assertNotEquals("Warning: State is mutable. Ghost object was updated in place.", startX, ghost.getPosition().x, 0.001);
+
+        assertNotEquals("Warning: State is mutable. Ghost object was updated in place.", startX,
+            ghost.getPosition().x, 0.001);
     }
 
     @Test
     public void testSimultaneousEnergizerAndGhostCollision() {
-        // Setup: Player about to step on Energizer, but Ghost is ON the Energizer.
-        // Logic Order: Move -> Collision -> Eat? 
-        // If so, Player dies (Normal ghost) BEFORE eating energizer.
-        
+
         initialState.ghosts().clear();
         Ghost ghost = new Ghost(GhostType.RED);
         initialState.ghosts().add(ghost);
@@ -539,49 +515,44 @@ public class ClientGameControllerTest extends BaseTest {
         Player player = initialState.players().getFirst();
         TileType[][] tiles = initialState.tiles();
 
-        // Position (1,1) is valid. (2,1) has Energizer.
         tiles[2][1] = TileType.ENERGIZER;
-        
-        // Player at (1.5, 1) moving East towards (2,1)
-        player.setPosition(new Position(1.5 * TILE_SIZE, 1 * TILE_SIZE));
+
+        player.setPosition(new Position(1.5 * TILE_SIZE, TILE_SIZE));
         player.setDirection(Direction.EAST);
-        
-        // Ghost at (2,1)
-        ghost.setPosition(new Position(2 * TILE_SIZE, 1 * TILE_SIZE));
-        ghost.setDirection(Direction.WEST); // Moving towards player
+
+        ghost.setPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
+        ghost.setDirection(Direction.WEST);
 
         controller.updateGameState(initialState, new ArrayList<>());
-        
-        // Expectation based on current code analysis: Death.
+
         assertFalse("Player should be dead (Collision priority over Powerup)", player.isAlive());
-        assertEquals("Energizer should theoretically remain if player died before eating", TileType.ENERGIZER, tiles[2][1]);
+        assertEquals("Energizer should theoretically remain if player died before eating", TileType.ENERGIZER,
+            tiles[2][1]);
     }
 
     @Test
     public void testPlayerReversingDirection() {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
-        player.setPosition(new Position(1 * TILE_SIZE, 1 * TILE_SIZE));
+        player.setPosition(new Position(TILE_SIZE, TILE_SIZE));
         player.setDirection(Direction.EAST);
-        
-        // Move 1 tick East
+
         controller.updateGameState(initialState, new ArrayList<>());
         double x1 = player.getPosition().x;
-        assertTrue(x1 > 1 * TILE_SIZE);
-        
-        // Input West
+        assertTrue(x1 > TILE_SIZE);
+
         ArrayList<Action> actions = new ArrayList<>();
-        actions.add(new Action(0, 0, 1)); // 1 = WEST
-        
+        actions.add(new Action(0, 0, 1));
+
         controller.updateGameState(initialState, actions);
-        
+
         assertEquals("Player should face West immediately", Direction.WEST, player.getDirection());
         assertTrue("Player should move West", player.getPosition().x < x1);
     }
 
     @Test
     public void testNullActionHandling() {
-        // Ensure robust handling of null lists or elements
+
         GameState state = controller.updateGameState(initialState, null);
         assertNotNull(state);
 
@@ -595,16 +566,13 @@ public class ClientGameControllerTest extends BaseTest {
 
     @Test
     public void testIntegerOverflowClock() {
-        // While we can't easily wait for overflow, we can set the clock manually if the constructor allowed.
-        // Since we can't easily mock the static clock in ClientMain without access,
-        // we check if a high clock value passed in state persists.
 
         GameState highClockState = new GameState(
-                Integer.MAX_VALUE - 5,
-                initialState.players(),
-                initialState.ghosts(),
-                initialState.tiles(),
-                null
+            Integer.MAX_VALUE - 5,
+            initialState.players(),
+            initialState.ghosts(),
+            initialState.tiles(),
+            null
         );
 
         GameState nextState = controller.updateGameState(highClockState, new ArrayList<>());
@@ -614,11 +582,10 @@ public class ClientGameControllerTest extends BaseTest {
 
     @Test
     public void testWinConditionLogic() {
-        // Scenario: All dots eaten. Game should declare a winner.
+
         initialState.ghosts().clear();
         TileType[][] tiles = initialState.tiles();
 
-        // Clear all dots
         for (int x = 0; x < tiles.length; x++) {
             for (int y = 0; y < tiles[0].length; y++) {
                 tiles[x][y] = TileType.EMPTY;
@@ -632,19 +599,19 @@ public class ClientGameControllerTest extends BaseTest {
 
     @Test
     public void testFruitSpawnLogic() {
-        // Scenario: After eating a certain number of pellets, a fruit should spawn.
+
         initialState.ghosts().clear();
         TileType[][] tiles = initialState.tiles();
 
-        // Count pellets
         int pellets = 0;
         for (TileType[] row : tiles) {
             for (TileType t : row) {
-                if (t == TileType.PAC_DOT) pellets++;
+                if (t == TileType.PAC_DOT) {
+                    pellets++;
+                }
             }
         }
 
-        // Simulate eating 70 pellets
         Player p = initialState.players().getFirst();
         p.addPoints(70 * 10);
 
@@ -663,7 +630,10 @@ public class ClientGameControllerTest extends BaseTest {
         boolean foundFruit = false;
         for (TileType[] row : initialState.tiles()) {
             for (TileType t : row) {
-                if (t == TileType.CHERRY || t == TileType.STRAWBERRY) foundFruit = true;
+                if (t == TileType.CHERRY || t == TileType.STRAWBERRY) {
+                    foundFruit = true;
+                    break;
+                }
             }
         }
 
@@ -672,26 +642,24 @@ public class ClientGameControllerTest extends BaseTest {
 
     @Test
     public void testInputBufferingPrecision() {
-        // TDD: If I press turn 1 pixel before intersection, it should buffer and turn AT intersection.
+
         Player p = initialState.players().getFirst();
-        p.setPosition(new Position(1 * TILE_SIZE - 1.0, 1 * TILE_SIZE)); // 1px before (1,1)
+        p.setPosition(new Position(TILE_SIZE - 1.0, TILE_SIZE));
         p.setDirection(Direction.EAST);
         p.setIntendedDirection(Direction.SOUTH);
 
-        // Move 1 tick
         controller.updateGameState(initialState, new ArrayList<>());
 
-        // Should NOT have turned yet if strictly at center, OR should have turned if within EPS.
-        assertNotNull("Player should maintain an intended direction until turn is executed", p.getIntendedDirection());
+        assertNotNull("Player should maintain an intended direction until turn is executed",
+            p.getIntendedDirection());
     }
 
     @Test
     public void testTeleportationBoundary() {
-        // Test exact boundary condition for teleport
+
         Player p = initialState.players().getFirst();
         double mapWidth = initialState.tiles().length * TILE_SIZE;
 
-        // Right edge
         p.setPosition(new Position(mapWidth - (TILE_SIZE / 2.0) + 0.1, TILE_SIZE));
         p.setDirection(Direction.EAST);
 

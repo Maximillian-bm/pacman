@@ -1,12 +1,22 @@
 package com.example.GameLogic;
 
 import static com.example.model.Constants.TILE_SIZE;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.common.BaseTest;
 import com.example.common.OptimalTimeoutMillis;
-import com.example.model.*;
+import com.example.model.Action;
+import com.example.model.Direction;
+import com.example.model.GameState;
+import com.example.model.Ghost;
+import com.example.model.GhostType;
+import com.example.model.Player;
+import com.example.model.Position;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,25 +45,24 @@ public class PlayerLogicTest extends BaseTest {
         controller = new ClientGameController();
         Ghost.setFrightenedTimerSec(0.0);
         initialState = controller.initializeGameState(2);
-        initialState.ghosts().clear(); 
+        initialState.ghosts().clear();
 
         host = new ConnectToLobby();
         players = new ArrayList<>();
     }
 
-    // --- Interaction Tests (from PlayerInteractionTest) ---
 
     @Test
     public void testPlayerEatsPlayerWithEnergizer() {
-        Player predator = initialState.players().get(0);
+        Player predator = initialState.players().getFirst();
         Player prey = initialState.players().get(1);
 
         predator.setEnergized(true);
         prey.setEnergized(false);
-        
+
         predator.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
         prey.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
-        
+
         prey.setLives(3);
         prey.setAlive(true);
         int initialPoints = predator.getPoints();
@@ -67,7 +76,7 @@ public class PlayerLogicTest extends BaseTest {
 
     @Test
     public void testPlayerCollisionNoEnergizer() {
-        Player p1 = initialState.players().get(0);
+        Player p1 = initialState.players().getFirst();
         Player p2 = initialState.players().get(1);
 
         p1.setEnergized(false);
@@ -82,38 +91,38 @@ public class PlayerLogicTest extends BaseTest {
         controller.updateGameState(initialState, new ArrayList<>());
 
         double distance = Math.abs(p1.getPosition().x - p2.getPosition().x);
-        assertTrue("Players should be at least one tile apart (collision blocked). Distance: " + distance, 
-                   distance >= TILE_SIZE - 1.0); 
-                   
+        assertTrue("Players should be at least one tile apart (collision blocked). Distance: " + distance,
+            distance >= TILE_SIZE - 1.0);
+
         assertTrue(p1.isAlive());
         assertTrue(p2.isAlive());
     }
-    
+
     @Test
     public void testPlayerCollisionSameSpot() {
-        Player p1 = initialState.players().get(0);
+        Player p1 = initialState.players().getFirst();
         Player p2 = initialState.players().get(1);
-        
-        p1.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE)); // Stationary
-        p2.setPosition(new Position(4 * TILE_SIZE, 5 * TILE_SIZE)); // Left of P1
-        p2.setDirection(Direction.EAST); // Run into P1
-        
+
+        p1.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE));
+        p2.setPosition(new Position(4 * TILE_SIZE, 5 * TILE_SIZE));
+        p2.setDirection(Direction.EAST);
+
         controller.updateGameState(initialState, new ArrayList<>());
-        
+
         double p2X = p2.getPosition().x;
-        assertTrue("Moving player should be blocked by stationary player. Pos: " + p2X, 
-                   p2X <= 4 * TILE_SIZE + 2.0); 
+        assertTrue("Moving player should be blocked by stationary player. Pos: " + p2X,
+            p2X <= 4 * TILE_SIZE + 2.0);
     }
 
     @Test
     public void testSimultaneousPlayerGhostSpawnCollision() {
-        Player p = initialState.players().get(0);
+        Player p = initialState.players().getFirst();
         Ghost g = new Ghost(GhostType.RED);
         initialState.ghosts().add(g);
 
         Position deathSpot = new Position(5 * TILE_SIZE, 5 * TILE_SIZE);
         p.setSpawnPosition(deathSpot);
-        g.setPosition(deathSpot); 
+        g.setPosition(deathSpot);
 
         p.setAlive(false);
         p.setRespawnTimer(0.01);
@@ -122,20 +131,20 @@ public class PlayerLogicTest extends BaseTest {
         controller.updateGameState(initialState, new ArrayList<>());
 
         if (!p.isAlive()) {
-             assertEquals("Player should lose a life immediately if spawn is camped", 1, p.getLives());
+            assertEquals("Player should lose a life immediately if spawn is camped", 1, p.getLives());
         }
     }
 
     @Test
     public void testRapidDirectionSwitching() {
-        Player p = initialState.players().get(0);
-        p.setPosition(new Position(1 * TILE_SIZE, 1 * TILE_SIZE)); 
+        Player p = initialState.players().getFirst();
+        p.setPosition(new Position(TILE_SIZE, TILE_SIZE));
 
         List<Action> spamActions = new ArrayList<>();
-        spamActions.add(new Action(p.getId(), 0, 1)); // West
-        spamActions.add(new Action(p.getId(), 0, 2)); // East
-        spamActions.add(new Action(p.getId(), 0, 3)); // North
-        spamActions.add(new Action(p.getId(), 0, 4)); // South
+        spamActions.add(new Action(p.getId(), 0, 1));
+        spamActions.add(new Action(p.getId(), 0, 2));
+        spamActions.add(new Action(p.getId(), 0, 3));
+        spamActions.add(new Action(p.getId(), 0, 4));
 
         controller.updateGameState(initialState, spamActions);
 
@@ -147,11 +156,10 @@ public class PlayerLogicTest extends BaseTest {
         Player p = initialState.players().getFirst();
         p.addPoints(Integer.MAX_VALUE - 5);
         p.addPoints(10);
-        
+
         assertTrue("Score should handle overflow gracefully (e.g. cap or use long)", p.getPoints() > 0);
     }
 
-    // --- Connection Tests (from PlayerConnectionTest) ---
 
     @Test
     public void testPlayerJoinAndLeaveLobby() {
@@ -167,15 +175,15 @@ public class PlayerLogicTest extends BaseTest {
 
         ConnectToLobby p3 = new ConnectToLobby();
         p3.joinLobby(String.valueOf(lobbyId));
-        
+
         assertTrue("Lobby should accept new player after one leaves", p3.getPlayerID() > 0);
     }
 
     @Test
-    public void testRapidJoinLeaveChurn() throws InterruptedException {
+    public void testRapidJoinLeaveChurn() {
         host.createLobby(10);
         int lobbyId = host.getLobbyID();
-        
+
         int numberOfChurns = 5;
         for (int i = 0; i < numberOfChurns; i++) {
             ConnectToLobby p = new ConnectToLobby();
@@ -186,7 +194,7 @@ public class PlayerLogicTest extends BaseTest {
     }
 
     @Test
-    public void testLeaveDuringGameStart() throws InterruptedException {
+    public void testLeaveDuringGameStart() {
         host.createLobby(2);
         String lobbyId = String.valueOf(host.getLobbyID());
 
@@ -220,8 +228,10 @@ public class PlayerLogicTest extends BaseTest {
         });
         t.setDaemon(true);
         t.start();
-        
-        try { t.join(1000); } catch (InterruptedException e) {}
+
+        try {
+            t.join(1000);
+        } catch (InterruptedException _) { }
 
         p2.leaveLobby();
 
@@ -239,10 +249,10 @@ public class PlayerLogicTest extends BaseTest {
         host.startGame();
         p2.startGame();
 
-        p2.leaveLobby(); 
+        p2.leaveLobby();
 
         boolean isP2InGame = host.isPlayerInGame(p2.getPlayerID());
-        assertEquals("Player 2 should be removed from game after leaving", false, isP2InGame);
+        assertFalse("Player 2 should be removed from game after leaving", isP2InGame);
     }
 
     @Test
@@ -270,19 +280,23 @@ public class PlayerLogicTest extends BaseTest {
             threads.add(t);
         }
 
-        for (Thread t : threads) t.start();
-        for (Thread t : threads) t.join(2000); 
+        for (Thread t : threads) {
+            t.start();
+        }
+        for (Thread t : threads) {
+            t.join(2000);
+        }
 
         if (!exceptions.isEmpty()) {
-            fail("Exceptions occurred during simultaneous connection: " + exceptions.get(0).getMessage());
+            fail("Exceptions occurred during simultaneous connection: " + exceptions.getFirst().getMessage());
         }
 
         assertEquals("All players should have joined", numberOfPlayers - 1, connectedPlayers.size());
-        
+
         long uniqueIds = connectedPlayers.stream()
-                .map(ConnectToLobby::getPlayerID)
-                .distinct()
-                .count();
+            .map(ConnectToLobby::getPlayerID)
+            .distinct()
+            .count();
         assertEquals("All players should have unique IDs", connectedPlayers.size(), uniqueIds);
     }
 }
