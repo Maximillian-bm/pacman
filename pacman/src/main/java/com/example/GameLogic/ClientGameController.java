@@ -28,10 +28,6 @@ import lombok.Getter;
 
 public class ClientGameController extends GameController {
 
-    //Skal bruge den
-    @Getter
-    private Player localPlayer;
-
     public GameState updateGameStateFor(GameState gameState, int targetClock){
         int clock = gameState.clock();
         while(clock < targetClock){
@@ -68,14 +64,14 @@ public class ClientGameController extends GameController {
         return newGameState;
     }
 
-    public GameState initializeGameState(int nrOfPlayers, int playerID) {
+    public GameState initializeGameState(int nrOfPlayers) {
         List<Player> players = new ArrayList<>();
         List<Ghost> ghosts = new ArrayList<>();
         TileType[][] tiles = Maps.getMap1();
 
         for (int i = 0; i < nrOfPlayers; i++) {
             Player player = new Player(i);
-            
+
         Position spawnPosition;
         switch (i) {
             case 0:
@@ -102,11 +98,6 @@ public class ClientGameController extends GameController {
     player.setIntendedDirection(null);
     player.setRespawnTimer(0.0);
     players.add(player);
-
-
-    if (i == playerID) {
-        localPlayer = player;
-    }
 }
 
         Ghost ghost1 = new Ghost(GhostType.RED);
