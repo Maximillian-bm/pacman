@@ -18,6 +18,9 @@ public class Constants {
     public final static int TILES_TALL = map1.length;
     public final static int INIT_SCREEN_WIDTH = TILES_WIDE * TILE_SIZE;
     public final static int INIT_SCREEN_HEIGHT = TILES_TALL * TILE_SIZE;
+    
+    public static final double PLAYER_RESPAWN_DELAY_SEC = 2.0;
+
     public final static long TARGET_FPS = 30;
     public static final double CENTER_EPS_PX = 1.5;
 
@@ -26,5 +29,6 @@ public class Constants {
     public final static double PLAYER_SPEED = 250;
 
     // Ghost
+    public static final double GHOST_RESPAWN_DELAY_SEC  = 3.0;
     public final static double FRIGHTENED_DURATION_SEC = 8.0;
 }

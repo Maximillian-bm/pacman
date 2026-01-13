@@ -1,19 +1,33 @@
 package com.example.UI;
 
+import static com.example.model.Constants.TARGET_FPS;
+import static com.example.model.Constants.TILE_SIZE;
+
+import java.util.List;
+
 import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
 import com.example.GameLogic.ClientComs.KeyHandlerOnline;
-import com.example.model.*;
+import com.example.model.Action;
+import com.example.model.Constants;
+import com.example.model.GameState;
+import com.example.model.Player;
+import com.example.model.Position;
+import com.example.model.TileType;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
@@ -30,6 +44,7 @@ import javafx.geometry.Pos;
 import java.util.List;
 
 import static com.example.model.Constants.*;
+import javafx.stage.Stage;
 
 public class UI extends Application {
     
@@ -356,7 +371,7 @@ public class UI extends Application {
                     case PURPLE -> 250; // ("Sue");
                 };
 
-                double fTimer = Ghost.getFrightenedTimerSec();
+                double fTimer = ghost.getFrightenedTimerSec();
 
                 if (fTimer > 0) {
                     sy += 50 * 11;
