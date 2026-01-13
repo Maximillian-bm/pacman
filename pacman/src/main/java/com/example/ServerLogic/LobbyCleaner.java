@@ -14,6 +14,7 @@ public class LobbyCleaner implements Runnable{
     private boolean running = true;
     private List<Lobby> toBeAdded = new ArrayList<>();
     private boolean showActiveLobbys = false;
+    private boolean closeAllLobbys = false;
 
     public LobbyCleaner(List<Lobby> lobbys, Space space1){
         this.lobbys = lobbys;
@@ -51,10 +52,23 @@ public class LobbyCleaner implements Runnable{
                 }
                 showActiveLobbys = false;
             }
+            if(closeAllLobbys){
+                for(Lobby lobby : lobbys) {
+                System.out.println("Closing lobby "+lobby.getLobbyID());
+                lobby.stop();
+                toBeRemoved.add(lobby);
+                }
+                closeAllLobbys = false;
+            }
             lobbys.removeAll(toBeRemoved);
             lobbys.addAll(toBeAdded);
             toBeAdded.removeAll(toBeAdded);
         }
+    }
+
+    public void closeAllLobbys(){
+        System.out.println("Closing all lobbys lobbys");
+        closeAllLobbys = true;
     }
 
     public void showActiveLobbys(){
