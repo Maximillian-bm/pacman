@@ -56,7 +56,7 @@ public class ClientGameController extends GameController {
         GhostMovement(gameState);
         handleGhostPlayerCollisions(gameState);
         handlePlayerGridPosition(gameState);
-
+        
         GameState newGameState = new GameState(
             ClientMain.clock,
             gameState.players(),
