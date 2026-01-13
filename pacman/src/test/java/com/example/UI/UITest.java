@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 
+import com.example.GUI.UI;
 import com.example.common.BaseTest;
 import com.example.model.Constants;
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,18 +15,36 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.framework.junit5.Start;
 import org.testfx.util.WaitForAsyncUtils;
 
 @ExtendWith(ApplicationExtension.class)
 @DisplayName("User Interface and Frontend Interaction Tests")
 public class UITest extends BaseTest {
 
-    // ... setupHeadless and start stay the same ...
+    @BeforeAll
+    public static void setupHeadless() {
+        if (Boolean.getBoolean("headless")) {
+            System.setProperty("testfx.robot", "glass");
+            System.setProperty("testfx.headless", "true");
+            System.setProperty("prism.order", "sw");
+            System.setProperty("prism.text", "t2k");
+            System.setProperty("glass.platform", "Monocle");
+            System.setProperty("monocle.platform", "Headless");
+        }
+    }
+
+    @Start
+    public void start(Stage stage) {
+        new UI().start(stage);
+    }
 
     @Test
     @DisplayName("Main menu buttons and title should be visible on startup")
