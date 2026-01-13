@@ -3,7 +3,7 @@ package com.example.GameLogic;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
@@ -15,9 +15,8 @@ import com.example.model.ActionList;
 import com.example.model.Constants;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
 
 @DisplayName("Game Systems Integration and Utility Tests")
 public class GameIntegrationTest extends BaseTest {
@@ -48,9 +47,7 @@ public class GameIntegrationTest extends BaseTest {
     @DisplayName("ActionUtil should throw exception for invalid input length")
     public void testActionUtilConversionInvalidLength() {
         Object[] input = new Object[]{1, 100};
-        assertThrows(IllegalArgumentException.class, () -> {
-            ActionUtil.convertObjToAction(input);
-        });
+        assertThrows(IllegalArgumentException.class, () -> ActionUtil.convertObjToAction(input));
     }
 
     @Test
@@ -65,9 +62,7 @@ public class GameIntegrationTest extends BaseTest {
     @Test
     @DisplayName("URIUtil should throw exception for URIs without lobby IDs")
     public void testURIUtilInvalidURI() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            URIUtil.getLobbyID(Constants.REMOTE_PUBLIC_URI);
-        });
+        assertThrows(IllegalArgumentException.class, () -> URIUtil.getLobbyID(Constants.REMOTE_PUBLIC_URI));
     }
 
     @Test
@@ -125,9 +120,7 @@ public class GameIntegrationTest extends BaseTest {
     @DisplayName("Joining a lobby with non-numeric ID should throw exception")
     public void testJoinLobbyInvalidIdFormat() {
         ConnectToLobby client = new ConnectToLobby();
-        assertThrows(NumberFormatException.class, () -> {
-            client.joinLobby("invalid-id");
-        });
+        assertThrows(NumberFormatException.class, () -> client.joinLobby("invalid-id"));
     }
 
     @Test
@@ -178,11 +171,9 @@ public class GameIntegrationTest extends BaseTest {
 
     @Test
     @DisplayName("Joining a lobby should timeout if the server does not respond")
-    public void testJoinLobbyTimeout() throws Throwable {
+    public void testJoinLobbyTimeout() {
         ConnectToLobby client = new ConnectToLobby();
-        assertThrows(TimeoutException.class, () -> {
-            client.joinLobby("12345", 500);
-        });
+        assertThrows(TimeoutException.class, () -> client.joinLobby("12345", 500));
     }
 
     @Test

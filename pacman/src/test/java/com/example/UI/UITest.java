@@ -24,12 +24,12 @@ import org.testfx.util.WaitForAsyncUtils;
 @ExtendWith(ApplicationExtension.class)
 @DisplayName("User Interface and Frontend Interaction Tests")
 public class UITest extends BaseTest {
-    
+
     // ... setupHeadless and start stay the same ...
 
     @Test
     @DisplayName("Main menu buttons and title should be visible on startup")
-    public void testLobbyUIComponentsVisible(FxRobot robot) {
+    public void testLobbyUIComponentsVisible() {
         verifyThat("Join Lobby", isVisible());
         verifyThat("Create Lobby", isVisible());
         verifyThat("Pacman", isVisible());
