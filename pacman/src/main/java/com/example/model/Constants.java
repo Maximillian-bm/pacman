@@ -28,7 +28,7 @@ public class Constants {
     
     public static final double PLAYER_RESPAWN_DELAY_SEC = 2.0;
 
-    public final static long TARGET_FPS = 30;
+    public final static long TARGET_FPS = 15;
     public static final double CENTER_EPS_PX = 1.5;
 
     // Player
