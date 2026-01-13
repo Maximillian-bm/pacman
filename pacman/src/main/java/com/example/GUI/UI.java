@@ -58,8 +58,8 @@ public class UI extends Application {
     private GraphicsContext gc;
     private Canvas canvas;
 
-    private final Image spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
-    private final Image wallSpriteSheet = new Image("./tilesets/chompermazetiles.png");
+    private final Image spriteSheet = new Image(getClass().getResource("/tilesets/pacman-sprite-sheet.png").toExternalForm());
+    private final Image wallSpriteSheet = new Image(getClass().getResource("/tilesets/chompermazetiles.png").toExternalForm());
 
     private KeyHandler keyHandler;
 

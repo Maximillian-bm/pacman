@@ -31,7 +31,12 @@ public class UITest extends BaseTest {
 
     @BeforeAll
     public static void setupHeadless() {
-        if (Boolean.getBoolean("headless")) {
+        // Ensure tests run against local server
+        System.setProperty("offline", "true");
+
+        // Default to headless unless explicitly set to false
+        String headless = System.getProperty("headless", "true");
+        if (Boolean.parseBoolean(headless)) {
             System.setProperty("testfx.robot", "glass");
             System.setProperty("testfx.headless", "true");
             System.setProperty("prism.order", "sw");
@@ -97,11 +102,13 @@ public class UITest extends BaseTest {
     @Test
     @DisplayName("Invalid lobby ID input should display a clear error message")
     public void testInvalidLobbyIdHandling(FxRobot robot) {
-
         TextField lobbyIdInput = robot.lookup(".text-field").queryAs(TextField.class);
-        robot.clickOn(lobbyIdInput).write("not-a-number");
-
+        
+        robot.clickOn(lobbyIdInput).eraseText(10).write("not-a-number");
         robot.clickOn("Join Lobby");
+
+        // Wait for potential async UI updates
+        WaitForAsyncUtils.waitForFxEvents();
 
         Node errorNode = robot.lookup(".text").match(n -> n instanceof Text && ((Text) n).getText().contains("Invalid"))
             .query();
@@ -110,22 +117,33 @@ public class UITest extends BaseTest {
 
     @Test
     @DisplayName("Game clock should advance smoothly via the AnimationTimer after starting")
-    public void testSmoothAnimationLoop(FxRobot robot) {
-
+    public void testSmoothAnimationLoop(FxRobot robot) throws java.util.concurrent.TimeoutException {
         int initialClock = Constants.clock;
 
         robot.clickOn("Create Lobby");
 
-        WaitForAsyncUtils.waitForFxEvents();
+        // Wait for the view to switch and the "Start Game" button to appear
+        org.testfx.util.WaitForAsyncUtils.waitFor(5, java.util.concurrent.TimeUnit.SECONDS, () -> 
+            !robot.lookup("Start Game").queryAll().isEmpty()
+        );
 
         robot.clickOn("Start Game");
 
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            System.err.println("Interrupted while waiting for game to start. Error: " + e.getMessage());
-        }
+        // Wait for game to actually start and clock to tick
+        org.testfx.util.WaitForAsyncUtils.waitFor(5, java.util.concurrent.TimeUnit.SECONDS, () -> 
+            Constants.clock > initialClock
+        );
 
         assertTrue(Constants.clock > initialClock, "Game clock should be advancing in the AnimationTimer");
+    }
+
+    @Test
+    @DisplayName("Lobby should handle player disconnection gracefully")
+    public void testPlayerDisconnectionHandling(FxRobot robot) {
+        robot.clickOn("Create Lobby");
+        
+        // Simulate a disconnection event (requires implementation in UI/LobbyHandler)
+        // verifyThat("A player has disconnected", isVisible());
+        assertTrue(false, "TDD: Implement disconnection notification in UI.");
     }
 }
