@@ -360,6 +360,8 @@ public class UI extends Application {
             });
         }
 
+        // Modified function from:
+        // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
         public Image colorPlayer(int nr, int ng, int nb) {
             int W = (int)spriteSheet.getWidth();
             int H = (int)spriteSheet.getHeight();
