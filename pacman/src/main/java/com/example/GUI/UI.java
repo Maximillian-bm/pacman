@@ -1,55 +1,48 @@
 package com.example.GUI;
 
-import java.util.List;
-import java.lang.StringBuilder;
+import static com.example.model.Constants.TARGET_FPS;
+import static com.example.model.Constants.TILES_TALL;
+import static com.example.model.Constants.TILES_WIDE;
+import static com.example.model.Constants.TILE_SIZE;
 
-import com.example.GameLogic.ClientGameController;
-import com.example.GameLogic.ClientMain;
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
+import com.example.GameLogic.ClientGameController;
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.GameState;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
-import com.example.model.Constants;
-
+import java.util.List;
+import java.util.Objects;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
-
-import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import javafx.scene.SnapshotParameters;
-
-import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
-import javafx.scene.control.ChoiceBox;
-import javafx.geometry.Pos;
-
-import java.util.List;
-
-import static com.example.model.Constants.*;
 import javafx.stage.Stage;
 
 public class UI extends Application {
     
-    private ConnectToLobby lobbyHandler = new ConnectToLobby();
+    private final ConnectToLobby lobbyHandler = new ConnectToLobby();
 
     private final ClientGameController gameController = new ClientGameController();
     private GameState gameState;
@@ -58,8 +51,10 @@ public class UI extends Application {
     private GraphicsContext gc;
     private Canvas canvas;
 
-    private final Image spriteSheet = new Image(getClass().getResource("/tilesets/pacman-sprite-sheet.png").toExternalForm());
-    private final Image wallSpriteSheet = new Image(getClass().getResource("/tilesets/chompermazetiles.png").toExternalForm());
+    private final Image spriteSheet = new Image(
+        Objects.requireNonNull(getClass().getResource("/tilesets/pacman-sprite-sheet.png")).toExternalForm());
+    private final Image wallSpriteSheet = new Image(
+        Objects.requireNonNull(getClass().getResource("/tilesets/chompermazetiles.png")).toExternalForm());
 
     private KeyHandler keyHandler;
 
