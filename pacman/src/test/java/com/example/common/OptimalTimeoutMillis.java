@@ -1,4 +1,4 @@
-package com.example.GameLogic;
+package com.example.common;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface TimeoutSeconds {
+public @interface OptimalTimeoutMillis {
     long value();
 }

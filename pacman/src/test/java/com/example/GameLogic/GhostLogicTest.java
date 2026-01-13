@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import static com.example.model.Constants.TILE_SIZE;
 import static org.junit.Assert.*;
 
-public class GhostTargetingTest extends BaseTest {
+public class GhostLogicTest extends BaseTest {
     private ClientGameController controller;
     private GameState state;
 
@@ -33,30 +33,103 @@ public class GhostTargetingTest extends BaseTest {
         ClientMain.clock = 0;
     }
 
+    // --- Movement Tests (from GhostMovementTest) ---
+
+    @Test
+    public void testGhostTrappedInBox() {
+        // Create a custom small map where a ghost is boxed in
+        TileType[][] boxMap = new TileType[5][5];
+        for(int x=0; x<5; x++) for(int y=0; y<5; y++) boxMap[x][y] = TileType.WALL;
+        boxMap[2][2] = TileType.EMPTY;
+        
+        GameState boxState = new GameState(
+            0,
+            state.players(),
+            state.ghosts(), 
+            boxMap,
+            null
+        );
+        
+        Ghost g = boxState.ghosts().getFirst();
+        g.setPosition(new Position(2 * TILE_SIZE, 2 * TILE_SIZE));
+        
+        controller.updateGameState(boxState, new ArrayList<>());
+        
+        assertEquals(2 * TILE_SIZE, g.getPosition().x, 0.1);
+        assertEquals(2 * TILE_SIZE, g.getPosition().y, 0.1);
+    }
+
+    @Test
+    public void testDoubleGhostEat() {
+        state.ghosts().clear();
+        
+        Ghost g1 = new Ghost(GhostType.RED);
+        g1.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE));
+        g1.setRespawnTimer(0.0);
+        
+        Ghost g2 = new Ghost(GhostType.PINK);
+        g2.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE));
+        g2.setRespawnTimer(0.0);
+        
+        state.ghosts().add(g1);
+        state.ghosts().add(g2);
+        
+        Player p = state.players().getFirst();
+        p.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE));
+        
+        Ghost.setFrightenedTimerSec(10.0);
+        
+        controller.updateGameState(state, new ArrayList<>());
+        
+        assertTrue("Ghost 1 should be eaten (respawning)", g1.getRespawnTimer() > 0);
+        assertTrue("Ghost 2 should be eaten (respawning)", g2.getRespawnTimer() > 0);
+    }
+
+    @Test
+    public void testGhostRespawnTimerReset() {
+        Ghost g = state.ghosts().getFirst();
+        g.setRespawnTimer(0.0000001); 
+        
+        controller.updateGameState(state, new ArrayList<>());
+        
+        assertEquals("Respawn timer should cap at 0.0", 0.0, g.getRespawnTimer(), 0.00001);
+    }
+
+    @Test
+    public void testSimultaneousGhostRespawn() {
+        for (Ghost g : state.ghosts()) {
+            g.setRespawnTimer(0.001);
+        }
+        
+        controller.updateGameState(state, new ArrayList<>());
+        
+        for (Ghost g : state.ghosts()) {
+            assertEquals("All ghosts should have respawned at their spawn points", 0.0, g.getRespawnTimer(), 0.001);
+            assertNotEquals("Ghost should not be at 'hidden' position", -1000, g.getPosition().x, 0.1);
+        }
+    }
+
+    // --- Targeting Tests (from GhostTargetingTest) ---
+
     @Test
     public void testGhostDoesNotTargetRespawningPlayer() {
         Player p1 = state.players().get(0);
         Player p2 = state.players().get(1);
         Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst().get();
 
-        // Place blinky at an intersection: (3, 1)
         blinky.setPosition(new Position(3 * TILE_SIZE, 1 * TILE_SIZE));
         blinky.setDirection(Direction.SOUTH); 
 
-        // P1 is alive and to the east: (15, 1)
         p1.setAlive(true);
         p1.setRespawnTimer(0.0);
         p1.setPosition(new Position(15 * TILE_SIZE, 1 * TILE_SIZE));
 
-        // P2 is respawning and to the west (but hidden at -1000, -1000)
         p2.setAlive(false);
         p2.setRespawnTimer(1.0);
         p2.setPosition(new Position(-1000, -1000));
 
-        // Update game state
         controller.updateGameState(state, new ArrayList<>());
 
-        // Blinky should choose EAST to go towards P1, rather than WEST towards the respawning P2 at (-1000, -1000)
         assertEquals("Ghost should target the only alive player (East)", Direction.EAST, blinky.getDirection());
     }
 
@@ -66,28 +139,20 @@ public class GhostTargetingTest extends BaseTest {
         Player p2 = state.players().get(1);
         Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst().get();
 
-        // Place blinky at an intersection: (3, 1)
         blinky.setPosition(new Position(3 * TILE_SIZE, 1 * TILE_SIZE));
         blinky.setDirection(Direction.SOUTH);
 
-        // P1 is alive and to the East: (10, 1)
-        // Distance to (3,1) is (10-3)^2 = 49
         p1.setAlive(true);
         p1.setRespawnTimer(0.0);
         p1.setPosition(new Position(10 * TILE_SIZE, 1 * TILE_SIZE));
 
-        // P2 is dead for good (lives = 0)
-        // Position -1000, -1000 is clamped to (0,0) in grid coordinates.
-        // Distance to (3,1) is (0-3)^2 + (0-1)^2 = 10
         p2.setAlive(false);
         p2.setLives(0);
         p2.setRespawnTimer(0.0);
         p2.setPosition(new Position(-1000, -1000));
 
-        // Update
         controller.updateGameState(state, new ArrayList<>());
 
-        // Blinky should move towards P1 (East)
         assertEquals("Ghost should target the only alive player (East)", Direction.EAST, blinky.getDirection());
     }
 
@@ -95,22 +160,17 @@ public class GhostTargetingTest extends BaseTest {
     public void testGhostGoesToCornerWhenNoAlivePlayers() {
         Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst().get();
         
-        // Kill all players
         for (Player p : state.players()) {
             p.setAlive(false);
             p.setLives(0);
             p.setPosition(new Position(-1000, -1000));
         }
 
-        // Place blinky at intersection: (3, 1)
-        // Corner for RED is (MaxX, 0) - Top Right. MaxX is 16.
         blinky.setPosition(new Position(3 * TILE_SIZE, 1 * TILE_SIZE));
         blinky.setDirection(Direction.SOUTH);
 
-        // Update
         controller.updateGameState(state, new ArrayList<>());
 
-        // Blinky should move towards its corner (Top-Right: which means EAST from (3,1))
         assertEquals("Ghost should move towards its corner if no players are alive", Direction.EAST, blinky.getDirection());
     }
 
@@ -122,23 +182,18 @@ public class GhostTargetingTest extends BaseTest {
 
         Ghost.setFrightenedTimerSec(10.0);
         
-        // Ghost at (3, 1)
         blinky.setPosition(new Position(3 * TILE_SIZE, 1 * TILE_SIZE));
         blinky.setDirection(Direction.SOUTH);
 
-        // P1 (alive) at (10, 1) -> East. Dist (10-3)^2 = 49.
         p1.setAlive(true);
         p1.setPosition(new Position(10 * TILE_SIZE, 1 * TILE_SIZE));
 
-        // P2 (dead) at (0, 0) -> West. Dist (0-3)^2 + (0-1)^2 = 10.
         p2.setAlive(false);
         p2.setLives(0);
-        p2.setPosition(new Position(-1000, -1000)); // Effectively (0,0)
+        p2.setPosition(new Position(-1000, -1000));
 
-        // Update
         controller.updateGameState(state, new ArrayList<>());
 
-        // Ghost should flee from P1 (move West), but will likely flee from P2 (move East)
         assertEquals("Frightened ghost should flee from the only alive player (West)", Direction.WEST, blinky.getDirection());
     }
 
@@ -148,31 +203,21 @@ public class GhostTargetingTest extends BaseTest {
         Player p2 = state.players().get(1);
         Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst().get();
 
-        // Ghost at (3, 1)
         blinky.setPosition(new Position(3 * TILE_SIZE, 1 * TILE_SIZE));
         blinky.setDirection(Direction.SOUTH);
 
-        // P1 (alive) at (2, 1) -> West (Nearer)
         p1.setAlive(true);
         p1.setPosition(new Position(2 * TILE_SIZE, 1 * TILE_SIZE));
 
-        // P2 (alive) at (10, 1) -> East (Further)
         p2.setAlive(true);
         p2.setPosition(new Position(10 * TILE_SIZE, 1 * TILE_SIZE));
 
-        // First update: should target P1 (West)
-        // Wait, I need to make sure it targets P1. 
-        // findNearestPlayer uses distance. (2-3)^2 = 1. (10-3)^2 = 49.
-        
-        // Now kill P1 in the same tick or just before update
         p1.setAlive(false);
         p1.setLives(0);
         p1.setPosition(new Position(-1000, -1000));
 
-        // Update
         controller.updateGameState(state, new ArrayList<>());
 
-        // Should now target P2 (East)
         assertEquals("Ghost should immediately retarget to P2 after P1 dies", Direction.EAST, blinky.getDirection());
     }
 }

@@ -1,4 +1,4 @@
-package com.example.GameLogic;
+package com.example.common;
 
 import com.example.ServerLogic.ServerController;
 import java.net.Socket;

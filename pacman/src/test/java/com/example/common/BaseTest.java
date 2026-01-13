@@ -1,8 +1,5 @@
 package com.example.common;
 
-import com.example.GameLogic.LocalTestServer;
-import com.example.GameLogic.OptimalTimeoutMillis;
-import com.example.GameLogic.TimeoutSeconds;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
