@@ -49,6 +49,9 @@ public class SystemPerformanceTest extends BaseTest {
         double averageTimeMs = (totalTimeNs / (double) iterations) / 1_000_000.0;
 
         assertTrue("Game logic update took too long: " + averageTimeMs + "ms", averageTimeMs < 1.0);
+        assertTrue("Clock should have advanced", currentState.clock() > initialState.clock());
+        assertNotEquals("Player position should have changed", initialState.players().getFirst().getPosition().x, 
+            currentState.players().getFirst().getPosition().x, 0.001);
     }
 
     @Test
@@ -57,11 +60,12 @@ public class SystemPerformanceTest extends BaseTest {
         int targetClock = initialState.clock() + lagFrames;
 
         long startTime = System.nanoTime();
-        controller.updateGameStateFor(initialState, targetClock);
+        GameState nextState = controller.updateGameStateFor(initialState, targetClock);
         long endTime = System.nanoTime();
         long durationMs = (endTime - startTime) / 1_000_000;
 
         assertTrue("Catch-up mechanism is too slow, UI will freeze. Took: " + durationMs + "ms", durationMs < 20);
+        assertEquals("State clock should match target after catch-up", targetClock, nextState.clock());
     }
 
     @Test

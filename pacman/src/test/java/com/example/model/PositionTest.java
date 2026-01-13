@@ -61,8 +61,8 @@ public class PositionTest extends BaseTest {
         Position pos = new Position(10000.0, 10000.0);
         Pair<Integer, Integer> grid = pos.ToGridPosition();
 
-        assertTrue(grid.getKey() > 0);
-        assertTrue(grid.getValue() > 0);
+        assertEquals("Large X coordinate grid mapping", (Integer) (int)(10000.0 / TILE_SIZE + 0.5), grid.getKey());
+        assertEquals("Large Y coordinate grid mapping", (Integer) (int)(10000.0 / TILE_SIZE + 0.5), grid.getValue());
     }
 
     @Test
@@ -70,14 +70,19 @@ public class PositionTest extends BaseTest {
 
         Position posLow = new Position(TILE_SIZE / 2.0 - 0.01, TILE_SIZE / 2.0 - 0.01);
         Pair<Integer, Integer> gridLow = posLow.ToGridPosition();
-        assertEquals((Integer) 0, gridLow.getKey());
-        assertEquals((Integer) 0, gridLow.getValue());
+        assertEquals("Just below boundary should map to 0", (Integer) 0, gridLow.getKey());
+        assertEquals("Just below boundary should map to 0", (Integer) 0, gridLow.getValue());
 
         Position posHigh = new Position(TILE_SIZE / 2.0, TILE_SIZE / 2.0);
         Pair<Integer, Integer> gridHigh = posHigh.ToGridPosition();
 
-        assertEquals((Integer) 1, gridHigh.getKey());
-        assertEquals((Integer) 1, gridHigh.getValue());
+        assertEquals("Exactly at boundary should map to 1", (Integer) 1, gridHigh.getKey());
+        assertEquals("Exactly at boundary should map to 1", (Integer) 1, gridHigh.getValue());
+        
+        Position posRight = new Position(TILE_SIZE + TILE_SIZE / 2.0 - 0.01, TILE_SIZE);
+        Pair<Integer, Integer> gridRight = posRight.ToGridPosition();
+        assertEquals("Just below next boundary should map to 1", (Integer) 1, gridRight.getKey());
+        assertEquals("Center of tile 1 should map to 1", (Integer) 1, gridRight.getValue());
     }
 
     @Test

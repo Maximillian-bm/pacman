@@ -187,6 +187,11 @@ public class PlayerLogicTest extends BaseTest {
             assertTrue("Player " + i + " should join successfully", p.getPlayerID() > 0);
             p.leaveLobby();
         }
+        
+        // After churn, try to join again and see if ID is reused or consistent
+        ConnectToLobby finalPlayer = new ConnectToLobby();
+        finalPlayer.joinLobby(String.valueOf(lobbyId));
+        assertTrue("Should be able to join after churn", finalPlayer.getPlayerID() > 0);
     }
 
     @Test
@@ -202,9 +207,11 @@ public class PlayerLogicTest extends BaseTest {
         gameThread.start();
 
         p2.leaveLobby();
+        assertFalse("Player 2 should be considered out of the game", host.isPlayerInGame(p2.getPlayerID()));
 
         ConnectToLobby p2Rejoin = new ConnectToLobby();
         p2Rejoin.joinLobby(lobbyId);
+        assertTrue("Rejoined player should have a valid positive ID", p2Rejoin.getPlayerID() > 0);
     }
 
     @Test

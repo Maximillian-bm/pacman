@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.testfx.api.FxAssert.verifyThat;
 import static org.testfx.matcher.base.NodeMatchers.isVisible;
 
-import com.example.GameLogic.ClientMain;
+import com.example.GUI.UI;
 import com.example.model.Constants;
 import java.util.concurrent.atomic.AtomicLong;
 import javafx.application.Platform;
@@ -102,7 +102,7 @@ public class UITest extends ApplicationTest {
     @Test
     public void testSmoothAnimationLoop() {
 
-        int initialClock = ClientMain.clock;
+        int initialClock = Constants.clock;
 
         clickOn("Create Lobby");
 
@@ -116,6 +116,6 @@ public class UITest extends ApplicationTest {
             System.err.println("Interrupted while waiting for game to start. Error: " + e.getMessage());
         }
 
-        assertTrue("Game clock should be advancing in the AnimationTimer", ClientMain.clock > initialClock);
+        assertTrue("Game clock should be advancing in the AnimationTimer", Constants.clock > initialClock);
     }
 }

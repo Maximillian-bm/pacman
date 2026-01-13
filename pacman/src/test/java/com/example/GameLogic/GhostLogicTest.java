@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.example.common.BaseTest;
+import com.example.model.Constants;
 import com.example.model.Direction;
 import com.example.model.GameState;
 import com.example.model.Ghost;
@@ -38,7 +39,7 @@ public class GhostLogicTest extends BaseTest {
         state = controller.initializeGameState(2);
         Ghost.setFrightenedTimerSec(0.0);
         Ghost.setGhostScatterMode(false);
-        ClientMain.clock = 0;
+        Constants.clock = 0;
     }
 
     @Test
@@ -177,13 +178,17 @@ public class GhostLogicTest extends BaseTest {
             p.setPosition(new Position(-1000, -1000));
         }
 
-        blinky.setPosition(new Position(3 * TILE_SIZE, TILE_SIZE));
+        double startX = 3 * TILE_SIZE;
+        double startY = TILE_SIZE;
+        blinky.setPosition(new Position(startX, startY));
         blinky.setDirection(Direction.SOUTH);
 
         controller.updateGameState(state, new ArrayList<>());
 
         assertEquals("Ghost should move towards its corner if no players are alive", Direction.EAST,
             blinky.getDirection());
+        assertTrue("Ghost should have moved East", blinky.getPosition().x > startX);
+        assertEquals("Ghost Y should be unchanged if moving purely East", startY, blinky.getPosition().y, 0.01);
     }
 
     @Test
@@ -195,7 +200,8 @@ public class GhostLogicTest extends BaseTest {
 
         Ghost.setFrightenedTimerSec(10.0);
 
-        blinky.setPosition(new Position(3 * TILE_SIZE, TILE_SIZE));
+        double startX = 3 * TILE_SIZE;
+        blinky.setPosition(new Position(startX, TILE_SIZE));
         blinky.setDirection(Direction.SOUTH);
 
         p1.setAlive(true);
@@ -209,6 +215,7 @@ public class GhostLogicTest extends BaseTest {
 
         assertEquals("Frightened ghost should flee from the only alive player (West)", Direction.WEST,
             blinky.getDirection());
+        assertTrue("Ghost should have moved West away from P1", blinky.getPosition().x < startX);
     }
 
     @Test

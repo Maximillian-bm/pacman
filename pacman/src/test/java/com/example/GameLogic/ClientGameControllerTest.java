@@ -44,7 +44,7 @@ public class ClientGameControllerTest extends BaseTest {
         Ghost.setFrightenedTimerSec(0.0);
         Ghost.setGhostChaseTimer(0.0);
         Ghost.setGhostScatterMode(true);
-        ClientMain.clock = 0;
+        Constants.clock = 0;
 
         initialState = controller.initializeGameState(1);
 
@@ -56,6 +56,17 @@ public class ClientGameControllerTest extends BaseTest {
         assertNotNull(state);
         assertEquals(1, state.players().size());
         assertEquals(5, state.ghosts().size());
+
+        Player player = state.players().getFirst();
+        assertNotNull("Player should have a spawn position", player.getSpawnPosition());
+        assertEquals("Player should start at spawn X", player.getSpawnPosition().x, player.getPosition().x, 0.01);
+        assertEquals("Player should start at spawn Y", player.getSpawnPosition().y, player.getPosition().y, 0.01);
+
+        for (Ghost ghost : state.ghosts()) {
+            assertNotNull("Ghost should have a spawn position", ghost.getSpawnPosition());
+            assertEquals("Ghost should start at spawn X", ghost.getSpawnPosition().x, ghost.getPosition().x, 0.01);
+            assertEquals("Ghost should start at spawn Y", ghost.getSpawnPosition().y, ghost.getPosition().y, 0.01);
+        }
     }
 
     @Test
@@ -299,7 +310,18 @@ public class ClientGameControllerTest extends BaseTest {
         GameState nextState = controller.updateGameState(initialState, new ArrayList<>());
 
         assertNotNull("Winner should be set", nextState.winner());
-
+        
+        boolean foundPellet = false;
+        for (TileType[] row : nextState.tiles()) {
+            for (TileType tile : row) {
+                if (tile == TileType.PAC_DOT || tile == TileType.ENERGIZER) {
+                    foundPellet = true;
+                    break;
+                }
+            }
+        }
+        assertTrue("Map should be refilled with pellets on level progression", foundPellet);
+        assertEquals("Clock should reset on new level", 1, nextState.clock());
     }
 
     @Test
@@ -658,7 +680,8 @@ public class ClientGameControllerTest extends BaseTest {
     public void testInputBufferingPrecision() {
 
         Player p = initialState.players().getFirst();
-        p.setPosition(new Position(TILE_SIZE - 1.0, TILE_SIZE));
+        double startX = TILE_SIZE - 1.0;
+        p.setPosition(new Position(startX, TILE_SIZE));
         p.setDirection(Direction.EAST);
         p.setIntendedDirection(Direction.SOUTH);
 
@@ -666,6 +689,9 @@ public class ClientGameControllerTest extends BaseTest {
 
         assertNotNull("Player should maintain an intended direction until turn is executed",
             p.getIntendedDirection());
+        assertEquals("Player should still be facing East if not yet at center of tile", Direction.EAST, p.getDirection());
+        assertTrue("Player should have moved forward East", p.getPosition().x > startX);
+        assertEquals("Player Y should not have changed yet", TILE_SIZE, p.getPosition().y, 0.001);
     }
 
     @Test
@@ -680,5 +706,6 @@ public class ClientGameControllerTest extends BaseTest {
         controller.updateGameState(initialState, new ArrayList<>());
 
         assertTrue("Player should have teleported to left", p.getPosition().x < TILE_SIZE);
+        assertEquals("Player should be at the far left after wrapping", 0.1, p.getPosition().x, 0.5);
     }
 }
