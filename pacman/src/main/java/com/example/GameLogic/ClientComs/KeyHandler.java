@@ -34,10 +34,34 @@ public class KeyHandler{
     }
 
     public void move(KeyCode key) {
-        if(key == KeyCode.W || key == KeyCode.UP) moveUp();
-        if(key == KeyCode.S || key == KeyCode.DOWN) moveDown();
-        if(key == KeyCode.A || key == KeyCode.LEFT) moveLeft();
-        if(key == KeyCode.D || key == KeyCode.RIGHT) moveRight();
+        if(key == KeyCode.W || key == KeyCode.UP){
+            new Thread(new Runnable() {
+                public void run() {
+                    moveUp();
+                }
+            }).start();
+        };
+        if(key == KeyCode.S || key == KeyCode.DOWN){
+            new Thread(new Runnable() {
+                public void run() {
+                    moveDown();
+                }
+            }).start();
+        };
+        if(key == KeyCode.A || key == KeyCode.LEFT){
+            new Thread(new Runnable() {
+                public void run() {
+                    moveLeft();
+                }
+            }).start();
+        };
+        if(key == KeyCode.D || key == KeyCode.RIGHT){
+            new Thread(new Runnable() {
+                public void run() {
+                    moveRight();
+                }
+            }).start();
+        };
     }
 
     public void moveUp() {
