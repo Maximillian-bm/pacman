@@ -25,8 +25,11 @@ public class ActionList {
             missedAction = true;
             if(actionsOfClock.get(0).getPlayerId() == playerID){
                 Constants.actionOffset++;
+                System.out.println("you missed your own action, action offset is now set to "+Constants.actionOffset+"game ticks");
             }else{
                 Constants.timeOffset = Constants.timeOffset + (500000000/Constants.TARGET_FPS);
+                double temp = Constants.timeOffset/(1000000000/Constants.TARGET_FPS);
+                System.out.println("you missed another players action, your clock offset is now set to "+temp+" game ticks");
             }
         }else if(!actionsOfClock.isEmpty()){
             nrOfActionsCalled = actionsOfClock.getLast().getIndex() + 1;
