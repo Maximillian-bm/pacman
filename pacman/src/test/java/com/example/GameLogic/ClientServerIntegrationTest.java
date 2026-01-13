@@ -64,6 +64,7 @@ public class ClientServerIntegrationTest extends BaseTest {
     }
 
     @Test
+    @OptimalTimeoutMillis(3000)
     public void testStartGameWait() throws InterruptedException {
         // Test that startGame blocks or waits correctly.
         // This requires a full lobby usually.

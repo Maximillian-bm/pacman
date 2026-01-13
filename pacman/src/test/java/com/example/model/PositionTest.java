@@ -1,5 +1,6 @@
 package com.example.model;
 
+import com.example.GameLogic.BaseTest;
 import javafx.util.Pair;
 import org.junit.Test;
 import static com.example.model.Constants.TILE_SIZE;

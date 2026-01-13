@@ -147,6 +147,7 @@ public class PlayerConnectionTest extends BaseTest {
     }
 
     @Test
+    @OptimalTimeoutMillis(3000)
     public void testSimultaneousConnections() throws InterruptedException {
         int numberOfPlayers = 10;
         host.createLobby(numberOfPlayers);
