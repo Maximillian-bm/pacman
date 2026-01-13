@@ -10,6 +10,7 @@ public class LobbyCleaner implements Runnable{
     private List<Lobby> lobbys;
     private Space space1;
     private boolean running = true;
+    private List<Lobby> toBeAdded = new ArrayList<>();
 
     public LobbyCleaner(List<Lobby> lobbys, Space space1){
         this.lobbys = lobbys;
@@ -24,12 +25,13 @@ public class LobbyCleaner implements Runnable{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            List<Lobby> toBeRemoved = new ArrayList<>();
             for (Lobby lobby : lobbys) {
                 System.out.println("Lobby "+lobby.getLobbyID()+" is active");
                 if(System.currentTimeMillis() - lobby.getTimeOfCreation() > 300000){
                     int lobbyID = lobby.getLobbyID();
                     lobby.stop();
-                    lobbys.remove(lobby);
+                    toBeRemoved.add(lobby);
                     try {
                         space1.put(lobbyID);
                     } catch (InterruptedException e) {
@@ -37,10 +39,17 @@ public class LobbyCleaner implements Runnable{
                     }
                 }              
             }
+            lobbys.removeAll(toBeRemoved);
+            lobbys.addAll(toBeAdded);
+            toBeAdded.removeAll(toBeAdded);
         }
     }
 
     public void stop(){
         running = false;
+    }
+
+    public void addLobby(Lobby lobby){
+        toBeAdded.add(lobby);
     }
 }

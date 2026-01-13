@@ -47,7 +47,7 @@ public class ServerController {
                 Lobby lobby = new Lobby(rep, nrOfPlayers, lobbyID, System.currentTimeMillis());
                 space1.put(lobbyID, nrOfPlayers, "OK");
                 lobby.start();
-                lobbys.add(lobby);
+                lobbyCleaner.addLobby(lobby);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
