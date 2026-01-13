@@ -1,55 +1,48 @@
 package com.example.GUI;
 
-import java.util.List;
-import java.lang.StringBuilder;
+import static com.example.model.Constants.TARGET_FPS;
+import static com.example.model.Constants.TILES_TALL;
+import static com.example.model.Constants.TILES_WIDE;
+import static com.example.model.Constants.TILE_SIZE;
 
-import com.example.GameLogic.ClientGameController;
-import com.example.GameLogic.ClientMain;
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
+import com.example.GameLogic.ClientGameController;
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.GameState;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
-import com.example.model.Constants;
-
+import java.util.List;
+import java.util.Objects;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
-
-import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import javafx.scene.SnapshotParameters;
-
-import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
-import javafx.scene.control.ChoiceBox;
-import javafx.geometry.Pos;
-
-import java.util.List;
-
-import static com.example.model.Constants.*;
 import javafx.stage.Stage;
 
 public class UI extends Application {
     
-    private ConnectToLobby lobbyHandler = new ConnectToLobby();
+    private final ConnectToLobby lobbyHandler = new ConnectToLobby();
 
     private final ClientGameController gameController = new ClientGameController();
     private GameState gameState;
@@ -58,12 +51,16 @@ public class UI extends Application {
     private GraphicsContext gc;
     private Canvas canvas;
 
-    private final Image spriteSheet = new Image("./tilesets/pacman-sprite-sheet.png");
-    private final Image wallSpriteSheet = new Image("./tilesets/chompermazetiles.png");
+    private final Image spriteSheet = new Image(
+        Objects.requireNonNull(getClass().getResource("/tilesets/pacman-sprite-sheet.png")).toExternalForm());
+    private final Image wallSpriteSheet = new Image(
+        Objects.requireNonNull(getClass().getResource("/tilesets/chompermazetiles.png")).toExternalForm());
 
     private KeyHandler keyHandler;
 
     private Runnable createLobby;
+
+    private Text notificationText;
 
     record TilePos(int x, int y) { }
 
@@ -71,9 +68,6 @@ public class UI extends Application {
     public void start(Stage stage) {
         stage.setTitle("Pacman");
         initializeLobby(stage);
-        //createLobby.run();
-        //startLobby(stage);
-        //startGame(stage);
     }
 
     private void initializeLobby(Stage stage) {
@@ -89,6 +83,16 @@ public class UI extends Application {
         Text joinedLobbyText = new Text("");
         joinedLobbyText.setFill(Color.WHITE);
         joinedLobbyText.setStyle("-fx-font-size: 14px;");
+
+        Text errorText = new Text("");
+        errorText.setId("errorText");
+        errorText.setFill(Color.RED);
+        errorText.setStyle("-fx-font-size: 14px;");
+
+        notificationText = new Text("");
+        notificationText.setId("notificationText");
+        notificationText.setFill(Color.YELLOW);
+        notificationText.setStyle("-fx-font-size: 14px;");
 
         Text playerCountText = new Text("Select number of players:");
         playerCountText.setFill(Color.WHITE);
@@ -127,7 +131,8 @@ public class UI extends Application {
 
         VBox joinLobbyV = new VBox(
             joinLobbyH,
-            joinLobbyButton
+            joinLobbyButton,
+            errorText
         );
         joinLobbyV.setAlignment(Pos.CENTER);
 
@@ -138,7 +143,8 @@ public class UI extends Application {
         VBox startRoot = new VBox(
             header,
             joinLobbyV,
-            createLobbyV
+            createLobbyV,
+            notificationText
         );
         startRoot.setAlignment(Pos.CENTER);
         startRoot.setSpacing(48);
@@ -153,15 +159,30 @@ public class UI extends Application {
         );
 
         joinLobbyButton.setOnAction(e -> {
-            System.out.println("Connecting to: " + lobbyIDInput.getText());
+            String input = lobbyIDInput.getText();
+            System.out.println("Connecting to: " + input);
+            errorText.setText("");
+            joinLobbyButton.setDisable(true);
 
-            lobbyHandler.joinLobby(lobbyIDInput.getText());
-
-            startRoot.getChildren().remove(joinLobbyV);
-            startRoot.getChildren().remove(createLobbyV);
-            joinedLobbyText.setText("Joined lobby with ID: " + lobbyIDInput.getText());
-            startRoot.getChildren().add(startButton);
-            startRoot.getChildren().add(joinedLobbyText);
+            new Thread(() -> {
+                try {
+                    lobbyHandler.joinLobby(input);
+                    javafx.application.Platform.runLater(() -> {
+                        startRoot.getChildren().remove(joinLobbyV);
+                        startRoot.getChildren().remove(createLobbyV);
+                        joinedLobbyText.setText("Joined lobby with ID: " + input);
+                        startRoot.getChildren().add(startButton);
+                        startRoot.getChildren().add(joinedLobbyText);
+                    });
+                } catch (Exception ex) {
+                    javafx.application.Platform.runLater(() -> {
+                        errorText.setText(ex.getMessage());
+                        joinLobbyButton.setDisable(false);
+                        System.err.println("--- Join Failed ---");
+                        System.err.println(ex.getMessage());
+                    });
+                }
+            }).start();
         });
 
         createLobby = () -> {
@@ -188,7 +209,18 @@ public class UI extends Application {
 
         stage.setScene(startScene);
 
+        stage.sizeToScene();
+        stage.setResizable(false);
+
         stage.show();
+    }
+
+    public void notifyDisconnection(String message) {
+        javafx.application.Platform.runLater(() -> {
+            if (notificationText != null) {
+                notificationText.setText(message);
+            }
+        });
     }
 
     private void startLobby(Stage stage){
@@ -660,6 +692,7 @@ public class UI extends Application {
 
         SnapshotParameters params = new SnapshotParameters();
         params.setFill(Color.TRANSPARENT);
+        params.setViewport(new javafx.geometry.Rectangle2D(0, 0, width, height));
         WritableImage snapshot = canvas.snapshot(params, null);
 
         ImageView imageView = new ImageView(snapshot);
