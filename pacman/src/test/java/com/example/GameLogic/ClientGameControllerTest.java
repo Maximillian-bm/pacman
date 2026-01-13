@@ -185,8 +185,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertEquals("Frightened timer should be reset to full duration", Constants.FRIGHTENED_DURATION_SEC,
-            Ghost.getFrightenedTimerSec(), 0.1);
+        assertEquals(Constants.FRIGHTENED_DURATION_SEC,
+            Ghost.getFrightenedTimerSec(), 0.1, "Frightened timer should be reset to full duration");
     }
 
     @Test
@@ -284,10 +284,10 @@ public class ClientGameControllerTest extends BaseTest {
         assertTrue(foundPellet, "Map should be refilled with pellets after winning");
 
         Player nextPlayer = nextState.players().getFirst();
-        assertEquals("Player should be reset to spawn position on map reset", player.getSpawnPosition().x,
-            nextPlayer.getPosition().x, 0.1);
-        assertEquals("Player should be reset to spawn position on map reset", player.getSpawnPosition().y,
-            nextPlayer.getPosition().y, 0.1);
+        assertEquals(player.getSpawnPosition().x,
+            nextPlayer.getPosition().x, 0.1, "Player should be reset to spawn position on map reset");
+        assertEquals(player.getSpawnPosition().y,
+            nextPlayer.getPosition().y, 0.1, "Player should be reset to spawn position on map reset");
     }
 
     @Test
@@ -552,8 +552,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertNotEquals("Warning: State is mutable. Ghost object was updated in place.", startX,
-            ghost.getPosition().x, 0.001);
+        assertNotEquals(startX,
+            ghost.getPosition().x, 0.001, "Warning: State is mutable. Ghost object was updated in place.");
     }
 
     @Test
