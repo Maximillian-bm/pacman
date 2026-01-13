@@ -1,7 +1,4 @@
-package com.example.UI;
-
-import static com.example.model.Constants.TARGET_FPS;
-import static com.example.model.Constants.TILE_SIZE;
+package com.example.GUI;
 
 import java.util.List;
 
@@ -9,13 +6,13 @@ import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
-import com.example.GameLogic.ClientComs.KeyHandlerOnline;
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.GameState;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
+import com.example.model.Constants;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -203,7 +200,8 @@ public class UI extends Application {
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
-        keyHandler = new KeyHandlerOnline(lobbyHandler.getLobbyID(), lobbyHandler.getPlayerID());
+        Constants.cleanActions.setPlayerID(lobbyHandler.getPlayerID());
+        keyHandler = new KeyHandler(lobbyHandler.getLobbyID(), lobbyHandler.getPlayerID());
 
         scene.setOnKeyPressed(e -> keyHandler.move(e.getCode()));
 
@@ -226,18 +224,18 @@ public class UI extends Application {
         @Override
         public void handle(long time) {
             if (startTime == 0) {startTime = time;}
-            if (time-startTime < ClientMain.clock*(1000000000/TARGET_FPS)) {
+            if (time-(startTime+Constants.timeOffset) < Constants.clock*(1000000000/TARGET_FPS)) {
                 return;
             }
 
-            List<Action> ActionOfClock = Constants.cleanActions.getActions(ClientMain.clock);
+            List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
             if (gameState == null) { 
                 // gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
                 gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
                 savedState = gameState;
             }
             if(Constants.cleanActions.missedAction()){
-                gameState = gameController.updateGameStateFor(savedState, ClientMain.clock);
+                gameState = gameController.updateGameStateFor(savedState, Constants.clock);
                 Constants.cleanActions.fixedMissedAction();
             }else{
                 if(!ActionOfClock.isEmpty()) savedState = gameState;
@@ -253,7 +251,7 @@ public class UI extends Application {
 
             draw(time);
 
-            ClientMain.clock++;
+            Constants.clock++;
         }
 
         private void draw(long time) {

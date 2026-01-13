@@ -9,6 +9,7 @@ public class ActionList {
     private final Map<Integer, List<Action>> actions = new HashMap<>();
     private int nrOfActionsCalled = 0;
     private boolean missedAction = false;
+    private int playerID = 0;
 
     public void addAction(Action action) {
         actions
@@ -22,6 +23,14 @@ public class ActionList {
             : List.of();
         if(!actionsOfClock.isEmpty() && actionsOfClock.get(0).getIndex() > nrOfActionsCalled){
             missedAction = true;
+            if(actionsOfClock.get(0).getPlayerId() == playerID){
+                Constants.actionOffset++;
+                System.out.println("you missed your own action, action offset is now set to "+Constants.actionOffset+"game ticks");
+            }else{
+                Constants.timeOffset = Constants.timeOffset + (500000000/Constants.TARGET_FPS);
+                double temp = Constants.timeOffset/(1000000000/Constants.TARGET_FPS);
+                System.out.println("you missed another players action, your clock offset is now set to "+temp+" game ticks");
+            }
         }else if(!actionsOfClock.isEmpty()){
             nrOfActionsCalled = actionsOfClock.getLast().getIndex() + 1;
         }
@@ -34,5 +43,9 @@ public class ActionList {
 
     public void fixedMissedAction(){
         missedAction = false;
+    }
+
+    public void setPlayerID(int playerID){
+        this.playerID = playerID;
     }
 }
