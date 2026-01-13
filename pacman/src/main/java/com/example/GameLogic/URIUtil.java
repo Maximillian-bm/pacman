@@ -52,6 +52,13 @@ public class URIUtil {
         return buildLobbyURI(baseURI, lobbyId, "cleanAction");
     }
 
+    /**
+     * Builds: tcp://host:port/space1?keep (preserves base query if present)
+     */
+    public static String getSpace1URI(String baseURI) {
+        return buildLobbyURI(baseURI, "space1");
+    }
+
     // ---------- Helpers ----------
 
     private static String buildLobbyURI(String baseURI, int lobbyId, String actionSuffix) {
@@ -78,6 +85,19 @@ public class URIUtil {
             throw new IllegalArgumentException("Invalid URI: " + uri, e);
         }
     }
-}
 
+    private static String buildLobbyURI(String baseURI, String actionSuffix) {
+
+        URI uri = parse(baseURI);
+
+        // Base is like: tcp://127.0.0.1:50000/?keep
+        // We ignore any base path and rebuild exactly as required: "/{action}"
+        String query = uri.getQuery(); // e.g. "keep"
+
+        return uri.getScheme() + "://" +
+               uri.getAuthority() +
+               "/" + actionSuffix +
+               (query != null ? "?" + query : "");
+    }
+}
 
