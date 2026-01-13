@@ -60,6 +60,8 @@ public class UI extends Application {
 
     private Runnable createLobby;
 
+    private Text notificationText;
+
     record TilePos(int x, int y) { }
 
     @Override
@@ -81,6 +83,16 @@ public class UI extends Application {
         Text joinedLobbyText = new Text("");
         joinedLobbyText.setFill(Color.WHITE);
         joinedLobbyText.setStyle("-fx-font-size: 14px;");
+
+        Text errorText = new Text("");
+        errorText.setId("errorText");
+        errorText.setFill(Color.RED);
+        errorText.setStyle("-fx-font-size: 14px;");
+
+        notificationText = new Text("");
+        notificationText.setId("notificationText");
+        notificationText.setFill(Color.YELLOW);
+        notificationText.setStyle("-fx-font-size: 14px;");
 
         Text playerCountText = new Text("Select number of players:");
         playerCountText.setFill(Color.WHITE);
@@ -119,7 +131,8 @@ public class UI extends Application {
 
         VBox joinLobbyV = new VBox(
             joinLobbyH,
-            joinLobbyButton
+            joinLobbyButton,
+            errorText
         );
         joinLobbyV.setAlignment(Pos.CENTER);
 
@@ -130,7 +143,8 @@ public class UI extends Application {
         VBox startRoot = new VBox(
             header,
             joinLobbyV,
-            createLobbyV
+            createLobbyV,
+            notificationText
         );
         startRoot.setAlignment(Pos.CENTER);
         startRoot.setSpacing(48);
@@ -145,15 +159,30 @@ public class UI extends Application {
         );
 
         joinLobbyButton.setOnAction(e -> {
-            System.out.println("Connecting to: " + lobbyIDInput.getText());
+            String input = lobbyIDInput.getText();
+            System.out.println("Connecting to: " + input);
+            errorText.setText("");
+            joinLobbyButton.setDisable(true);
 
-            lobbyHandler.joinLobby(lobbyIDInput.getText());
-
-            startRoot.getChildren().remove(joinLobbyV);
-            startRoot.getChildren().remove(createLobbyV);
-            joinedLobbyText.setText("Joined lobby with ID: " + lobbyIDInput.getText());
-            startRoot.getChildren().add(startButton);
-            startRoot.getChildren().add(joinedLobbyText);
+            new Thread(() -> {
+                try {
+                    lobbyHandler.joinLobby(input);
+                    javafx.application.Platform.runLater(() -> {
+                        startRoot.getChildren().remove(joinLobbyV);
+                        startRoot.getChildren().remove(createLobbyV);
+                        joinedLobbyText.setText("Joined lobby with ID: " + input);
+                        startRoot.getChildren().add(startButton);
+                        startRoot.getChildren().add(joinedLobbyText);
+                    });
+                } catch (Exception ex) {
+                    javafx.application.Platform.runLater(() -> {
+                        errorText.setText(ex.getMessage());
+                        joinLobbyButton.setDisable(false);
+                        System.err.println("--- Join Failed ---");
+                        System.err.println(ex.getMessage());
+                    });
+                }
+            }).start();
         });
 
         createLobby = () -> {
@@ -184,6 +213,14 @@ public class UI extends Application {
         stage.setResizable(false);
 
         stage.show();
+    }
+
+    public void notifyDisconnection(String message) {
+        javafx.application.Platform.runLater(() -> {
+            if (notificationText != null) {
+                notificationText.setText(message);
+            }
+        });
     }
 
     private void startLobby(Stage stage){

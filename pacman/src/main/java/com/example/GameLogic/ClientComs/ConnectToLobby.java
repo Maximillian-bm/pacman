@@ -45,8 +45,15 @@ public class ConnectToLobby {
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
             playerID = (int) t[0];
             nrOfPlayers = (int) t[1];
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid lobby ID: " + lobbyID);
+        } catch (IOException e) {
+            throw new RuntimeException("Lobby " + lobbyID + " not found or connection failed.");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Join interrupted", e);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to join lobby", e);
+            throw new RuntimeException("Failed to join lobby: " + e.getMessage(), e);
         }
     }
 

@@ -29,13 +29,12 @@ import org.testfx.util.WaitForAsyncUtils;
 @DisplayName("User Interface and Frontend Interaction Tests")
 public class UITest extends BaseTest {
 
-    @BeforeAll
-    public static void setupHeadless() {
-    }
+    private UI ui;
 
     @Start
     public void start(Stage stage) {
-        new UI().start(stage);
+        ui = new UI();
+        ui.start(stage);
     }
 
     @Test
@@ -68,7 +67,7 @@ public class UITest extends BaseTest {
 
         robot.clickOn(joinButton);
 
-        WaitForAsyncUtils.sleep(200, java.util.concurrent.TimeUnit.MILLISECONDS);
+        WaitForAsyncUtils.sleep(500, java.util.concurrent.TimeUnit.MILLISECONDS);
 
         long endHeartbeat = heartbeatCount.get();
 
@@ -96,10 +95,11 @@ public class UITest extends BaseTest {
 
         // Wait for potential async UI updates
         WaitForAsyncUtils.waitForFxEvents();
+        WaitForAsyncUtils.sleep(500, java.util.concurrent.TimeUnit.MILLISECONDS);
 
-        Node errorNode = robot.lookup(".text").match(n -> n instanceof Text && ((Text) n).getText().contains("Invalid"))
-            .query();
+        Text errorNode = robot.lookup("#errorText").queryAs(Text.class);
         assertNotNull(errorNode, "Should display error message for invalid Lobby ID");
+        assertTrue(errorNode.getText().contains("Invalid"), "Error message should contain 'Invalid'");
     }
 
     @Test
@@ -129,8 +129,13 @@ public class UITest extends BaseTest {
     public void testPlayerDisconnectionHandling(FxRobot robot) {
         robot.clickOn("Create Lobby");
         
-        // Simulate a disconnection event (requires implementation in UI/LobbyHandler)
-        // verifyThat("A player has disconnected", isVisible());
-        assertTrue(false, "TDD: Implement disconnection notification in UI.");
+        String disconnectMsg = "A player has disconnected";
+        ui.notifyDisconnection(disconnectMsg);
+
+        WaitForAsyncUtils.waitForFxEvents();
+
+        verifyThat(disconnectMsg, isVisible());
+        Text notifyNode = robot.lookup("#notificationText").queryAs(Text.class);
+        assertEquals(disconnectMsg, notifyNode.getText());
     }
 }
