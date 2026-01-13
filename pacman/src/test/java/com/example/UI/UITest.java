@@ -31,19 +31,6 @@ public class UITest extends BaseTest {
 
     @BeforeAll
     public static void setupHeadless() {
-        // Ensure tests run against local server
-        System.setProperty("offline", "true");
-
-        // Default to headless unless explicitly set to false
-        String headless = System.getProperty("headless", "true");
-        if (Boolean.parseBoolean(headless)) {
-            System.setProperty("testfx.robot", "glass");
-            System.setProperty("testfx.headless", "true");
-            System.setProperty("prism.order", "sw");
-            System.setProperty("prism.text", "t2k");
-            System.setProperty("glass.platform", "Monocle");
-            System.setProperty("monocle.platform", "Headless");
-        }
     }
 
     @Start

@@ -66,9 +66,6 @@ public class UI extends Application {
     public void start(Stage stage) {
         stage.setTitle("Pacman");
         initializeLobby(stage);
-        //createLobby.run();
-        //startLobby(stage);
-        //startGame(stage);
     }
 
     private void initializeLobby(Stage stage) {
@@ -182,6 +179,9 @@ public class UI extends Application {
         startButton.setOnAction(e -> startLobby(stage));
 
         stage.setScene(startScene);
+
+        stage.sizeToScene();
+        stage.setResizable(false);
 
         stage.show();
     }
@@ -655,6 +655,7 @@ public class UI extends Application {
 
         SnapshotParameters params = new SnapshotParameters();
         params.setFill(Color.TRANSPARENT);
+        params.setViewport(new javafx.geometry.Rectangle2D(0, 0, width, height));
         WritableImage snapshot = canvas.snapshot(params, null);
 
         ImageView imageView = new ImageView(snapshot);

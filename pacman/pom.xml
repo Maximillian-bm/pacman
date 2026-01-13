@@ -122,6 +122,9 @@
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.2.5</version>
+          <configuration>
+            <argLine>-Dtestfx.robot=glass -Dtestfx.headless=true -Dglass.platform=Monocle -Dmonocle.platform=Headless -Dprism.order=sw -Dmonocle.screen.geometry=1920x1080-32 -Dheadless.geometry=1920x1080-32 -Dprism.allowhidpi=false -Dglass.uiScale=1.0 -Doffline=true</argLine>
+          </configuration>
         </plugin>
 
         <plugin>
