@@ -29,6 +29,9 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
+
 import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.*;
@@ -228,8 +231,9 @@ public class UI extends Application {
             }
 
             List<Action> ActionOfClock = Constants.cleanActions.getActions(ClientMain.clock);
-            if (gameState == null) {
-                gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
+            if (gameState == null) { 
+                // gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
+                gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
                 savedState = gameState;
             }
             if(Constants.cleanActions.missedAction()){
@@ -258,7 +262,7 @@ public class UI extends Application {
 
             drawMap();
 
-            drawPlayerPosition(time);
+            drawPlayers(time);
 
             drawGhosts(time);
 
@@ -266,11 +270,11 @@ public class UI extends Application {
         }
 
         private void drawPoints() {
-            Player localPlayer = gameController.getLocalPlayer();
-            if (localPlayer != null) {
+            List<Player> players = gameState.players();
+            for (int i = 0; i < players.size(); i++) {
                 gc.setFill(Color.WHITE);
                 gc.setFont(new javafx.scene.text.Font(20));
-                gc.fillText("Score: " + localPlayer.getPoints(), 10, 25);
+                gc.fillText("Score: " + players.get(i).getPoints(), (i+1)*10, 25);
             }
         }
 
@@ -327,7 +331,7 @@ public class UI extends Application {
             }
         }
         
-        private void drawPlayerPosition(long time) {
+        private void drawPlayers(long time) {
             gameState.players().forEach(player -> {
                 int sy = switch (player.getDirection()) {
                     case WEST -> 50 * 6;
@@ -343,9 +347,48 @@ public class UI extends Application {
                     default -> sy + 50;
                 };
 
+                Image coloredPlayer;
+                switch (player.getId()) {
+                    case 1: coloredPlayer = colorPlayer(255,0,0) ; break;
+                    case 2: coloredPlayer = colorPlayer(0,255,0) ; break;
+                    case 3: coloredPlayer = colorPlayer(0,0,255) ; break;
+                    default: coloredPlayer = spriteSheet ; break;
+                }
+
                 Position playerTilePos = player.getPosition();
-                gc.drawImage(spriteSheet, 850, sy, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                gc.drawImage(coloredPlayer, 850, sy, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
             });
+        }
+
+        // Modified function from:
+        // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
+        public Image colorPlayer(int nr, int ng, int nb) {
+            int W = (int)spriteSheet.getWidth();
+            int H = (int)spriteSheet.getHeight();
+            WritableImage outputImage = new WritableImage(W, H);
+            PixelReader reader = spriteSheet.getPixelReader();
+            PixelWriter writer = outputImage.getPixelWriter();
+            // Yellow (the player)
+            int or= 255;
+            int og= 241;
+            int ob= 0;
+            for (int y = 0; y < H; y++) {
+                for (int x = 0; x < W; x++) {
+                    int argb = reader.getArgb(x, y);
+                    int a = (argb >> 24) & 0xFF;
+                    int r = (argb >> 16) & 0xFF;
+                    int g = (argb >>  8) & 0xFF;
+                    int b =  argb        & 0xFF;
+                    if (g==og && r==or && b==ob) {
+                        r=nr;
+                        g=ng;
+                        b=nb;
+                    }
+                    argb = (a << 24) | (r << 16) | (g << 8) | b;
+                    writer.setArgb(x, y, argb);
+                }
+            }
+            return outputImage;
         }
 
         private void drawGhosts(long time) {
