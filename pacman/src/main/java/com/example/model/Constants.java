@@ -9,6 +9,7 @@ import static com.example.model.Maps.map1;
 public class Constants {
     //Varibles
     public static int clock = 0;
+    public static int actionOffset = 1;
 
     //Constants
     public final static long LOBBY_TTL = 300000;

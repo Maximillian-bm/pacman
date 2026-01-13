@@ -41,18 +41,18 @@ public class KeyHandler{
     }
 
     public void moveUp() {
-        ActionUtil.registerRawAction(new Action(playerID, Constants.clock + 2, 3), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, Constants.clock + Constants.actionOffset, 3), rawActions);
     }
 
     public void moveDown() {
-        ActionUtil.registerRawAction(new Action(playerID, Constants.clock + 2, 4), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, Constants.clock + Constants.actionOffset, 4), rawActions);
     }
 
     public void moveLeft() {
-        ActionUtil.registerRawAction(new Action(playerID, Constants.clock + 2, 1), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, Constants.clock + Constants.actionOffset, 1), rawActions);
     }
 
     public void moveRight() {
-        ActionUtil.registerRawAction(new Action(playerID, Constants.clock + 2, 2), rawActions);
+        ActionUtil.registerRawAction(new Action(playerID, Constants.clock + Constants.actionOffset, 2), rawActions);
     }
 }
