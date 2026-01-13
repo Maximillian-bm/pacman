@@ -1,5 +1,7 @@
 package com.example.model;
 
+import javafx.scene.paint.Color;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -72,5 +74,14 @@ public class Player extends Entity {
     // Instead of calling a function/event like 'die()' in loseHealth, we can just check if a player is dead like this:
     public boolean isDead() {
         return lives <= 0;
+    }
+
+    public Color getColor() {
+        switch (id) {
+            case 1: return Color.rgb(255, 0, 0);
+            case 2: return Color.rgb(0, 255, 0);
+            case 3: return Color.rgb(0, 0, 255);
+            default: return Color.rgb(255, 241, 0);
+        }
     }
 }
