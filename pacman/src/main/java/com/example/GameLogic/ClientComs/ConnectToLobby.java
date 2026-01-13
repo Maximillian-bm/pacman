@@ -58,6 +58,10 @@ public class ConnectToLobby {
         }
     }
 
+    public void leaveLobby() {
+        throw new UnsupportedOperationException("TDD: Implement this method to handle player disconnection.");
+    }
+
     public void startGame() {
         try {
 
