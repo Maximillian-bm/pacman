@@ -6,29 +6,32 @@ import java.util.List;
 import java.util.Map;
 
 public class ActionList {
-    private final Map<Integer, List<Action>> actions = new HashMap<>();
+    private final Map<Integer, List<Action>> actionsMap = new HashMap<>();
+    private final List<Action> actionsList = new ArrayList<>();
     private int nrOfActionsCalled = 0;
     private boolean missedAction = false;
     private int playerID = 0;
 
     public void addAction(Action action) {
-        actions
+        actionsList.add(action);
+        actionsMap
             .computeIfAbsent(action.getClock(), k -> new ArrayList<>())
             .add(action);
     }
 
     public List<Action> getActions(int clock) {
-        List<Action> actionsOfClock = actions.containsKey(clock)
-            ? List.copyOf(actions.get(clock))
+        List<Action> actionsOfClock = actionsMap.containsKey(clock)
+            ? List.copyOf(actionsMap.get(clock))
             : List.of();
         if(!actionsOfClock.isEmpty() && actionsOfClock.get(0).getIndex() > nrOfActionsCalled){
             missedAction = true;
-            if(actionsOfClock.get(0).getPlayerId() == playerID){
+            if(actionsList.get(nrOfActionsCalled).getPlayerId() == playerID){
                 Constants.actionOffset++;
                 System.out.println("you missed your own action, action offset is now set to "+Constants.actionOffset+"game ticks");
             }else{
                 Constants.timeOffset = Constants.timeOffset + (500000000/Constants.TARGET_FPS);
                 double temp = Constants.timeOffset/(1000000000/Constants.TARGET_FPS);
+                System.out.println(Constants.timeOffset);
                 System.out.println("you missed another players action, your clock offset is now set to "+temp+" game ticks");
             }
         }else if(!actionsOfClock.isEmpty()){
