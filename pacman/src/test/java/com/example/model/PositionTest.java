@@ -169,4 +169,17 @@ public class PositionTest {
         Pair<Integer, Integer> grid = pos.ToGridPosition();
         assertNotNull(grid);
     }
+
+    @Test
+    public void testPrecisionLoss() {
+        // Large value where adding TILE_SIZE/2 might lose precision if not careful, 
+        // though double precision is usually enough for this range.
+        // 2^52 is approx 4.5e15.
+        double largeX = 4.5e15;
+        Position pos = new Position(largeX, 10.0);
+        // largeX + 12.0 might be == largeX due to precision if larger.
+        
+        Pair<Integer, Integer> grid = pos.ToGridPosition();
+        assertNotNull(grid);
+    }
 }

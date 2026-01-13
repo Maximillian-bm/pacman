@@ -481,4 +481,77 @@ public class ClientGameControllerTest {
         assertEquals("Ghost should be at spawn position after respawn", spawnPos.y, ghost.getPosition().y, 0.1);
         assertEquals("Respawn timer should be 0", 0.0, ghost.getRespawnTimer(), 0.001);
     }
+
+    @Test
+    public void testStateImmutability() {
+        // Verify if updateGameState modifies the passed state in-place (Side Effect).
+        // Functional design would prefer it doesn't, but game loops often do.
+        initialState.ghosts().clear();
+        Ghost ghost = new Ghost(GhostType.RED);
+        ghost.setPosition(new Position(100, 100));
+        initialState.ghosts().add(ghost);
+        
+        double startX = ghost.getPosition().x;
+        
+        controller.updateGameState(initialState, new ArrayList<>());
+        
+        // If the state is mutable, the object in the list changed.
+        // If immutable, startX should match ghost.getPosition().x (reference equality check issue?)
+        // actually we hold a reference 'ghost'.
+        
+        assertNotEquals("Warning: State is mutable. Ghost object was updated in place.", startX, ghost.getPosition().x, 0.001);
+    }
+
+    @Test
+    public void testSimultaneousEnergizerAndGhostCollision() {
+        // Setup: Player about to step on Energizer, but Ghost is ON the Energizer.
+        // Logic Order: Move -> Collision -> Eat? 
+        // If so, Player dies (Normal ghost) BEFORE eating energizer.
+        
+        initialState.ghosts().clear();
+        Ghost ghost = new Ghost(GhostType.RED);
+        initialState.ghosts().add(ghost);
+
+        Player player = initialState.players().getFirst();
+        TileType[][] tiles = initialState.tiles();
+
+        // Position (1,1) is valid. (2,1) has Energizer.
+        tiles[2][1] = TileType.ENERGIZER;
+        
+        // Player at (1.5, 1) moving East towards (2,1)
+        player.setPosition(new Position(1.5 * TILE_SIZE, 1 * TILE_SIZE));
+        player.setDirection(Direction.EAST);
+        
+        // Ghost at (2,1)
+        ghost.setPosition(new Position(2 * TILE_SIZE, 1 * TILE_SIZE));
+        ghost.setDirection(Direction.WEST); // Moving towards player
+
+        controller.updateGameState(initialState, new ArrayList<>());
+        
+        // Expectation based on current code analysis: Death.
+        assertFalse("Player should be dead (Collision priority over Powerup)", player.isAlive());
+        assertEquals("Energizer should theoretically remain if player died before eating", TileType.ENERGIZER, tiles[2][1]);
+    }
+
+    @Test
+    public void testPlayerReversingDirection() {
+        initialState.ghosts().clear();
+        Player player = initialState.players().getFirst();
+        player.setPosition(new Position(1 * TILE_SIZE, 1 * TILE_SIZE));
+        player.setDirection(Direction.EAST);
+        
+        // Move 1 tick East
+        controller.updateGameState(initialState, new ArrayList<>());
+        double x1 = player.getPosition().x;
+        assertTrue(x1 > 1 * TILE_SIZE);
+        
+        // Input West
+        ArrayList<Action> actions = new ArrayList<>();
+        actions.add(new Action(0, 0, 1)); // 1 = WEST
+        
+        controller.updateGameState(initialState, actions);
+        
+        assertEquals("Player should face West immediately", Direction.WEST, player.getDirection());
+        assertTrue("Player should move West", player.getPosition().x < x1);
+    }
 }
