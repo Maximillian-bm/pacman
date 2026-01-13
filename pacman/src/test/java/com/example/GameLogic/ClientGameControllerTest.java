@@ -927,4 +927,88 @@ public class ClientGameControllerTest extends BaseTest {
         assertEquals("Clock should be at target clock", 5, finalState.clock());
         assertEquals("Frightened timer should have expired in the final state context", 0.0, Ghost.getFrightenedTimerSec(), 0.001);
     }
+
+    @Test
+    public void testMultiClientResyncConsistency() {
+        // Shared sequence of actions for 2 players
+        List<Action> sharedActionsList = new ArrayList<>();
+        for (int i = 1; i <= 20; i++) {
+            sharedActionsList.add(new Action(0, i, 2, (i - 1) * 2));     // P0 moves EAST
+            sharedActionsList.add(new Action(1, i, 4, (i - 1) * 2 + 1)); // P1 moves SOUTH
+        }
+
+        // --- "Client 1" View: Processes all 20 ticks at once ---
+        Constants.cleanActions = new ActionList();
+        sharedActionsList.forEach(Constants.cleanActions::addAction);
+        GameState stateClient1 = controller.initializeGameState(2);
+        stateClient1 = controller.updateGameStateFor(stateClient1, 20);
+
+        // --- "Client 2" View: Processes in chunks (simulating lag/bursts) ---
+        // Reset static state for fresh simulation
+        Ghost.setFrightenedTimerSec(0.0);
+        Ghost.setGhostChaseTimer(0.0);
+        Ghost.setGhostScatterMode(true);
+        
+        Constants.cleanActions = new ActionList();
+        sharedActionsList.forEach(Constants.cleanActions::addAction);
+        GameState stateClient2 = controller.initializeGameState(2);
+        
+        stateClient2 = controller.updateGameStateFor(stateClient2, 5);
+        stateClient2 = controller.updateGameStateFor(stateClient2, 15);
+        stateClient2 = controller.updateGameStateFor(stateClient2, 20);
+
+        // --- Assertions: Both clients should have identical positions for all entities ---
+        assertEquals("Clocks should match", stateClient1.clock(), stateClient2.clock());
+        
+        for (int i = 0; i < 2; i++) {
+            Player p1 = stateClient1.players().get(i);
+            Player p2 = stateClient2.players().get(i);
+            assertEquals("Player " + i + " X should match", p1.getPosition().x, p2.getPosition().x, 0.001);
+            assertEquals("Player " + i + " Y should match", p1.getPosition().y, p2.getPosition().y, 0.001);
+            assertEquals("Player " + i + " direction should match", p1.getDirection(), p2.getDirection());
+        }
+
+        for (int i = 0; i < stateClient1.ghosts().size(); i++) {
+            Ghost g1 = stateClient1.ghosts().get(i);
+            Ghost g2 = stateClient2.ghosts().get(i);
+            assertEquals("Ghost " + i + " X should match", g1.getPosition().x, g2.getPosition().x, 0.001);
+            assertEquals("Ghost " + i + " Y should match", g1.getPosition().y, g2.getPosition().y, 0.001);
+        }
+    }
+
+    @Test
+    public void testResyncAfterRollback() {
+        // Scenario: Client is at clock 15, then discovers an action from another player happened at clock 10.
+        // It must resimulate from the last known good state (clock 9) up to 15.
+        
+        Constants.cleanActions = new ActionList();
+        // Initial actions (only P0 moves)
+        for (int i = 1; i <= 15; i++) {
+            Constants.cleanActions.addAction(new Action(0, i, 2, i)); // P0 moves EAST
+        }
+        
+        GameState stateAtClock9 = controller.initializeGameState(2);
+        stateAtClock9 = controller.updateGameStateFor(stateAtClock9, 9);
+        
+        // Client mistakenly proceeds to 15 without knowing about P1's action at 10
+        GameState stateWrong = controller.updateGameStateFor(stateAtClock9, 15);
+        
+        // Now "discover" the late action for P1 at clock 10
+        Constants.cleanActions.addAction(new Action(1, 10, 4, 100)); // P1 moves SOUTH at clock 10
+        
+        // Resync from the last good state (9) to 15
+        GameState stateCorrected = controller.updateGameStateFor(stateAtClock9, 15);
+        
+        // Assertions
+        assertNotEquals("P1 position should be different after corrected resimulation", 
+            stateWrong.players().get(1).getPosition().y, 
+            stateCorrected.players().get(1).getPosition().y, 0.001);
+        
+        assertTrue("P1 should have moved SOUTH in the corrected state", 
+            stateCorrected.players().get(1).getPosition().y > stateWrong.players().get(1).getPosition().y);
+            
+        assertEquals("P0 position should still be consistent (independent movement)", 
+            stateWrong.players().get(0).getPosition().x, 
+            stateCorrected.players().get(0).getPosition().x, 0.001);
+    }
 }
