@@ -3,6 +3,7 @@ package com.example.GameLogic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
@@ -40,10 +41,11 @@ public class GameIntegrationTest extends BaseTest {
         assertEquals(5, action.getIndex());
     }
 
-    @Test(expected = AssertionError.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testActionUtilConversionInvalidLength() {
         Object[] input = new Object[]{1, 100};
-        ActionUtil.convertObjToAction(input);
+        Action action = ActionUtil.convertObjToAction(input);
+        assertNotNull("Action should not be null if it somehow succeeded", action);
     }
 
     @Test
