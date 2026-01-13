@@ -790,9 +790,12 @@ public class ClientGameControllerTest extends BaseTest {
         Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
 
         // Resimulate over eating the energizer
-        GameState finalState = controller.updateGameStateFor(initialState, 10);
+        GameState finalState = controller.updateGameStateFor(initialState, 15);
 
+        assertNotNull("Final state should not be null", finalState);
+        assertEquals("Energizer should be eaten in final state", TileType.EMPTY, finalState.tiles()[3][3]);
         assertTrue("Ghosts should be frightened after eating energizer in resimulation", Ghost.getFrightenedTimerSec() > 0);
+        assertTrue("Player should have more points in final state", finalState.players().getFirst().getPoints() > 0);
     }
 
     @Test
@@ -918,8 +921,10 @@ public class ClientGameControllerTest extends BaseTest {
         assertTrue(Ghost.getFrightenedTimerSec() > 0);
         
         // Resimulate 5 ticks
-        controller.updateGameStateFor(initialState, 5);
+        GameState finalState = controller.updateGameStateFor(initialState, 5);
         
-        assertEquals("Frightened timer should have expired during resimulation", 0.0, Ghost.getFrightenedTimerSec(), 0.001);
+        assertNotNull("Final state should not be null", finalState);
+        assertEquals("Clock should be at target clock", 5, finalState.clock());
+        assertEquals("Frightened timer should have expired in the final state context", 0.0, Ghost.getFrightenedTimerSec(), 0.001);
     }
 }
