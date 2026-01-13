@@ -4,6 +4,7 @@ import static com.example.model.Constants.TARGET_FPS;
 import static com.example.model.Constants.TILE_SIZE;
 
 import java.util.List;
+import java.lang.StringBuilder;
 
 import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
@@ -274,7 +275,16 @@ public class UI extends Application {
             for (int i = 0; i < players.size(); i++) {
                 gc.setFill(players.get(i).getColor());
                 gc.setFont(new javafx.scene.text.Font(20));
-                gc.fillText("Score: " + players.get(i).getPoints(), 10, (i+1)*20);
+
+                StringBuilder hearts = new StringBuilder("");
+                for (int j = 0; j < players[i].getLives(); j++) {
+                    hearts.append("❤️");
+                }
+                // for (int j = 0; j < 5 - players[i].getLives(); j++) {
+                //     hearts.append(" ");
+                // }
+
+                gc.fillText(hearts + " Score: " + players.get(i).getPoints(), 10, (i+1)*20);
             }
         }
 
