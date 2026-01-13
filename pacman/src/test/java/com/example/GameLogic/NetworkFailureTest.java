@@ -10,30 +10,25 @@ public class NetworkFailureTest {
     @Test(expected = TimeoutException.class, timeout = 2000)
     public void testJoinLobbyTimeout() throws Throwable {
         // This test expects the client to throw a formatted TimeoutException 
-        // when it cannot connect within a reasonable time, rather than crashing 
-        // or throwing a raw ConnectException (which is wrapped in IOException and caught).
-        
-        // Since existing code catches IOException and prints it, this test will likely 
-        // finish without exception (but with invalid state), failing the 'expected' condition.
-        // OR it will throw nothing and fail.
-        
         ConnectToLobby client = new ConnectToLobby();
-        client.joinLobby("12345"); // Non-existent lobby on non-existent server (effectively)
-        
-        // If the method returns silently (as it currently does on error), 
-        // we throw a dummy exception to say "Hey, you didn't throw TimeoutException!"
-        // But JUnit handles "expected" by failing if NO exception is thrown.
+        // Use the new method that supports timeout
+        client.joinLobby("12345", 500); 
     }
 
     @Test(timeout = 1000)
     public void testReaderHandleDisconnect() throws InterruptedException {
-        // Test that Reader detects a disconnect and stops, rather than looping forever.
-        // Since Reader.run() is an infinite loop that catches exceptions, this thread will never finish.
-        // The timeout=1000 will kill it and mark the test as FAILED (Timeout).
-        
+        // Test that Reader detects a disconnect and updates its state
         Reader reader = new Reader(999);
         Thread t = new Thread(reader);
         t.start();
-        t.join(); // Wait for it to finish (it won't)
+        
+        // Wait briefly for it to "start" (it will fail immediately in reality)
+        t.join(100);
+        
+        // Assert that the reader reports disconnected
+        // Note: currently isConnected throws UnsupportedOperationException, so this will fail as expected for TDD
+        if (reader.isConnected()) {
+            throw new RuntimeException("Reader should report disconnected");
+        }
     }
 }

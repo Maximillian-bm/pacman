@@ -131,8 +131,9 @@ public class PlayerConnectionTest extends BaseTest {
         p2.leaveLobby(); 
 
         // Assert game logic handles this (e.g., game doesn't crash, p2 is removed from state)
-        // This requires access to GameState or similar checks, abstractly represented here:
-        // verify(gameState).removePlayer(p2.getPlayerID());
+        // Check that player 2 is no longer in the game state
+        boolean isP2InGame = host.isPlayerInGame(p2.getPlayerID());
+        assertEquals("Player 2 should be removed from game after leaving", false, isP2InGame);
     }
 
     @Test

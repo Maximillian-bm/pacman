@@ -23,6 +23,10 @@ public class Reader implements Runnable {
         this.lobbyID = lobbyID;
     }
 
+    public boolean isConnected() {
+        throw new UnsupportedOperationException("TDD: Implement check for active connection.");
+    }
+
     //Continuesly reads from the remote clean actions space and updates the static list of clean actions
     @Override
     public void run() {
