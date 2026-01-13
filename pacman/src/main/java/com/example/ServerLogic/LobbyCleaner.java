@@ -39,7 +39,7 @@ public class LobbyCleaner implements Runnable{
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }              
+                }
             }
             lobbys.removeAll(toBeRemoved);
             lobbys.addAll(toBeAdded);

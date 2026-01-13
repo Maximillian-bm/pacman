@@ -59,6 +59,10 @@ public class Lobby implements Runnable{
         return timeOfCreation;
     }
 
+    public void setTimeOfCreation(long timeOfCreation){
+        this.timeOfCreation = timeOfCreation;
+    }
+
     public int getLobbyID(){
         return lobbyID;
     }
