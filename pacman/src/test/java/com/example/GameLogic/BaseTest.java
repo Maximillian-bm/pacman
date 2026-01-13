@@ -1,5 +1,6 @@
 package com.example.GameLogic;
 
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.rules.Timeout;
@@ -7,6 +8,11 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 public abstract class BaseTest {
+
+    @BeforeClass
+    public static void ensureServerStarted() {
+        LocalTestServer.startServer();
+    }
     
     @Rule
     public TestRule timeoutRule = new TestRule() {
