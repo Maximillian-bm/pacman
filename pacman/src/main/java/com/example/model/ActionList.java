@@ -9,6 +9,7 @@ public class ActionList {
     private final Map<Integer, List<Action>> actions = new HashMap<>();
     private int nrOfActionsCalled = 0;
     private boolean missedAction = false;
+    private int playerID = 0;
 
     public void addAction(Action action) {
         actions
@@ -34,5 +35,9 @@ public class ActionList {
 
     public void fixedMissedAction(){
         missedAction = false;
+    }
+
+    public void setPlayerID(int playerID){
+        this.playerID = playerID;
     }
 }
