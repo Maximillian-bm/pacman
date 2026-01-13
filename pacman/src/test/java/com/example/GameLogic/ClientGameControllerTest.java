@@ -259,6 +259,12 @@ public class ClientGameControllerTest extends BaseTest {
             }
         }
         assertTrue("Map should be refilled with pellets after winning", foundPellet);
+
+        Player nextPlayer = nextState.players().getFirst();
+        assertEquals("Player should be reset to spawn position on map reset", player.getSpawnPosition().x,
+            nextPlayer.getPosition().x, 0.1);
+        assertEquals("Player should be reset to spawn position on map reset", player.getSpawnPosition().y,
+            nextPlayer.getPosition().y, 0.1);
     }
 
     @Test
@@ -626,6 +632,16 @@ public class ClientGameControllerTest extends BaseTest {
         }
 
         controller.updateGameState(initialState, new ArrayList<>());
+
+        int remainingPellets = 0;
+        for (TileType[] row : initialState.tiles()) {
+            for (TileType t : row) {
+                if (t == TileType.PAC_DOT) {
+                    remainingPellets++;
+                }
+            }
+        }
+        assertEquals("Pellets should be removed from map", pellets - 127, remainingPellets);
 
         boolean foundFruit = false;
         for (TileType[] row : initialState.tiles()) {

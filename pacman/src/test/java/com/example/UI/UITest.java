@@ -36,7 +36,7 @@ public class UITest extends ApplicationTest {
     }
 
     @Override
-    public void start(Stage stage) throws Exception {
+    public void start(Stage stage) {
         new UI().start(stage);
     }
 
@@ -119,7 +119,7 @@ public class UITest extends ApplicationTest {
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            System.err.println("Interrupted while waiting for game to start. Error: " + e.getMessage());
         }
 
         assertTrue("Game clock should be advancing in the AnimationTimer", ClientMain.clock > initialClock);
