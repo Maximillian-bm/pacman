@@ -22,11 +22,6 @@ public class SystemPerformanceTest extends BaseTest {
     private GameState initialState;
 
     @Override
-    protected long getTimeoutSeconds() {
-        return 10;
-    }
-
-    @Override
     protected long getOptimalTimeoutMillis() {
         return 1000;
     }
@@ -147,7 +142,7 @@ public class SystemPerformanceTest extends BaseTest {
         }
 
         if (!exceptions.isEmpty()) {
-            fail("Exceptions during concurrent joining: " + exceptions.get(0).getMessage());
+            fail("Exceptions during concurrent joining: " + exceptions.getFirst().getMessage());
         }
 
         Thread startA = new Thread(hostA::startGame);
@@ -177,7 +172,7 @@ public class SystemPerformanceTest extends BaseTest {
     }
 
     @Test
-    public void testMixedGameStatesInMultipleLobbies() throws InterruptedException {
+    public void testMixedGameStatesInMultipleLobbies() {
         ConnectToLobby host1 = new ConnectToLobby();
         host1.createLobby(4);
 
@@ -229,11 +224,7 @@ public class SystemPerformanceTest extends BaseTest {
 
         Thread.sleep(100);
 
-        try {
-            p2.leaveLobby();
-        } catch (UnsupportedOperationException e) {
-            throw e;
-        }
+        p2.leaveLobby();
 
         assertFalse("Player 2 should be removed from game state", host.isPlayerInGame(p2.getPlayerID()));
     }
@@ -250,8 +241,6 @@ public class SystemPerformanceTest extends BaseTest {
         try {
             intruder.joinLobby(String.valueOf(host.getLobbyID()));
             fail("Should not be able to join a started game as regular player");
-        } catch (Exception e) {
-
-        }
+        } catch (Exception _) { }
     }
 }
