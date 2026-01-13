@@ -277,12 +277,12 @@ public class UI extends Application {
                 gc.setFont(new javafx.scene.text.Font(20));
 
                 StringBuilder hearts = new StringBuilder("");
-                for (int j = 0; j < players[i].getLives(); j++) {
+                for (int j = 0; j < players.get(i).getLives(); j++) {
                     hearts.append("❤️");
                 }
-                // for (int j = 0; j < 5 - players[i].getLives(); j++) {
-                //     hearts.append(" ");
-                // }
+                for (int j = 0; j < 5 - players.get(i).getLives(); j++) {
+                    hearts.append("   ");
+                }
 
                 gc.fillText(hearts + " Score: " + players.get(i).getPoints(), 10, (i+1)*20);
             }
