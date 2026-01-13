@@ -6,6 +6,7 @@ import com.example.common.BaseTest;
 import com.example.common.OptimalTimeoutMillis;
 import com.example.model.Action;
 import com.example.model.ActionList;
+import com.example.model.Constants;
 import org.junit.Test;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -44,14 +45,15 @@ public class GameIntegrationTest extends BaseTest {
 
     @Test
     public void testURIUtilGetLobbyID() {
-        String uri = "tcp://127.0.0.1:50000/123sync?keep";
+        String baseUri = Constants.REMOTE_PUBLIC_URI;
+        String uri = baseUri.replace("/?", "/123sync?");
         int id = URIUtil.getLobbyID(uri);
         assertEquals(123, id);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testURIUtilInvalidURI() {
-        URIUtil.getLobbyID("tcp://127.0.0.1:50000/?keep");
+        URIUtil.getLobbyID(Constants.REMOTE_PUBLIC_URI);
     }
 
     @Test
