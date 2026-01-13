@@ -1,8 +1,5 @@
 package com.example.GUI;
 
-import static com.example.model.Constants.TARGET_FPS;
-import static com.example.model.Constants.TILE_SIZE;
-
 import java.util.List;
 
 import com.example.GameLogic.ClientGameController;
@@ -225,18 +222,18 @@ public class UI extends Application {
         @Override
         public void handle(long time) {
             if (startTime == 0) {startTime = time;}
-            if (time-startTime < ClientMain.clock*(1000000000/TARGET_FPS)) {
+            if (time-startTime < Constants.clock*(1000000000/TARGET_FPS)) {
                 return;
             }
 
-            List<Action> ActionOfClock = Constants.cleanActions.getActions(ClientMain.clock);
+            List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
             if (gameState == null) { 
                 // gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
                 gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
                 savedState = gameState;
             }
             if(Constants.cleanActions.missedAction()){
-                gameState = gameController.updateGameStateFor(savedState, ClientMain.clock);
+                gameState = gameController.updateGameStateFor(savedState, Constants.clock);
                 Constants.cleanActions.fixedMissedAction();
             }else{
                 if(!ActionOfClock.isEmpty()) savedState = gameState;
@@ -252,7 +249,7 @@ public class UI extends Application {
 
             draw(time);
 
-            ClientMain.clock++;
+            Constants.clock++;
         }
 
         private void draw(long time) {
