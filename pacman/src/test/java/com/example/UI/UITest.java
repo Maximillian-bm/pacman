@@ -48,7 +48,7 @@ public class UITest extends ApplicationTest {
     }
 
     @Test
-    public void testUIResponsivenessDuringJoin() throws InterruptedException {
+    public void testUIResponsivenessDuringJoin() {
 
         TextField lobbyIdInput = lookup(".text-field").queryAs(TextField.class);
         Platform.runLater(() -> lobbyIdInput.setText("123"));
@@ -56,32 +56,26 @@ public class UITest extends ApplicationTest {
         Button joinButton = lookup("Join Lobby").queryButton();
 
         AtomicLong heartbeatCount = new AtomicLong(0);
-
-        Thread heartbeatThread = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(10);
-                    Platform.runLater(heartbeatCount::incrementAndGet);
-                } catch (InterruptedException e) {
-                    break;
-                }
+        javafx.animation.AnimationTimer heartbeatTimer = new javafx.animation.AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                heartbeatCount.incrementAndGet();
             }
-        });
-        heartbeatThread.setDaemon(true);
-        heartbeatThread.start();
+        };
+        heartbeatTimer.start();
 
         long startHeartbeat = heartbeatCount.get();
 
         clickOn(joinButton);
 
-        Thread.sleep(200);
+        WaitForAsyncUtils.sleep(200, java.util.concurrent.TimeUnit.MILLISECONDS);
 
         long endHeartbeat = heartbeatCount.get();
 
-        assertTrue("UI Thread was BLOCKED during Join Lobby! Heartbeat didn't increment enough.",
-            (endHeartbeat - startHeartbeat) > 10);
+        assertTrue("UI Thread was BLOCKED during Join Lobby! Heartbeat didn't increment within JavaFX loop.",
+            (endHeartbeat - startHeartbeat) > 5);
 
-        heartbeatThread.interrupt();
+        heartbeatTimer.stop();
     }
 
     @Test

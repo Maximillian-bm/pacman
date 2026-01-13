@@ -28,7 +28,6 @@ public class PlayerLogicTest extends BaseTest {
     private ClientGameController controller;
     private GameState initialState;
     private ConnectToLobby host;
-    private List<ConnectToLobby> players;
 
     @Override
     protected long getTimeoutSeconds() {
@@ -48,7 +47,6 @@ public class PlayerLogicTest extends BaseTest {
         initialState.ghosts().clear();
 
         host = new ConnectToLobby();
-        players = new ArrayList<>();
     }
 
     @Test
