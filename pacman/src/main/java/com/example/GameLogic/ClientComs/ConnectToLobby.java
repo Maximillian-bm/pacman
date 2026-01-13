@@ -32,12 +32,8 @@ public class ConnectToLobby {
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
             playerID = (int) t[0];
             this.nrOfPlayers = (int) t[1];
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create lobby", e);
         }
         System.out.println("Created lobby with ID: "+lobbyID);
     }
@@ -49,12 +45,8 @@ public class ConnectToLobby {
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
             playerID = (int) t[0];
             nrOfPlayers = (int) t[1];
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to join lobby", e);
         }
     }
 

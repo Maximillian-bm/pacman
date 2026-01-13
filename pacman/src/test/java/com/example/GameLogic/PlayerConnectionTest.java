@@ -1,16 +1,17 @@
 package com.example.GameLogic;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import com.example.GameLogic.ClientComs.ConnectToLobby;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.ArrayList;
-import java.util.List;
 
-import static org.junit.Assert.*;
-
-public class PlayerConnectionTest {
+public class PlayerConnectionTest extends BaseTest {
 
     private ConnectToLobby host;
     private List<ConnectToLobby> players;
@@ -68,6 +69,7 @@ public class PlayerConnectionTest {
 
         // Simulate game start sequence
         Thread gameThread = new Thread(() -> host.startGame());
+        gameThread.setDaemon(true);
         gameThread.start();
 
         // Player 2 leaves right as game starts
@@ -98,6 +100,7 @@ public class PlayerConnectionTest {
         ConnectToLobby p4 = new ConnectToLobby();
         // This runs in a separate thread to avoid blocking the test if it hangs
         Thread t = new Thread(() -> p4.joinLobby(lobbyId));
+        t.setDaemon(true);
         t.start();
         
         try {
@@ -130,5 +133,50 @@ public class PlayerConnectionTest {
         // Assert game logic handles this (e.g., game doesn't crash, p2 is removed from state)
         // This requires access to GameState or similar checks, abstractly represented here:
         // verify(gameState).removePlayer(p2.getPlayerID());
+    }
+
+    @Test
+    public void testSimultaneousConnections() throws InterruptedException {
+        int numberOfPlayers = 10;
+        host.createLobby(numberOfPlayers);
+        String lobbyId = String.valueOf(host.getLobbyID());
+
+        List<ConnectToLobby> connectedPlayers = Collections.synchronizedList(new ArrayList<>());
+        List<Thread> threads = new ArrayList<>();
+        List<Throwable> exceptions = Collections.synchronizedList(new ArrayList<>());
+
+        // Create threads for multiple players joining simultaneously
+        for (int i = 0; i < numberOfPlayers - 1; i++) {
+            Thread t = new Thread(() -> {
+                try {
+                    ConnectToLobby player = new ConnectToLobby();
+                    player.joinLobby(lobbyId);
+                    connectedPlayers.add(player);
+                } catch (Throwable e) {
+                    exceptions.add(e);
+                }
+            });
+            t.setDaemon(true);
+            threads.add(t);
+        }
+
+        // Start all threads effectively at once
+        for (Thread t : threads) t.start();
+
+        // Wait for all threads to finish
+        for (Thread t : threads) t.join(2000); // 2 second timeout
+
+        if (!exceptions.isEmpty()) {
+            fail("Exceptions occurred during simultaneous connection: " + exceptions.get(0).getMessage());
+        }
+
+        assertEquals("All players should have joined", numberOfPlayers - 1, connectedPlayers.size());
+        
+        // Verify all have unique IDs
+        long uniqueIds = connectedPlayers.stream()
+                .map(ConnectToLobby::getPlayerID)
+                .distinct()
+                .count();
+        assertEquals("All players should have unique IDs", connectedPlayers.size(), uniqueIds);
     }
 }

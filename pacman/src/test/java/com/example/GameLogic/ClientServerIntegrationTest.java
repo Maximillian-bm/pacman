@@ -1,12 +1,15 @@
 package com.example.GameLogic;
 
-import com.example.GameLogic.ClientComs.ConnectToLobby;
-import com.example.model.Constants;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import java.io.IOException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
-public class ClientServerIntegrationTest {
+import com.example.GameLogic.ClientComs.ConnectToLobby;
+import org.junit.Test;
+
+public class ClientServerIntegrationTest extends BaseTest {
+
+    private ConnectToLobby client;
 
     @Test
     public void testCreateLobbySuccess() {
