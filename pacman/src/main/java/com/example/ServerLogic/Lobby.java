@@ -8,21 +8,24 @@ import org.jspace.SpaceRepository;
 
 import com.example.GameLogic.*;
 
-public class Lobby {
+public class Lobby implements Runnable{
 
     private SpaceRepository rep;
     private int nrOfPlayers;
     private LobbyActionHandler actionHandler;
     private int lobbyID;
+    private long timeOfCreation;
 
-    public Lobby(SpaceRepository rep, int nrOfPlayers, int lobbyID){
+    public Lobby(SpaceRepository rep, int nrOfPlayers, int lobbyID, long timeOfCreation){
         this.lobbyID = lobbyID;
         this.rep = rep;
         this.nrOfPlayers = nrOfPlayers;
         this.actionHandler = new LobbyActionHandler(rep, lobbyID);
+        this.timeOfCreation = timeOfCreation;
     }
 
-    public void start(){
+    @Override
+    public void run(){
         Thread actionThread = new Thread(actionHandler);
         actionThread.setDaemon(true);
         actionThread.start();
@@ -50,6 +53,18 @@ public class Lobby {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public long getTimeOfCreation(){
+        return timeOfCreation;
+    }
+
+    public int getLobbyID(){
+        return lobbyID;
+    }
+
+    public void stop(){
+        actionHandler.stop();
     }
 
 }

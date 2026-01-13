@@ -24,7 +24,7 @@ public class ConnectToLobby {
 
     public void createLobby(int nrOfPlayers) {
         try {
-            Space space1 = new RemoteSpace(Constants.REMOTE_PUBLIC_URI);
+            Space space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
             lobbyID = (int) space1.get(new FormalField(Integer.class))[0];
             space1.put(lobbyID, nrOfPlayers);
             space1.get(new ActualField(lobbyID), new ActualField(nrOfPlayers), new ActualField("OK"));
