@@ -1,12 +1,37 @@
 package com.example.GameLogic.ClientComs;
+import static com.example.model.Constants.REMOTE_PUBLIC_URI;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.jspace.RemoteSpace;
+import org.jspace.Space;
+
+import com.example.GameLogic.ActionUtil;
 import com.example.GameLogic.ClientMain;
+import com.example.GameLogic.URIUtil;
 import com.example.model.Action;
 import com.example.model.Constants;
 
 import javafx.scene.input.KeyCode;
 
-public class KeyHandler {
+public class KeyHandler{
+
+    private Space rawActions;
+    private int playerID;
+
+    public KeyHandler(int lobbyID, int playerID) {
+        this.playerID = playerID;
+        try {
+            this.rawActions = new RemoteSpace(URIUtil.getRawActionURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void move(KeyCode key) {
         if(key == KeyCode.W || key == KeyCode.UP) moveUp();
@@ -16,18 +41,18 @@ public class KeyHandler {
     }
 
     public void moveUp() {
-        Constants.cleanActions.addAction(new Action(0, ClientMain.clock + 2, 3));
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 3), rawActions);
     }
 
     public void moveDown() {
-        Constants.cleanActions.addAction(new Action(0, ClientMain.clock + 2, 4));
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 4), rawActions);
     }
 
     public void moveLeft() {
-        Constants.cleanActions.addAction(new Action(0, ClientMain.clock + 2, 1));
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 1), rawActions);
     }
 
     public void moveRight() {
-        Constants.cleanActions.addAction(new Action(0, ClientMain.clock + 2, 2));
+        ActionUtil.registerRawAction(new Action(playerID, ClientMain.clock + 2, 2), rawActions);
     }
 }

@@ -1,4 +1,4 @@
-package com.example.UI;
+package com.example.GUI;
 
 import static com.example.model.Constants.TARGET_FPS;
 import static com.example.model.Constants.TILE_SIZE;
@@ -9,7 +9,6 @@ import com.example.GameLogic.ClientGameController;
 import com.example.GameLogic.ClientMain;
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
-import com.example.GameLogic.ClientComs.KeyHandlerOnline;
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.GameState;
@@ -203,7 +202,7 @@ public class UI extends Application {
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
-        keyHandler = new KeyHandlerOnline(lobbyHandler.getLobbyID(), lobbyHandler.getPlayerID());
+        keyHandler = new KeyHandler(lobbyHandler.getLobbyID(), lobbyHandler.getPlayerID());
 
         scene.setOnKeyPressed(e -> keyHandler.move(e.getCode()));
 

@@ -1,7 +1,7 @@
 package com.example.GameLogic;
 
+import com.example.GUI.UI;
 import com.example.GameLogic.ClientComs.Reader;
-import com.example.UI.UI;
 import com.example.model.*;
 import javafx.application.Application;
 
