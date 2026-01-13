@@ -1,9 +1,5 @@
 package com.example.model;
 
-import java.util.ArrayList;
-
-import org.jspace.SpaceRepository;
-
 import static com.example.model.Maps.map1;
 
 public class Constants {
@@ -15,9 +11,19 @@ public class Constants {
     //Constants
     public final static long LOBBY_TTL = 300000;
     public final static int NR_OF_LOBBYS_CAP = 100;
-    public final static ActionList cleanActions = new ActionList();
-    public final static String REMOTE_PUBLIC_URI = "tcp://pacman.maximillian.info:50000/?keep";
-    public final static String LOCAL_GATE = "tcp://192.168.1.112:50000/?keep";
+    public static ActionList cleanActions = new ActionList();
+
+    public static String REMOTE_PUBLIC_URI;
+    public static String LOCAL_GATE;
+    static {
+        if (System.getProperty("offline") != null) {
+            REMOTE_PUBLIC_URI = "tcp://127.0.0.1:50000/?keep";
+            LOCAL_GATE = "tcp://127.0.0.1:50000/?keep";
+        } else {
+            REMOTE_PUBLIC_URI = "tcp://pacman.maximillian.info:50000/?keep";
+            LOCAL_GATE = "tcp://192.168.1.112:50000/?keep";
+        }
+    }
 
     public final static int TILE_SIZE = 48;
 
