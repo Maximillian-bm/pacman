@@ -12,6 +12,7 @@ import com.example.model.GameState;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
+import com.example.model.Constants;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -222,7 +223,7 @@ public class UI extends Application {
         @Override
         public void handle(long time) {
             if (startTime == 0) {startTime = time;}
-            if (time-startTime < Constants.clock*(1000000000/TARGET_FPS)) {
+            if (Constants.timeOffset+time-startTime < Constants.clock*(1000000000/TARGET_FPS)) {
                 return;
             }
 

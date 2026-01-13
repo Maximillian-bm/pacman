@@ -10,6 +10,7 @@ public class Constants {
     //Varibles
     public static int clock = 0;
     public static int actionOffset = 1;
+    public static int timeOffset = 0;
 
     //Constants
     public final static long LOBBY_TTL = 300000;
