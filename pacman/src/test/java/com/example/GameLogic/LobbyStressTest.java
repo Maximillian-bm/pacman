@@ -1,20 +1,22 @@
 package com.example.GameLogic;
 
-import com.example.GameLogic.ClientComs.ConnectToLobby;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import com.example.GameLogic.ClientComs.ConnectToLobby;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class LobbyStressTest extends BaseTest {
 
-    @org.junit.Rule
-    public org.junit.rules.Timeout globalTimeout = org.junit.rules.Timeout.seconds(10);
+    @Override
+    protected long getOptimalTimeoutMillis() {
+        return 5000;
+    }
 
     @Test
     public void testConcurrentLobbyLifecycles() throws InterruptedException {

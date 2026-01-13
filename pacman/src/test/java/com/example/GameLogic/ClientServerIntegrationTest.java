@@ -11,6 +11,16 @@ public class ClientServerIntegrationTest extends BaseTest {
 
     private ConnectToLobby client;
 
+    @Override
+    protected long getTimeoutSeconds() {
+        return 5;
+    }
+
+    @Override
+    protected long getOptimalTimeoutMillis() {
+        return 2000;
+    }
+
     @Test
     public void testCreateLobbySuccess() {
         ConnectToLobby client = new ConnectToLobby();
@@ -53,7 +63,7 @@ public class ClientServerIntegrationTest extends BaseTest {
         assertNotEquals("Should not be able to join non-existent lobby", 999999, client.getLobbyID());
     }
 
-    @Test(timeout = 5000)
+    @Test
     public void testStartGameWait() throws InterruptedException {
         // Test that startGame blocks or waits correctly.
         // This requires a full lobby usually.

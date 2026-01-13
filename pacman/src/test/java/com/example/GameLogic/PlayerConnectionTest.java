@@ -16,6 +16,16 @@ public class PlayerConnectionTest extends BaseTest {
     private ConnectToLobby host;
     private List<ConnectToLobby> players;
 
+    @Override
+    protected long getTimeoutSeconds() {
+        return 5;
+    }
+
+    @Override
+    protected long getOptimalTimeoutMillis() {
+        return 2000;
+    }
+
     @Before
     public void setUp() {
         host = new ConnectToLobby();

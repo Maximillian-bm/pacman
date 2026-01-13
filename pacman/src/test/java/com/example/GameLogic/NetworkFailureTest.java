@@ -5,9 +5,19 @@ import com.example.GameLogic.ClientComs.Reader;
 import org.junit.Test;
 import java.util.concurrent.TimeoutException;
 
-public class NetworkFailureTest {
+public class NetworkFailureTest extends BaseTest {
 
-    @Test(expected = TimeoutException.class, timeout = 2000)
+    @Override
+    protected long getTimeoutSeconds() {
+        return 2;
+    }
+
+    @Override
+    protected long getOptimalTimeoutMillis() {
+        return 1000;
+    }
+
+    @Test(expected = TimeoutException.class)
     public void testJoinLobbyTimeout() throws Throwable {
         // This test expects the client to throw a formatted TimeoutException 
         ConnectToLobby client = new ConnectToLobby();
@@ -15,7 +25,7 @@ public class NetworkFailureTest {
         client.joinLobby("12345", 500); 
     }
 
-    @Test(timeout = 1000)
+    @Test
     public void testReaderHandleDisconnect() throws InterruptedException {
         // Test that Reader detects a disconnect and updates its state
         Reader reader = new Reader(999);

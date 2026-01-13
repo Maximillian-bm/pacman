@@ -8,7 +8,17 @@ import org.junit.Test;
 import java.util.List;
 import static org.junit.Assert.*;
 
-public class GameCommunicationTest {
+public class GameCommunicationTest extends BaseTest {
+
+    @Override
+    protected long getTimeoutSeconds() {
+        return 1;
+    }
+
+    @Override
+    protected long getOptimalTimeoutMillis() {
+        return 50;
+    }
 
     @Test
     public void testActionUtilConversionValid() {

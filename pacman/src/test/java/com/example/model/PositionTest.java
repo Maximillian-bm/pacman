@@ -5,10 +5,20 @@ import org.junit.Test;
 import static com.example.model.Constants.TILE_SIZE;
 import static org.junit.Assert.*;
 
-public class PositionTest {
+public class PositionTest extends BaseTest {
+
+    @Override
+    protected long getTimeoutSeconds() {
+        return 1;
+    }
+
+    @Override
+    protected long getOptimalTimeoutMillis() {
+        return 50;
+    }
 
     @Test
-    public void testInitialization() {
+    public void testEqualsSameObject() {
         Position pos = new Position(10.5, 20.7);
         assertEquals(10.5, pos.x, 0.0);
         assertEquals(20.7, pos.y, 0.0);

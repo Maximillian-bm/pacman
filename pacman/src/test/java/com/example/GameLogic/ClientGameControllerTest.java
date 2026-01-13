@@ -20,10 +20,20 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
-public class ClientGameControllerTest {
+public class ClientGameControllerTest extends BaseTest {
 
     private ClientGameController controller;
     private GameState initialState;
+
+    @Override
+    protected long getTimeoutSeconds() {
+        return 2;
+    }
+
+    @Override
+    protected long getOptimalTimeoutMillis() {
+        return 200;
+    }
 
     @Before
     public void setUp() {
