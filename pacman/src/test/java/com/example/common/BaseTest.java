@@ -47,11 +47,9 @@ public abstract class BaseTest {
         }
     };
 
-
     protected long getTimeoutSeconds() {
         return 10;
     }
-
 
     protected long getOptimalTimeoutMillis() {
         return 100;

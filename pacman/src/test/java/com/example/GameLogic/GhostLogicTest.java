@@ -41,7 +41,6 @@ public class GhostLogicTest extends BaseTest {
         ClientMain.clock = 0;
     }
 
-
     @Test
     public void testGhostTrappedInBox() {
 
@@ -120,12 +119,12 @@ public class GhostLogicTest extends BaseTest {
         }
     }
 
-
     @Test
     public void testGhostDoesNotTargetRespawningPlayer() {
         Player p1 = state.players().get(0);
         Player p2 = state.players().get(1);
-        Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst().get();
+        Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
+            .orElseThrow(() -> new AssertionError("Blinky not found"));
 
         blinky.setPosition(new Position(3 * TILE_SIZE, TILE_SIZE));
         blinky.setDirection(Direction.SOUTH);
@@ -147,7 +146,8 @@ public class GhostLogicTest extends BaseTest {
     public void testGhostDoesNotTargetDeadPlayer() {
         Player p1 = state.players().get(0);
         Player p2 = state.players().get(1);
-        Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst().get();
+        Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
+            .orElseThrow(() -> new AssertionError("Blinky not found"));
 
         blinky.setPosition(new Position(3 * TILE_SIZE, TILE_SIZE));
         blinky.setDirection(Direction.SOUTH);
@@ -168,7 +168,8 @@ public class GhostLogicTest extends BaseTest {
 
     @Test
     public void testGhostGoesToCornerWhenNoAlivePlayers() {
-        Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst().get();
+        Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
+            .orElseThrow(() -> new AssertionError("Blinky not found"));
 
         for (Player p : state.players()) {
             p.setAlive(false);
@@ -189,7 +190,8 @@ public class GhostLogicTest extends BaseTest {
     public void testFrightenedGhostFleesFromAlivePlayerIgnoringDeadOnes() {
         Player p1 = state.players().get(0);
         Player p2 = state.players().get(1);
-        Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst().get();
+        Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
+            .orElseThrow(() -> new AssertionError("Blinky not found"));
 
         Ghost.setFrightenedTimerSec(10.0);
 
@@ -213,7 +215,8 @@ public class GhostLogicTest extends BaseTest {
     public void testGhostChangesTargetImmediatelyWhenPlayerDies() {
         Player p1 = state.players().get(0);
         Player p2 = state.players().get(1);
-        Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst().get();
+        Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
+            .orElseThrow(() -> new AssertionError("Blinky not found"));
 
         blinky.setPosition(new Position(3 * TILE_SIZE, TILE_SIZE));
         blinky.setDirection(Direction.SOUTH);

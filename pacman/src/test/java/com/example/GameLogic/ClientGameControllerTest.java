@@ -48,7 +48,6 @@ public class ClientGameControllerTest extends BaseTest {
 
         initialState = controller.initializeGameState(1);
 
-
     }
 
     @Test
@@ -300,7 +299,6 @@ public class ClientGameControllerTest extends BaseTest {
         GameState nextState = controller.updateGameState(initialState, new ArrayList<>());
 
         assertNotNull("Winner should be set", nextState.winner());
-
 
     }
 

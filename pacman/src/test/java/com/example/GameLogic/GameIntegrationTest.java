@@ -29,7 +29,6 @@ public class GameIntegrationTest extends BaseTest {
         return 2000;
     }
 
-
     @Test
     public void testActionUtilConversionValid() {
         Object[] input = new Object[]{1, 100, 2, 5};
@@ -85,7 +84,6 @@ public class GameIntegrationTest extends BaseTest {
         list.fixedMissedAction();
         assertFalse(list.missedAction());
     }
-
 
     @Test
     public void testCreateLobbySuccess() {
@@ -156,7 +154,6 @@ public class GameIntegrationTest extends BaseTest {
 
         assertNotEquals("Should not be able to join full lobby", creator.getLobbyID(), joiner.getLobbyID());
     }
-
 
     @Test(expected = TimeoutException.class)
     public void testJoinLobbyTimeout() throws Throwable {

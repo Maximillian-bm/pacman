@@ -51,7 +51,6 @@ public class PlayerLogicTest extends BaseTest {
         players = new ArrayList<>();
     }
 
-
     @Test
     public void testPlayerEatsPlayerWithEnergizer() {
         Player predator = initialState.players().getFirst();
@@ -159,7 +158,6 @@ public class PlayerLogicTest extends BaseTest {
 
         assertTrue("Score should handle overflow gracefully (e.g. cap or use long)", p.getPoints() > 0);
     }
-
 
     @Test
     public void testPlayerJoinAndLeaveLobby() {

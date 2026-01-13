@@ -32,7 +32,6 @@ public class SystemPerformanceTest extends BaseTest {
         initialState = controller.initializeGameState(4);
     }
 
-
     @Test
     public void testUpdateLoopSmoothness() {
         int iterations = 5000;
@@ -85,7 +84,6 @@ public class SystemPerformanceTest extends BaseTest {
         double durationMs = (endTime - startTime) / 1_000_000.0;
         assertTrue("Collision detection scaling is poor: " + durationMs + "ms", durationMs < 5.0);
     }
-
 
     @Test
     public void testConcurrentLobbyLifecycles() throws InterruptedException {
