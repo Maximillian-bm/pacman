@@ -41,6 +41,7 @@ public class LobbyCleaner implements Runnable{
             }
             lobbys.removeAll(toBeRemoved);
             lobbys.addAll(toBeAdded);
+            toBeAdded.removeAll(toBeAdded);
         }
     }
 
