@@ -5,7 +5,7 @@ import static com.example.model.Maps.map1;
 public class Constants {
     //Varibles
     public static int clock = 0;
-    public static int actionOffset = 1;
+    public static int actionOffset = 6;
     public static long timeOffset = 0;
 
     //Constants
@@ -34,7 +34,7 @@ public class Constants {
     
     public static final double PLAYER_RESPAWN_DELAY_SEC = 2.0;
 
-    public final static long TARGET_FPS = 15;
+    public final static long TARGET_FPS = 20;
     public static final double CENTER_EPS_PX = 1.5;
 
     // Player
