@@ -27,6 +27,7 @@ public class Player extends Entity {
 
     @Getter @Setter
     private Position spawnPosition;
+    @Getter @Setter
     private boolean isEnergized;
 
     public Player(int id) {
