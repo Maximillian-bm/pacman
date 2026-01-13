@@ -7,7 +7,11 @@ import org.jspace.SpaceRepository;
 import static com.example.model.Maps.map1;
 
 public class Constants {
+    //Varibles
     public static int clock = 0;
+
+    //Constants
+    public final static long LOBBY_TTL = 300000;
     public final static int NR_OF_LOBBYS_CAP = 100;
     public final static ActionList cleanActions = new ActionList();
     public final static String REMOTE_PUBLIC_URI = "tcp://pacman.maximillian.info:50000/?keep";
