@@ -1,9 +1,9 @@
 package com.example.GameLogic;
 
 import static com.example.model.Constants.TILE_SIZE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.common.BaseTest;
 import com.example.model.Constants;
@@ -96,8 +96,8 @@ public class GhostLogicTest extends BaseTest {
 
         controller.updateGameState(state, new ArrayList<>());
 
-        assertTrue("Ghost 1 should be eaten (respawning)", g1.getRespawnTimer() > 0);
-        assertTrue("Ghost 2 should be eaten (respawning)", g2.getRespawnTimer() > 0);
+        assertTrue(g1.getRespawnTimer() > 0, "Ghost 1 should be eaten (respawning)");
+        assertTrue(g2.getRespawnTimer() > 0, "Ghost 2 should be eaten (respawning)");
     }
 
     @Test
@@ -108,7 +108,7 @@ public class GhostLogicTest extends BaseTest {
 
         controller.updateGameState(state, new ArrayList<>());
 
-        assertEquals("Respawn timer should cap at 0.0", 0.0, g.getRespawnTimer(), 0.00001);
+        assertEquals(0.0, g.getRespawnTimer(), 0.00001, "Respawn timer should cap at 0.0");
     }
 
     @Test
@@ -121,8 +121,8 @@ public class GhostLogicTest extends BaseTest {
         controller.updateGameState(state, new ArrayList<>());
 
         for (Ghost g : state.ghosts()) {
-            assertEquals("All ghosts should have respawned at their base points", 0.0, g.getRespawnTimer(), 0.001);
-            assertNotEquals("Ghost should not be at 'hidden' position", -1000, g.getPosition().x, 0.1);
+            assertEquals(0.0, g.getRespawnTimer(), 0.001, "All ghosts should have respawned at their base points");
+            assertNotEquals(-1000, g.getPosition().x, 0.1, "Ghost should not be at 'hidden' position");
         }
     }
 
@@ -147,7 +147,7 @@ public class GhostLogicTest extends BaseTest {
 
         controller.updateGameState(state, new ArrayList<>());
 
-        assertEquals("Ghost should target the only alive player (East)", Direction.EAST, blinky.getDirection());
+        assertEquals(Direction.EAST, blinky.getDirection(), "Ghost should target the only alive player (East)");
     }
 
     @Test
@@ -171,7 +171,7 @@ public class GhostLogicTest extends BaseTest {
 
         controller.updateGameState(state, new ArrayList<>());
 
-        assertEquals("Ghost should target the only alive player (East)", Direction.EAST, blinky.getDirection());
+        assertEquals(Direction.EAST, blinky.getDirection(), "Ghost should target the only alive player (East)");
     }
 
     @Test
@@ -193,10 +193,9 @@ public class GhostLogicTest extends BaseTest {
 
         controller.updateGameState(state, new ArrayList<>());
 
-        assertEquals("Ghost should move towards its corner if no players are alive", Direction.EAST,
-            blinky.getDirection());
-        assertTrue("Ghost should have moved East", blinky.getPosition().x > startX);
-        assertEquals("Ghost Y should be unchanged if moving purely East", startY, blinky.getPosition().y, 0.01);
+        assertEquals(Direction.EAST, blinky.getDirection(), "Ghost should move towards its corner if no players are alive");
+        assertTrue(blinky.getPosition().x > startX, "Ghost should have moved East");
+        assertEquals(startY, blinky.getPosition().y, 0.01, "Ghost Y should be unchanged if moving purely East");
     }
 
     @Test
@@ -222,9 +221,8 @@ public class GhostLogicTest extends BaseTest {
 
         controller.updateGameState(state, new ArrayList<>());
 
-        assertEquals("Frightened ghost should flee from the only alive player (West)", Direction.WEST,
-            blinky.getDirection());
-        assertTrue("Ghost should have moved West away from P1", blinky.getPosition().x < startX);
+        assertEquals(Direction.WEST, blinky.getDirection(), "Frightened ghost should flee from the only alive player (West)");
+        assertTrue(blinky.getPosition().x < startX, "Ghost should have moved West away from P1");
     }
 
     @Test
@@ -250,6 +248,6 @@ public class GhostLogicTest extends BaseTest {
 
         controller.updateGameState(state, new ArrayList<>());
 
-        assertEquals("Ghost should immediately retarget to P2 after P1 dies", Direction.EAST, blinky.getDirection());
+        assertEquals(Direction.EAST, blinky.getDirection(), "Ghost should immediately retarget to P2 after P1 dies");
     }
 }

@@ -4,8 +4,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.Timeout;
 import java.util.concurrent.TimeUnit;
 
+@Timeout(value = 10, unit = TimeUnit.SECONDS)
 public abstract class BaseTest {
 
     private long startTime;

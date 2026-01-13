@@ -1,10 +1,10 @@
 package com.example.GameLogic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.Reader;
@@ -91,7 +91,7 @@ public class GameIntegrationTest extends BaseTest {
         list.addAction(a1);
 
         list.getActions(10);
-        assertTrue("Should have missed action", list.missedAction());
+        assertTrue(list.missedAction(), "Should have missed action");
 
         list.fixedMissedAction();
         assertFalse(list.missedAction());
@@ -102,8 +102,8 @@ public class GameIntegrationTest extends BaseTest {
     public void testCreateLobbySuccess() {
         ConnectToLobby client = new ConnectToLobby();
         client.createLobby(2);
-        assertTrue("Lobby ID should be positive", client.getLobbyID() > 0);
-        assertTrue("Player ID should be set (usually 0 for creator)", client.getPlayerID() >= 0);
+        assertTrue(client.getLobbyID() > 0, "Lobby ID should be positive");
+        assertTrue(client.getPlayerID() >= 0, "Player ID should be set (usually 0 for creator)");
     }
 
     @Test
@@ -112,13 +112,13 @@ public class GameIntegrationTest extends BaseTest {
         ConnectToLobby creator = new ConnectToLobby();
         creator.createLobby(2);
         int lobbyId = creator.getLobbyID();
-        assertTrue("Failed to create lobby for join test", lobbyId > 0);
+        assertTrue(lobbyId > 0, "Failed to create lobby for join test");
 
         ConnectToLobby joiner = new ConnectToLobby();
         joiner.joinLobby(String.valueOf(lobbyId));
-        assertEquals("Joined lobby ID should match", lobbyId, joiner.getLobbyID());
-        assertTrue("Player ID should be valid", joiner.getPlayerID() >= 0);
-        assertNotEquals("Players should have different IDs", creator.getPlayerID(), joiner.getPlayerID());
+        assertEquals(lobbyId, joiner.getLobbyID(), "Joined lobby ID should match");
+        assertTrue(joiner.getPlayerID() >= 0, "Player ID should be valid");
+        assertNotEquals(creator.getPlayerID(), joiner.getPlayerID(), "Players should have different IDs");
     }
 
     @Test
@@ -135,7 +135,7 @@ public class GameIntegrationTest extends BaseTest {
     public void testJoinNonExistentLobby() {
         ConnectToLobby client = new ConnectToLobby();
         client.joinLobby("999999");
-        assertNotEquals("Should not be able to join non-existent lobby", 999999, client.getLobbyID());
+        assertNotEquals(999999, client.getLobbyID(), "Should not be able to join non-existent lobby");
     }
 
     @Test
@@ -161,7 +161,7 @@ public class GameIntegrationTest extends BaseTest {
         ConnectToLobby client2 = new ConnectToLobby();
         client2.createLobby(2);
 
-        assertNotEquals("Lobby IDs should be unique", client1.getLobbyID(), client2.getLobbyID());
+        assertNotEquals(client1.getLobbyID(), client2.getLobbyID(), "Lobby IDs should be unique");
     }
 
     @Test
@@ -173,7 +173,7 @@ public class GameIntegrationTest extends BaseTest {
         ConnectToLobby joiner = new ConnectToLobby();
         joiner.joinLobby(String.valueOf(creator.getLobbyID()));
 
-        assertNotEquals("Should not be able to join full lobby", creator.getLobbyID(), joiner.getLobbyID());
+        assertNotEquals(creator.getLobbyID(), joiner.getLobbyID(), "Should not be able to join full lobby");
     }
 
     @Test

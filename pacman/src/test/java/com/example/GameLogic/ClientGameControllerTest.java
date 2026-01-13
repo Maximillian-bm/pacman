@@ -1,11 +1,11 @@
 package com.example.GameLogic;
 
 import static com.example.model.Constants.TILE_SIZE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.common.BaseTest;
 import com.example.model.Action;
@@ -62,14 +62,14 @@ public class ClientGameControllerTest extends BaseTest {
         assertEquals(5, state.ghosts().size());
 
         Player player = state.players().getFirst();
-        assertNotNull("Player should have a spawn position", player.getSpawnPosition());
-        assertEquals("Player should start at spawn X", player.getSpawnPosition().x, player.getPosition().x, 0.01);
-        assertEquals("Player should start at spawn Y", player.getSpawnPosition().y, player.getPosition().y, 0.01);
+        assertNotNull(player.getSpawnPosition(), "Player should have a spawn position");
+        assertEquals(player.getSpawnPosition().x, player.getPosition().x, 0.01, "Player should start at spawn X");
+        assertEquals(player.getSpawnPosition().y, player.getPosition().y, 0.01, "Player should start at spawn Y");
 
         for (Ghost ghost : state.ghosts()) {
-            assertNotNull("Ghost should have a spawn position", ghost.getSpawnPosition());
-            assertEquals("Ghost should start at spawn X", ghost.getSpawnPosition().x, ghost.getPosition().x, 0.01);
-            assertEquals("Ghost should start at spawn Y", ghost.getSpawnPosition().y, ghost.getPosition().y, 0.01);
+            assertNotNull(ghost.getSpawnPosition(), "Ghost should have a spawn position");
+            assertEquals(ghost.getSpawnPosition().x, ghost.getPosition().x, 0.01, "Ghost should start at spawn X");
+            assertEquals(ghost.getSpawnPosition().y, ghost.getPosition().y, 0.01, "Ghost should start at spawn Y");
         }
     }
 
@@ -86,7 +86,7 @@ public class ClientGameControllerTest extends BaseTest {
         controller.updateGameState(initialState, new ArrayList<>());
         double endX = player.getPosition().x;
 
-        assertTrue("Player should have moved East", endX > startX);
+        assertTrue(endX > startX, "Player should have moved East");
         assertEquals(startX + (Constants.PLAYER_SPEED / Constants.TARGET_FPS), endX, 0.001);
     }
 
@@ -102,7 +102,7 @@ public class ClientGameControllerTest extends BaseTest {
         controller.updateGameState(initialState, new ArrayList<>());
         Position pos = player.getPosition();
 
-        assertEquals("Player should be stopped by wall at x=" + TILE_SIZE, TILE_SIZE, pos.x, 0.1);
+        assertEquals(TILE_SIZE, pos.x, 0.1, "Player should be stopped by wall at x=" + TILE_SIZE);
     }
 
     @Test
@@ -117,9 +117,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertEquals("Player should ignore invalid turn and keep facing East", Direction.EAST,
-            player.getDirection());
-        assertTrue("Player should keep moving East", player.getPosition().x > TILE_SIZE);
+        assertEquals(Direction.EAST, player.getDirection(), "Player should ignore invalid turn and keep facing East");
+        assertTrue(player.getPosition().x > TILE_SIZE, "Player should keep moving East");
     }
 
     @Test
@@ -136,7 +135,7 @@ public class ClientGameControllerTest extends BaseTest {
         controller.updateGameState(initialState, new ArrayList<>());
         Position pos = player.getPosition();
 
-        assertTrue("Player should wrap to the right side, x=" + pos.x, pos.x > mapWidth / 2);
+        assertTrue(pos.x > mapWidth / 2, "Player should wrap to the right side, x=" + pos.x);
     }
 
     @Test
@@ -152,8 +151,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertTrue("Points should increase", player.getPoints() > initialPoints);
-        assertEquals("Tile should become EMPTY", TileType.EMPTY, tiles[3][3]);
+        assertTrue(player.getPoints() > initialPoints, "Points should increase");
+        assertEquals(TileType.EMPTY, tiles[3][3], "Tile should become EMPTY");
     }
 
     @Test
@@ -168,8 +167,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertTrue("Frightened timer should be active", Ghost.getFrightenedTimerSec() > 0);
-        assertEquals("Tile should become EMPTY", TileType.EMPTY, tiles[3][3]);
+        assertTrue(Ghost.getFrightenedTimerSec() > 0, "Frightened timer should be active");
+        assertEquals(TileType.EMPTY, tiles[3][3], "Tile should become EMPTY");
     }
 
     @Test
@@ -210,8 +209,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         GameState nextState = controller.updateGameState(initialState, new ArrayList<>());
 
-        assertNotNull("Winner should be declared when all dots are eaten", nextState.winner());
-        assertEquals("Player 0 should be the winner", 0, nextState.winner().getId());
+        assertNotNull(nextState.winner(), "Winner should be declared when all dots are eaten");
+        assertEquals(0, nextState.winner().getId(), "Player 0 should be the winner");
     }
 
     @Test
@@ -231,7 +230,7 @@ public class ClientGameControllerTest extends BaseTest {
                 }
             }
         }
-        assertFalse("Fruit (Cherry) should NOT be on the map initially", foundFruit);
+        assertFalse(foundFruit, "Fruit (Cherry) should NOT be on the map initially");
 
         int dotsEaten = 0;
         for (int x = 0; x < tiles.length && dotsEaten < 70; x++) {
@@ -254,7 +253,7 @@ public class ClientGameControllerTest extends BaseTest {
                 }
             }
         }
-        assertTrue("Fruit (Cherry) should spawn after eating dots", foundFruit);
+        assertTrue(foundFruit, "Fruit (Cherry) should spawn after eating dots");
     }
 
     @Test
@@ -282,7 +281,7 @@ public class ClientGameControllerTest extends BaseTest {
                 }
             }
         }
-        assertTrue("Map should be refilled with pellets after winning", foundPellet);
+        assertTrue(foundPellet, "Map should be refilled with pellets after winning");
 
         Player nextPlayer = nextState.players().getFirst();
         assertEquals("Player should be reset to spawn position on map reset", player.getSpawnPosition().x,
@@ -307,7 +306,7 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertTrue("Ghost speed should increase on level up", Ghost.getGHOSTSPEED() > initialSpeed);
+        assertTrue(Ghost.getGHOSTSPEED() > initialSpeed, "Ghost speed should increase on level up");
     }
 
     @Test
@@ -325,7 +324,7 @@ public class ClientGameControllerTest extends BaseTest {
 
         GameState nextState = controller.updateGameState(initialState, new ArrayList<>());
 
-        assertNotNull("Winner should be set", nextState.winner());
+        assertNotNull(nextState.winner(), "Winner should be set");
         
         boolean foundPellet = false;
         for (TileType[] row : nextState.tiles()) {
@@ -336,8 +335,8 @@ public class ClientGameControllerTest extends BaseTest {
                 }
             }
         }
-        assertTrue("Map should be refilled with pellets on level progression", foundPellet);
-        assertEquals("Clock should reset on new level", 1, nextState.clock());
+        assertTrue(foundPellet, "Map should be refilled with pellets on level progression");
+        assertEquals(1, nextState.clock(), "Clock should reset on new level");
     }
 
     @Test
@@ -358,8 +357,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertEquals("Player should lose a life", 2, player.getLives());
-        assertFalse("Player should be waiting for respawn", player.isAlive());
+        assertEquals(2, player.getLives(), "Player should lose a life");
+        assertFalse(player.isAlive(), "Player should be waiting for respawn");
     }
 
     @Test
@@ -381,8 +380,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertEquals("Player should lose only 1 life for simultaneous collision", 2, player.getLives());
-        assertFalse("Player should be waiting for respawn", player.isAlive());
+        assertEquals(2, player.getLives(), "Player should lose only 1 life for simultaneous collision");
+        assertFalse(player.isAlive(), "Player should be waiting for respawn");
     }
 
     @Test
@@ -404,8 +403,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertEquals("Player should NOT lose a life", 3, player.getLives());
-        assertTrue("Ghost should be on respawn timer", ghost.getRespawnTimer() > 0);
+        assertEquals(3, player.getLives(), "Player should NOT lose a life");
+        assertTrue(ghost.getRespawnTimer() > 0, "Ghost should be on respawn timer");
     }
 
     @Test
@@ -424,8 +423,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertEquals("Player lives should not decrease while respawning", 3, player.getLives());
-        assertTrue("Respawn timer should still be active", player.getRespawnTimer() > 0.0);
+        assertEquals(3, player.getLives(), "Player lives should not decrease while respawning");
+        assertTrue(player.getRespawnTimer() > 0.0, "Respawn timer should still be active");
     }
 
     @Test
@@ -447,8 +446,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertEquals("Player should lose a life immediately upon unsafe respawn", 2, player.getLives());
-        assertFalse("Player should be dead again", player.isAlive());
+        assertEquals(2, player.getLives(), "Player should lose a life immediately upon unsafe respawn");
+        assertFalse(player.isAlive(), "Player should be dead again");
     }
 
     @Test
@@ -469,8 +468,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertTrue("Ghost 1 should move East", g1.getPosition().x > 3 * TILE_SIZE);
-        assertTrue("Ghost 2 should move West", g2.getPosition().x < 4 * TILE_SIZE);
+        assertTrue(g1.getPosition().x > 3 * TILE_SIZE, "Ghost 1 should move East");
+        assertTrue(g2.getPosition().x < 4 * TILE_SIZE, "Ghost 2 should move West");
     }
 
     @Test
@@ -481,8 +480,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertFalse("Should have switched to Chase mode", Ghost.isGhostScatterMode());
-        assertEquals("Timer should reset", 0.0, Ghost.getGhostChaseTimer(), 0.1);
+        assertFalse(Ghost.isGhostScatterMode(), "Should have switched to Chase mode");
+        assertEquals(0.0, Ghost.getGhostChaseTimer(), 0.1, "Timer should reset");
     }
 
     @Test
@@ -502,8 +501,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertEquals("Lives should be 0", 0, player.getLives());
-        assertFalse("Player should be dead", player.isAlive());
+        assertEquals(0, player.getLives(), "Lives should be 0");
+        assertFalse(player.isAlive(), "Player should be dead");
     }
 
     @Test
@@ -522,8 +521,8 @@ public class ClientGameControllerTest extends BaseTest {
         Ghost.setFrightenedTimerSec(10.0);
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertTrue("Ghost should be on respawn timer", ghost.getRespawnTimer() > 0);
-        assertEquals("Ghost should be hidden", -1000, ghost.getPosition().x, 0.1);
+        assertTrue(ghost.getRespawnTimer() > 0, "Ghost should be on respawn timer");
+        assertEquals(-1000, ghost.getPosition().x, 0.1, "Ghost should be hidden");
 
         ghost.setRespawnTimer(0.001);
 
@@ -535,9 +534,9 @@ public class ClientGameControllerTest extends BaseTest {
             Ghost.setGHOSTSPEED(originalSpeed);
         }
 
-        assertEquals("Ghost should be at spawn position after respawn", spawnPos.x, ghost.getPosition().x, 0.1);
-        assertEquals("Ghost should be at spawn position after respawn", spawnPos.y, ghost.getPosition().y, 0.1);
-        assertEquals("Respawn timer should be 0", 0.0, ghost.getRespawnTimer(), 0.001);
+        assertEquals(spawnPos.x, ghost.getPosition().x, 0.1, "Ghost should be at spawn position after respawn");
+        assertEquals(spawnPos.y, ghost.getPosition().y, 0.1, "Ghost should be at spawn position after respawn");
+        assertEquals(0.0, ghost.getRespawnTimer(), 0.001, "Respawn timer should be 0");
     }
 
     @Test
@@ -578,9 +577,9 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertFalse("Player should be dead (Collision priority over Powerup)", player.isAlive());
-        assertEquals("Energizer should theoretically remain if player died before eating", TileType.ENERGIZER,
-            tiles[2][1]);
+        assertFalse(player.isAlive(), "Player should be dead (Collision priority over Powerup)");
+        assertEquals(TileType.ENERGIZER,
+            tiles[2][1], "Energizer should theoretically remain if player died before eating");
     }
 
     @Test
@@ -600,8 +599,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, actions);
 
-        assertEquals("Player should face West immediately", Direction.WEST, player.getDirection());
-        assertTrue("Player should move West", player.getPosition().x < x1);
+        assertEquals(Direction.WEST, player.getDirection(), "Player should face West immediately");
+        assertTrue(player.getPosition().x < x1, "Player should move West");
     }
 
     @Test
@@ -633,7 +632,7 @@ public class ClientGameControllerTest extends BaseTest {
 
         GameState nextState = controller.updateGameState(highClockState, new ArrayList<>());
 
-        assertTrue("Clock should handle potential high values gracefully", nextState.clock() != 0);
+        assertTrue(nextState.clock() != 0, "Clock should handle potential high values gracefully");
     }
 
     @Test
@@ -651,7 +650,7 @@ public class ClientGameControllerTest extends BaseTest {
 
         GameState nextState = controller.updateGameState(initialState, new ArrayList<>());
 
-        assertNotNull("Winner should be declared when map is empty", nextState.winner());
+        assertNotNull(nextState.winner(), "Winner should be declared when map is empty");
     }
 
     @Test
@@ -693,7 +692,7 @@ public class ClientGameControllerTest extends BaseTest {
                 }
             }
         }
-        assertEquals("Pellets should be removed from map", pellets - 127, remainingPellets);
+        assertEquals(pellets - 127, remainingPellets, "Pellets should be removed from map");
 
         boolean foundFruit = false;
         for (TileType[] row : initialState.tiles()) {
@@ -705,7 +704,7 @@ public class ClientGameControllerTest extends BaseTest {
             }
         }
 
-        assertTrue("Fruit should spawn after eating pellets", foundFruit);
+        assertTrue(foundFruit, "Fruit should spawn after eating pellets");
     }
 
     @Test
@@ -720,11 +719,10 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertNotNull("Player should maintain an intended direction until turn is executed",
-            p.getIntendedDirection());
-        assertEquals("Player should still be facing East if not yet at center of tile", Direction.EAST, p.getDirection());
-        assertTrue("Player should have moved forward East", p.getPosition().x > startX);
-        assertEquals("Player Y should not have changed yet", TILE_SIZE, p.getPosition().y, 0.001);
+        assertNotNull(p.getIntendedDirection(), "Player should maintain an intended direction until turn is executed");
+        assertEquals(Direction.EAST, p.getDirection(), "Player should still be facing East if not yet at center of tile");
+        assertTrue(p.getPosition().x > startX, "Player should have moved forward East");
+        assertEquals(TILE_SIZE, p.getPosition().y, 0.001, "Player Y should not have changed yet");
     }
 
     @Test
@@ -739,8 +737,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertTrue("Player should have teleported to left", p.getPosition().x < TILE_SIZE);
-        assertEquals("Player should be at the far left after wrapping", 0.1, p.getPosition().x, 0.5);
+        assertTrue(p.getPosition().x < TILE_SIZE, "Player should have teleported to left");
+        assertEquals(0.1, p.getPosition().x, 0.5, "Player should be at the far left after wrapping");
     }
 
     @Test
@@ -758,9 +756,9 @@ public class ClientGameControllerTest extends BaseTest {
         GameState finalState = controller.updateGameStateFor(initialState, 5);
         
         assertEquals(5, finalState.clock());
-        assertTrue("Player should have moved EAST from resimulation", finalState.players().getFirst().getPosition().x > TILE_SIZE);
+        assertTrue(finalState.players().getFirst().getPosition().x > TILE_SIZE, "Player should have moved EAST from resimulation");
         double expectedX = TILE_SIZE + 4 * (Constants.PLAYER_SPEED / Constants.TARGET_FPS);
-        assertEquals("Player should be at expected X after 4 ticks of movement", expectedX, finalState.players().getFirst().getPosition().x, 0.001);
+        assertEquals(expectedX, finalState.players().getFirst().getPosition().x, 0.001, "Player should be at expected X after 4 ticks of movement");
     }
 
     @Test
@@ -784,8 +782,8 @@ public class ClientGameControllerTest extends BaseTest {
 
         assertEquals(6, finalState.clock());
         Player finalPlayer = finalState.players().getFirst();
-        assertEquals("Player should be facing SOUTH after resimulation", Direction.SOUTH, finalPlayer.getDirection());
-        assertTrue("Player should have moved SOUTH", finalPlayer.getPosition().y > 3 * TILE_SIZE);
+        assertEquals(Direction.SOUTH, finalPlayer.getDirection(), "Player should be facing SOUTH after resimulation");
+        assertTrue(finalPlayer.getPosition().y > 3 * TILE_SIZE, "Player should have moved SOUTH");
     }
 
     @Test
@@ -808,8 +806,8 @@ public class ClientGameControllerTest extends BaseTest {
         // Resimulate long enough for them to collide
         GameState finalState = controller.updateGameStateFor(initialState, 20);
 
-        assertTrue("Player should have lost a life during resimulation", finalState.players().getFirst().getLives() < 3);
-        assertFalse("Player should be dead or respawning", finalState.players().getFirst().isAlive());
+        assertTrue(finalState.players().getFirst().getLives() < 3, "Player should have lost a life during resimulation");
+        assertFalse(finalState.players().getFirst().isAlive(), "Player should be dead or respawning");
     }
 
     @Test
@@ -829,10 +827,10 @@ public class ClientGameControllerTest extends BaseTest {
         // Resimulate over eating the energizer
         GameState finalState = controller.updateGameStateFor(initialState, 15);
 
-        assertNotNull("Final state should not be null", finalState);
-        assertEquals("Energizer should be eaten in final state", TileType.EMPTY, finalState.tiles()[3][3]);
-        assertTrue("Ghosts should be frightened after eating energizer in resimulation", Ghost.getFrightenedTimerSec() > 0);
-        assertTrue("Player should have more points in final state", finalState.players().getFirst().getPoints() > 0);
+        assertNotNull(finalState, "Final state should not be null");
+        assertEquals(TileType.EMPTY, finalState.tiles()[3][3], "Energizer should be eaten in final state");
+        assertTrue(Ghost.getFrightenedTimerSec() > 0, "Ghosts should be frightened after eating energizer in resimulation");
+        assertTrue(finalState.players().getFirst().getPoints() > 0, "Player should have more points in final state");
     }
 
     @Test
@@ -847,9 +845,9 @@ public class ClientGameControllerTest extends BaseTest {
         
         GameState finalState = controller.updateGameStateFor(initialState, 10);
 
-        assertNotEquals("Final state should be different from initial state", initialClock, finalState.clock());
-        assertEquals("Initial state clock should NOT have changed", initialClock, initialState.clock());
-        assertEquals("Initial state position should NOT have changed", initialPos.x, initialState.players().getFirst().getPosition().x, 0.001);
+        assertNotEquals(initialClock, finalState.clock(), "Final state should be different from initial state");
+        assertEquals(initialClock, initialState.clock(), "Initial state clock should NOT have changed");
+        assertEquals(initialPos.x, initialState.players().getFirst().getPosition().x, 0.001, "Initial state position should NOT have changed");
     }
 
     @Test
@@ -867,9 +865,9 @@ public class ClientGameControllerTest extends BaseTest {
         // Resimulate state2 for 5 ticks
         state2 = controller.updateGameStateFor(state2, 5);
         
-        assertEquals("States should have same clock", state1.clock(), state2.clock());
-        assertEquals("Player X should be same", state1.players().getFirst().getPosition().x, state2.players().getFirst().getPosition().x, 0.001);
-        assertEquals("Player Y should be same", state1.players().getFirst().getPosition().y, state2.players().getFirst().getPosition().y, 0.001);
+        assertEquals(state1.clock(), state2.clock(), "States should have same clock");
+        assertEquals(state1.players().getFirst().getPosition().x, state2.players().getFirst().getPosition().x, 0.001, "Player X should be same");
+        assertEquals(state1.players().getFirst().getPosition().y, state2.players().getFirst().getPosition().y, 0.001, "Player Y should be same");
     }
 
     @Test
@@ -894,7 +892,7 @@ public class ClientGameControllerTest extends BaseTest {
         // targetClock (5) < futureState.clock() (10)
         GameState resultState = controller.updateGameStateFor(futureState, 5);
         
-        assertEquals("Clock should not regress and state should remain unchanged", 10, resultState.clock());
+        assertEquals(10, resultState.clock(), "Clock should not regress and state should remain unchanged");
     }
 
     @Test
@@ -912,7 +910,7 @@ public class ClientGameControllerTest extends BaseTest {
         GameState finalState = controller.updateGameStateFor(initialState, 5);
         
         assertEquals(5, finalState.clock());
-        assertEquals("Direction should still be EAST", Direction.EAST, finalState.players().getFirst().getDirection());
+        assertEquals(Direction.EAST, finalState.players().getFirst().getDirection(), "Direction should still be EAST");
     }
 
     @Test
@@ -932,8 +930,8 @@ public class ClientGameControllerTest extends BaseTest {
         
         GameState finalState = controller.updateGameStateFor(initialState, 5);
         
-        assertTrue("P0 should have moved WEST", finalState.players().getFirst().getPosition().x < 3 * TILE_SIZE);
-        assertTrue("P1 should have moved EAST", finalState.players().get(1).getPosition().x > 10 * TILE_SIZE);
+        assertTrue(finalState.players().getFirst().getPosition().x < 3 * TILE_SIZE, "P0 should have moved WEST");
+        assertTrue(finalState.players().get(1).getPosition().x > 10 * TILE_SIZE, "P1 should have moved EAST");
     }
 
     @Test
@@ -952,7 +950,7 @@ public class ClientGameControllerTest extends BaseTest {
         
         controller.updateGameStateFor(initialState, 3);
         
-        assertTrue("Missed action should be detected during resimulation", Constants.cleanActions.missedAction());
+        assertTrue(Constants.cleanActions.missedAction(), "Missed action should be detected during resimulation");
     }
 
     @Test
@@ -968,9 +966,9 @@ public class ClientGameControllerTest extends BaseTest {
         // Resimulate 5 ticks
         GameState finalState = controller.updateGameStateFor(initialState, 5);
         
-        assertNotNull("Final state should not be null", finalState);
-        assertEquals("Clock should be at target clock", 5, finalState.clock());
-        assertEquals("Frightened timer should have expired in the final state context", 0.0, Ghost.getFrightenedTimerSec(), 0.001);
+        assertNotNull(finalState, "Final state should not be null");
+        assertEquals(5, finalState.clock(), "Clock should be at target clock");
+        assertEquals(0.0, Ghost.getFrightenedTimerSec(), 0.001, "Frightened timer should have expired in the final state context");
     }
 
     @Test
@@ -1004,21 +1002,21 @@ public class ClientGameControllerTest extends BaseTest {
         stateClient2 = controller.updateGameStateFor(stateClient2, 20);
 
         // --- Assertions: Both clients should have identical positions for all entities ---
-        assertEquals("Clocks should match", stateClient1.clock(), stateClient2.clock());
+        assertEquals(stateClient1.clock(), stateClient2.clock(), "Clocks should match");
         
         for (int i = 0; i < 2; i++) {
             Player p1 = stateClient1.players().get(i);
             Player p2 = stateClient2.players().get(i);
-            assertEquals("Player " + i + " X should match", p1.getPosition().x, p2.getPosition().x, 0.001);
-            assertEquals("Player " + i + " Y should match", p1.getPosition().y, p2.getPosition().y, 0.001);
-            assertEquals("Player " + i + " direction should match", p1.getDirection(), p2.getDirection());
+            assertEquals(p1.getPosition().x, p2.getPosition().x, 0.001, "Player " + i + " X should match");
+            assertEquals(p1.getPosition().y, p2.getPosition().y, 0.001, "Player " + i + " Y should match");
+            assertEquals(p1.getDirection(), p2.getDirection(), "Player " + i + " direction should match");
         }
 
         for (int i = 0; i < stateClient1.ghosts().size(); i++) {
             Ghost g1 = stateClient1.ghosts().get(i);
             Ghost g2 = stateClient2.ghosts().get(i);
-            assertEquals("Ghost " + i + " X should match", g1.getPosition().x, g2.getPosition().x, 0.001);
-            assertEquals("Ghost " + i + " Y should match", g1.getPosition().y, g2.getPosition().y, 0.001);
+            assertEquals(g1.getPosition().x, g2.getPosition().x, 0.001, "Ghost " + i + " X should match");
+            assertEquals(g1.getPosition().y, g2.getPosition().y, 0.001, "Ghost " + i + " Y should match");
         }
     }
 
@@ -1047,15 +1045,12 @@ public class ClientGameControllerTest extends BaseTest {
         GameState stateCorrected = controller.updateGameStateFor(stateAtClock9, 15);
         
         // Assertions
-        assertNotEquals("P1 position should be different after corrected resimulation", 
-            stateWrong.players().get(1).getPosition().y, 
-            stateCorrected.players().get(1).getPosition().y, 0.001);
+        assertNotEquals(stateWrong.players().get(1).getPosition().y, 
+            stateCorrected.players().get(1).getPosition().y, 0.001, "P1 position should be different after corrected resimulation");
         
-        assertTrue("P1 should have moved SOUTH in the corrected state", 
-            stateCorrected.players().get(1).getPosition().y > stateWrong.players().get(1).getPosition().y);
+        assertTrue(stateCorrected.players().get(1).getPosition().y > stateWrong.players().get(1).getPosition().y, "P1 should have moved SOUTH in the corrected state");
             
-        assertEquals("P0 position should still be consistent (independent movement)", 
-            stateWrong.players().get(0).getPosition().x, 
-            stateCorrected.players().get(0).getPosition().x, 0.001);
+        assertEquals(stateWrong.players().get(0).getPosition().x, 
+            stateCorrected.players().get(0).getPosition().x, 0.001, "P0 position should still be consistent (independent movement)");
     }
 }

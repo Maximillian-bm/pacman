@@ -1,10 +1,10 @@
 package com.example.GameLogic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.common.BaseTest;
@@ -51,10 +51,10 @@ public class SystemPerformanceTest extends BaseTest {
         long totalTimeNs = endTime - startTime;
         double averageTimeMs = (totalTimeNs / (double) iterations) / 1_000_000.0;
 
-        assertTrue("Game logic update took too long: " + averageTimeMs + "ms", averageTimeMs < 1.0);
-        assertTrue("Clock should have advanced", currentState.clock() > initialState.clock());
-        assertNotEquals("Player position should have changed", initialState.players().getFirst().getPosition().x, 
-            currentState.players().getFirst().getPosition().x, 0.001);
+        assertTrue(averageTimeMs < 1.0, "Game logic update took too long: " + averageTimeMs + "ms");
+        assertTrue(currentState.clock() > initialState.clock(), "Clock should have advanced");
+        assertNotEquals(initialState.players().getFirst().getPosition().x, 
+            currentState.players().getFirst().getPosition().x, 0.001, "Player position should have changed");
     }
 
     @Test
@@ -68,8 +68,8 @@ public class SystemPerformanceTest extends BaseTest {
         long endTime = System.nanoTime();
         long durationMs = (endTime - startTime) / 1_000_000;
 
-        assertTrue("Catch-up mechanism is too slow, UI will freeze. Took: " + durationMs + "ms", durationMs < 20);
-        assertEquals("State clock should match target after catch-up", targetClock, nextState.clock());
+        assertTrue(durationMs < 20, "Catch-up mechanism is too slow, UI will freeze. Took: " + durationMs + "ms");
+        assertEquals(targetClock, nextState.clock(), "State clock should match target after catch-up");
     }
 
     @Test
@@ -91,7 +91,7 @@ public class SystemPerformanceTest extends BaseTest {
         long endTime = System.nanoTime();
 
         double durationMs = (endTime - startTime) / 1_000_000.0;
-        assertTrue("Collision detection scaling is poor: " + durationMs + "ms", durationMs < 5.0);
+        assertTrue(durationMs < 5.0, "Collision detection scaling is poor: " + durationMs + "ms");
     }
 
     @Test
@@ -107,7 +107,7 @@ public class SystemPerformanceTest extends BaseTest {
         int lobbyIdA = hostA.getLobbyID();
         int lobbyIdB = hostB.getLobbyID();
 
-        assertNotEquals("Lobbies should have different IDs", lobbyIdA, lobbyIdB);
+        assertNotEquals(lobbyIdA, lobbyIdB, "Lobbies should have different IDs");
 
         List<Thread> threads = new ArrayList<>();
         List<Throwable> exceptions = new ArrayList<>();
@@ -175,7 +175,7 @@ public class SystemPerformanceTest extends BaseTest {
         for (int i = 0; i < 10; i++) {
             ConnectToLobby p = new ConnectToLobby();
             p.joinLobby(lobbyId);
-            assertTrue("Player should connect", p.getPlayerID() > 0);
+            assertTrue(p.getPlayerID() > 0, "Player should connect");
             p.leaveLobby();
         }
     }
@@ -201,7 +201,7 @@ public class SystemPerformanceTest extends BaseTest {
         traveler.leaveLobby();
 
         traveler.joinLobby(String.valueOf(host1.getLobbyID()));
-        assertEquals("Traveler should now be in Lobby 1", host1.getLobbyID(), traveler.getLobbyID());
+        assertEquals(host1.getLobbyID(), traveler.getLobbyID(), "Traveler should now be in Lobby 1");
     }
 
     @Test
@@ -238,7 +238,7 @@ public class SystemPerformanceTest extends BaseTest {
 
         p2.leaveLobby();
 
-        assertFalse("Player 2 should be removed from game state", host.isPlayerInGame(p2.getPlayerID()));
+        assertFalse(host.isPlayerInGame(p2.getPlayerID()), "Player 2 should be removed from game state");
     }
 
     @Test

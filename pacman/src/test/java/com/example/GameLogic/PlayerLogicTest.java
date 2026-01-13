@@ -1,11 +1,11 @@
 package com.example.GameLogic;
 
 import static com.example.model.Constants.TILE_SIZE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.common.BaseTest;
@@ -69,9 +69,9 @@ public class PlayerLogicTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        assertEquals("Prey should lose a life when eaten by energized player", 2, prey.getLives());
-        assertFalse("Prey should be dead/respawning", prey.isAlive());
-        assertTrue("Predator should gain points for eating player", predator.getPoints() > initialPoints);
+        assertEquals(2, prey.getLives(), "Prey should lose a life when eaten by energized player");
+        assertFalse(prey.isAlive(), "Prey should be dead/respawning");
+        assertTrue(predator.getPoints() > initialPoints, "Predator should gain points for eating player");
     }
 
     @Test
@@ -92,8 +92,7 @@ public class PlayerLogicTest extends BaseTest {
         controller.updateGameState(initialState, new ArrayList<>());
 
         double distance = Math.abs(p1.getPosition().x - p2.getPosition().x);
-        assertTrue("Players should be at least one tile apart (collision blocked). Distance: " + distance,
-            distance >= TILE_SIZE - 1.0);
+        assertTrue(distance >= TILE_SIZE - 1.0, "Players should be at least one tile apart (collision blocked). Distance: " + distance);
 
         assertTrue(p1.isAlive());
         assertTrue(p2.isAlive());
@@ -112,8 +111,7 @@ public class PlayerLogicTest extends BaseTest {
         controller.updateGameState(initialState, new ArrayList<>());
 
         double p2X = p2.getPosition().x;
-        assertTrue("Moving player should be blocked by stationary player. Pos: " + p2X,
-            p2X <= 4 * TILE_SIZE + 2.0);
+        assertTrue(p2X <= 4 * TILE_SIZE + 2.0, "Moving player should be blocked by stationary player. Pos: " + p2X);
     }
 
     @Test
@@ -134,7 +132,7 @@ public class PlayerLogicTest extends BaseTest {
         controller.updateGameState(initialState, new ArrayList<>());
 
         if (!p.isAlive()) {
-            assertEquals("Player should lose a life immediately if spawn is camped", 1, p.getLives());
+            assertEquals(1, p.getLives(), "Player should lose a life immediately if spawn is camped");
         }
     }
 
@@ -162,7 +160,7 @@ public class PlayerLogicTest extends BaseTest {
         p.addPoints(Integer.MAX_VALUE - 5);
         p.addPoints(10);
 
-        assertTrue("Score should handle overflow gracefully (e.g. cap or use long)", p.getPoints() > 0);
+        assertTrue(p.getPoints() > 0, "Score should handle overflow gracefully (e.g. cap or use long)");
     }
 
     @Test
@@ -170,18 +168,18 @@ public class PlayerLogicTest extends BaseTest {
     public void testPlayerJoinAndLeaveLobby() {
         host.createLobby(3);
         int lobbyId = host.getLobbyID();
-        assertTrue("Lobby ID should be valid", lobbyId > 0);
+        assertTrue(lobbyId > 0, "Lobby ID should be valid");
 
         ConnectToLobby p2 = new ConnectToLobby();
         p2.joinLobby(String.valueOf(lobbyId));
-        assertEquals("Player 2 should have ID 2", 2, p2.getPlayerID());
+        assertEquals(2, p2.getPlayerID(), "Player 2 should have ID 2");
 
         p2.leaveLobby();
 
         ConnectToLobby p3 = new ConnectToLobby();
         p3.joinLobby(String.valueOf(lobbyId));
 
-        assertTrue("Lobby should accept new player after one leaves", p3.getPlayerID() > 0);
+        assertTrue(p3.getPlayerID() > 0, "Lobby should accept new player after one leaves");
     }
 
     @Test
@@ -194,14 +192,14 @@ public class PlayerLogicTest extends BaseTest {
         for (int i = 0; i < numberOfChurns; i++) {
             ConnectToLobby p = new ConnectToLobby();
             p.joinLobby(String.valueOf(lobbyId));
-            assertTrue("Player " + i + " should join successfully", p.getPlayerID() > 0);
+            assertTrue(p.getPlayerID() > 0, "Player " + i + " should join successfully");
             p.leaveLobby();
         }
         
         // After churn, try to join again and see if ID is reused or consistent
         ConnectToLobby finalPlayer = new ConnectToLobby();
         finalPlayer.joinLobby(String.valueOf(lobbyId));
-        assertTrue("Should be able to join after churn", finalPlayer.getPlayerID() > 0);
+        assertTrue(finalPlayer.getPlayerID() > 0, "Should be able to join after churn");
     }
 
     @Test
@@ -218,11 +216,11 @@ public class PlayerLogicTest extends BaseTest {
         gameThread.start();
 
         p2.leaveLobby();
-        assertFalse("Player 2 should be considered out of the game", host.isPlayerInGame(p2.getPlayerID()));
+        assertFalse(host.isPlayerInGame(p2.getPlayerID()), "Player 2 should be considered out of the game");
 
         ConnectToLobby p2Rejoin = new ConnectToLobby();
         p2Rejoin.joinLobby(lobbyId);
-        assertTrue("Rejoined player should have a valid positive ID", p2Rejoin.getPlayerID() > 0);
+        assertTrue(p2Rejoin.getPlayerID() > 0, "Rejoined player should have a valid positive ID");
     }
 
     @Test
@@ -252,7 +250,7 @@ public class PlayerLogicTest extends BaseTest {
 
         ConnectToLobby p5 = new ConnectToLobby();
         p5.joinLobby(lobbyId);
-        assertTrue("Player should be able to join after spot frees up", p5.getPlayerID() > 0);
+        assertTrue(p5.getPlayerID() > 0, "Player should be able to join after spot frees up");
     }
 
     @Test
@@ -268,7 +266,7 @@ public class PlayerLogicTest extends BaseTest {
         p2.leaveLobby();
 
         boolean isP2InGame = host.isPlayerInGame(p2.getPlayerID());
-        assertFalse("Player 2 should be removed from game after leaving", isP2InGame);
+        assertFalse(isP2InGame, "Player 2 should be removed from game after leaving");
     }
 
     @Test
@@ -308,12 +306,12 @@ public class PlayerLogicTest extends BaseTest {
             fail("Exceptions occurred during simultaneous connection: " + exceptions.getFirst().getMessage());
         }
 
-        assertEquals("All players should have joined", numberOfPlayers - 1, connectedPlayers.size());
+        assertEquals(numberOfPlayers - 1, connectedPlayers.size(), "All players should have joined");
 
         long uniqueIds = connectedPlayers.stream()
             .map(ConnectToLobby::getPlayerID)
             .distinct()
             .count();
-        assertEquals("All players should have unique IDs", connectedPlayers.size(), uniqueIds);
+        assertEquals(connectedPlayers.size(), uniqueIds, "All players should have unique IDs");
     }
 }
