@@ -41,7 +41,7 @@ public class ClientGameController extends GameController {
     public GameState updateGameState(GameState gameState, List<Action> actions) {
 
         updateRespawnTimers(gameState);
-
+        updatePlayerPowerTimers(gameState);
         if (Ghost.getFrightenedTimerSec() > 0.0) {
             Ghost.setFrightenedTimerSec(Ghost.getFrightenedTimerSec() - (1.0 / TARGET_FPS));
             if (Ghost.getFrightenedTimerSec() < 0.0) Ghost.setFrightenedTimerSec(0.0);
@@ -49,6 +49,7 @@ public class ClientGameController extends GameController {
 
         handleActions(gameState, actions);
         stepMovement(gameState);
+        handlePvPcollitions(gameState);
         GhostMovement(gameState);
         handleGhostPlayerCollisions(gameState);
         handlePlayerGridPosition(gameState);
@@ -327,10 +328,13 @@ ghost5.setDirection(Direction.WEST);
         player.addPoints(tileType.points);
 
         if (isPowerup(tileType)) {
+            player.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
             Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
-            for (Ghost g : gameState.ghosts()) {
-                g.setDirection(oppositeDir(getGhostDir(g)));
-            }
+
+        for (Ghost g : gameState.ghosts()) {
+            g.setDirection(oppositeDir(getGhostDir(g)));
+        }
+
             tiles[tileX][tileY] = TileType.EMPTY;
             return;
         }
@@ -815,4 +819,100 @@ private void updateRespawnTimers(GameState gameState) {
         }
     }
 }
+private void updatePlayerPowerTimers(GameState gameState) {
+    double dt = 1.0 / TARGET_FPS;
+
+    for (Player p : gameState.players()) {
+        if (p == null) continue;
+
+        if (p.getPowerUpTimer() > 0.0) {
+            p.setPowerUpTimer(Math.max(0.0, p.getPowerUpTimer() - dt));
+        }
+    }
+}
+
+private boolean isPowered(Player p) {
+    return p != null && p.getPowerUpTimer() > 0.0;
+}
+
+private void handlePvPcollitions(GameState gameState) {
+    List<Player> players = gameState.players();
+    if (players == null || players.size() < 2) return;
+
+    for (int i = 0; i < players.size(); i++) {
+        Player a = players.get(i);
+        if (!isPlayerCollidable(a)) continue;
+
+        for (int j = i + 1; j < players.size(); j++) {
+            Player b = players.get(j);
+            if (!isPlayerCollidable(b)) continue;
+
+            if (!collision(a.getPosition(), b.getPosition())) continue;
+
+            boolean aPow = isPowered(a);
+            boolean bPow = isPowered(b);
+
+            if (aPow ^ bPow) {
+                Player eater = aPow ? a : b;
+                Player victim = aPow ? b : a;
+
+                eatPlayer(gameState, eater, victim);
+                return;
+            }
+            resolvePlayerOverlap(a, b);
+        }
+    }
+}
+
+private boolean isPlayerCollidable(Player p) {
+    return p != null
+        && p.getPosition() != null
+        && p.isAlive()
+        && p.getRespawnTimer() <= 0.0;
+}
+
+private void eatPlayer(GameState gameState, Player eater, Player victim) {
+    eater.addPoints(500);
+
+    int livesLeft = Math.max(0, victim.getLives() - 1);
+    victim.setLives(livesLeft);
+
+    if (livesLeft <= 0) {
+        victim.setAlive(false);
+        victim.setIntendedDirection(null);
+        victim.setPosition(new Position(-1000, -1000));
+        return;
+    }
+
+    victim.setAlive(false);
+    victim.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
+    victim.setPosition(new Position(-1000, -1000));
+    victim.setIntendedDirection(null);
+
+    victim.setPowerUpTimer(0.0);
+}
+
+private void resolvePlayerOverlap(Player a, Player b) {
+    Position pa = a.getPosition();
+    Position pb = b.getPosition();
+
+    double overlapX = Math.min(pa.x + TILE_SIZE, pb.x + TILE_SIZE) - Math.max(pa.x, pb.x);
+    double overlapY = Math.min(pa.y + TILE_SIZE, pb.y + TILE_SIZE) - Math.max(pa.y, pb.y);
+
+    if (overlapX <= 0 || overlapY <= 0) return;
+
+    if (overlapX < overlapY) {
+        double push = overlapX / 2.0;
+        if (pa.x < pb.x) { pa.x -= push; pb.x += push; }
+        else            { pa.x += push; pb.x -= push; }
+    } else {
+        double push = overlapY / 2.0;
+        if (pa.y < pb.y) { pa.y -= push; pb.y += push; }
+        else            { pa.y += push; pb.y -= push; }
+    }
+
+    a.setPosition(pa);
+    b.setPosition(pb);
+}
+
 }
