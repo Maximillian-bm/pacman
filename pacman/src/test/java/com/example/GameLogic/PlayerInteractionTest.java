@@ -184,4 +184,14 @@ public class PlayerInteractionTest extends BaseTest {
         // or just ensure state is valid and no crash.
         assertNotNull(p.getIntendedDirection());
     }
+
+    @Test
+    public void testScoreCap() {
+        // TDD: Score shouldn't overflow or behave weirdly at very high values.
+        Player p = initialState.players().getFirst();
+        p.addPoints(Integer.MAX_VALUE - 5);
+        p.addPoints(10);
+        
+        assertTrue("Score should handle overflow gracefully (e.g. cap or use long)", p.getPoints() > 0);
+    }
 }

@@ -613,6 +613,79 @@ public class ClientGameControllerTest extends BaseTest {
     }
 
     @Test
+    public void testWinConditionLogic() {
+        // Scenario: All dots eaten. Game should declare a winner.
+        initialState.ghosts().clear();
+        TileType[][] tiles = initialState.tiles();
+
+        // Clear all dots
+        for (int x = 0; x < tiles.length; x++) {
+            for (int y = 0; y < tiles[0].length; y++) {
+                tiles[x][y] = TileType.EMPTY;
+            }
+        }
+
+        GameState nextState = controller.updateGameState(initialState, new ArrayList<>());
+
+        assertNotNull("Winner should be declared when map is empty", nextState.winner());
+    }
+
+    @Test
+    public void testFruitSpawnLogic() {
+        // Scenario: After eating a certain number of pellets, a fruit should spawn.
+        initialState.ghosts().clear();
+        TileType[][] tiles = initialState.tiles();
+
+        // Count pellets
+        int pellets = 0;
+        for (TileType[] row : tiles) {
+            for (TileType t : row) {
+                if (t == TileType.PAC_DOT) pellets++;
+            }
+        }
+
+        // Simulate eating 70 pellets
+        Player p = initialState.players().getFirst();
+        p.addPoints(70 * 10);
+
+        int removed = 0;
+        for (int x = 0; x < tiles.length && removed < 70; x++) {
+            for (int y = 0; y < tiles[0].length && removed < 70; y++) {
+                if (tiles[x][y] == TileType.PAC_DOT) {
+                    tiles[x][y] = TileType.EMPTY;
+                    removed++;
+                }
+            }
+        }
+
+        controller.updateGameState(initialState, new ArrayList<>());
+
+        boolean foundFruit = false;
+        for (TileType[] row : initialState.tiles()) {
+            for (TileType t : row) {
+                if (t == TileType.CHERRY || t == TileType.STRAWBERRY) foundFruit = true;
+            }
+        }
+
+        assertTrue("Fruit should spawn after eating pellets", foundFruit);
+    }
+
+    @Test
+    public void testInputBufferingPrecision() {
+        // TDD: If I press turn 1 pixel before intersection, it should buffer and turn AT intersection.
+        Player p = initialState.players().getFirst();
+        p.setPosition(new Position(1 * TILE_SIZE - 1.0, 1 * TILE_SIZE)); // 1px before (1,1)
+        p.setDirection(Direction.EAST);
+        p.setIntendedDirection(Direction.SOUTH);
+
+        // Move 1 tick
+        controller.updateGameState(initialState, new ArrayList<>());
+
+        // Should NOT have turned yet if strictly at center, OR should have turned if within EPS.
+        assertNotNull("Player should maintain an intended direction until turn is executed", p.getIntendedDirection());
+    }
+
+    @Test
     public void testTeleportationBoundary() {
         // Test exact boundary condition for teleport
         Player p = initialState.players().getFirst();

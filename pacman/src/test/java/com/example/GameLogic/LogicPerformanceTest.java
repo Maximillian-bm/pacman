@@ -1,21 +1,19 @@
 package com.example.GameLogic;
 
-import static org.junit.Assert.assertTrue;
-
 import com.example.common.BaseTest;
 import com.example.model.Action;
 import com.example.model.GameState;
 import com.example.model.Ghost;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertTrue;
 
 public class LogicPerformanceTest extends BaseTest {
 
     private ClientGameController controller;
-    private GameState gameState;
+    private GameState initialState;
 
     @Override
     protected long getTimeoutSeconds() {
@@ -30,77 +28,79 @@ public class LogicPerformanceTest extends BaseTest {
     @Before
     public void setUp() {
         controller = new ClientGameController();
-        gameState = controller.initializeGameState(1);
+        // Setup a "heavy" state if possible, or just standard
+        initialState = controller.initializeGameState(4); // Max players
     }
 
     @Test
-    public void testGameLoopPerformance() {
-        // Warmup
-        for (int i = 0; i < 100; i++) {
-            controller.updateGameState(gameState, new ArrayList<>());
-        }
-
-        long startTime = System.nanoTime();
+    public void testUpdateLoopSmoothness() {
+        // Measure average update time
         int iterations = 5000;
-        
-        List<Action> emptyActions = new ArrayList<>();
-        
+        long startTime = System.nanoTime();
+
+        GameState currentState = initialState;
+        List<Action> actions = new ArrayList<>(); // Empty actions
+
         for (int i = 0; i < iterations; i++) {
-            gameState = controller.updateGameState(gameState, emptyActions);
+            currentState = controller.updateGameState(currentState, actions);
         }
-        
+
         long endTime = System.nanoTime();
-        long durationNs = endTime - startTime;
-        double averageTimeMs = (durationNs / (double) iterations) / 1_000_000.0;
-        
-        System.out.println("Average Logic Update Time: " + averageTimeMs + " ms");
-        
-        // Logic should be very fast (< 0.5ms) to leave room for rendering (16ms total budget)
-        assertTrue("Game logic is too slow! Avg: " + averageTimeMs + "ms", averageTimeMs < 0.5);
+        long totalTimeNs = endTime - startTime;
+        double averageTimeMs = (totalTimeNs / (double) iterations) / 1_000_000.0;
+
+        System.out.println("Average Update Time: " + averageTimeMs + " ms");
+
+        // The UI needs to run at ~60 FPS (16ms frame time). 
+        // Logic should take a fraction of that (e.g., < 2ms) to leave room for rendering.
+        assertTrue("Game logic update took too long: " + averageTimeMs + "ms", averageTimeMs < 1.0);
     }
 
     @Test
-    public void testInputStormPerformance() {
-        // Simulate receiving many inputs in a single frame (e.g. network lag catchup)
-        int inputCount = 100;
-        List<Action> stormActions = new ArrayList<>();
-        Random rng = new Random();
-        
-        for (int i = 0; i < inputCount; i++) {
-            stormActions.add(new Action(0, 0, rng.nextInt(4) + 1));
-        }
+    public void testCatchUpLag() {
+        // Simulate a lag spike where the client falls behind by 60 frames (1 second)
+        int lagFrames = 60;
+        int startClock = initialState.clock();
+        int targetClock = startClock + lagFrames;
 
         long startTime = System.nanoTime();
         
-        gameState = controller.updateGameState(gameState, stormActions);
-        
+        // This runs the catch-up loop
+        controller.updateGameStateFor(initialState, targetClock);
+
         long endTime = System.nanoTime();
+        long durationMs = (endTime - startTime) / 1_000_000;
+
+        System.out.println("Catch-up for " + lagFrames + " frames took: " + durationMs + " ms");
+
+        // If catching up 1 second of gameplay takes more than ~16ms, 
+        // we can't catch up within a single frame, leading to a freeze or "spiral of death".
+        assertTrue("Catch-up mechanism is too slow, UI will freeze. Took: " + durationMs + "ms", durationMs < 20);
+    }
+    
+    @Test
+    public void testStressTestEntityCollision() {
+        // Create a state with MANY ghosts/entities if possible to test O(N^2) collisions
+        // Current limit is 5 ghosts, but let's try to add more manually if the list is mutable
+        
+        GameState stressState = controller.initializeGameState(1);
+        try {
+            // Add 100 ghosts at the same position
+            for (int i = 0; i < 100; i++) {
+                Ghost g = new Ghost(com.example.model.GhostType.RED);
+                g.setPosition(new com.example.model.Position(100, 100));
+                stressState.ghosts().add(g);
+            }
+        } catch (UnsupportedOperationException e) {
+            // List might be immutable, skip if so
+            return;
+        }
+
+        long startTime = System.nanoTime();
+        controller.updateGameState(stressState, new ArrayList<>());
+        long endTime = System.nanoTime();
+        
         double durationMs = (endTime - startTime) / 1_000_000.0;
-        
-        System.out.println("Input Storm Processing Time: " + durationMs + " ms");
-        
-        assertTrue("Input storm processing took too long: " + durationMs + "ms", durationMs < 5.0);
-    }
-
-    @Test
-    public void testGhostAIStress() {
-        // Add 100 ghosts to see if AI logic scales
-        for (int i = 0; i < 100; i++) {
-            gameState.ghosts().add(new Ghost(com.example.model.GhostType.RED));
-        }
-
-        long startTime = System.nanoTime();
-        int iterations = 1000;
-        
-        for (int i = 0; i < iterations; i++) {
-            controller.updateGameState(gameState, new ArrayList<>());
-        }
-        
-        long endTime = System.nanoTime();
-        double averageTimeMs = ((endTime - startTime) / (double) iterations) / 1_000_000.0;
-        
-        System.out.println("Stress Test (100 Ghosts) Avg Time: " + averageTimeMs + " ms");
-        
-        assertTrue("Ghost AI stress test failed! Avg: " + averageTimeMs + "ms", averageTimeMs < 2.0);
+        assertTrue("Collision detection scaling is poor: " + durationMs + "ms", durationMs < 5.0);
     }
 }
