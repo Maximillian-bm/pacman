@@ -325,68 +325,48 @@ public class UI extends Application {
                     default -> sy + 50;
                 };
 
-                // PixelReader reader = spriteSheet.getPixelReader();
-                // WritableImage playerImage = new WritableImage(reader, 850, syf, 50, 50);
-                // Image abc = playerImage.getImage();
-                //
-                // ImageView playerImage = new ImageView(spriteSheet);
-                // Rectangle2D viewportRect = new Rectangle2D(850, syf, 50, 50);
-                // playerImage.setViewport(viewportRect);
-                // Color oldColor = Color.rgb(255, 241, 0);
-                // gc.drawImage(reColor(playerImage.getImage(), oldColor, Color.PINK), TILE_SIZE, TILE_SIZE);
+                Image coloredPlayer;
+                switch (player.getId()) {
+                    case 1: coloredPlayer = colorPlayer(255,0,0) ; break;
+                    case 2: coloredPlayer = colorPlayer(0,255,0) ; break;
+                    case 3: coloredPlayer = colorPlayer(0,0,255) ; break;
+                    default: coloredPlayer = spriteSheet ; break;
+                }
 
-                // switch (player.getId()) {
-                //     case 0: ; break;
-                //     case 1: ; break;
-                // }
-
-                // gc.drawImage(spriteSheet, 850, syf, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
-                Color pacmanColor = Color.rgb(255, 255, 241, 0);
-                // Color pacmanColor = Color.web("#FFFF00");
-                // Color pacmanColor = Color.YELLOW;
-                // Image recolored = reColor(spriteSheet, Color.BLACK, pacmanColor);
-                Image recolored = reColor(spriteSheet, pacmanColor, Color.PINK);
-                gc.drawImage(recolored, TILE_SIZE, TILE_SIZE, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
-                gc.drawImage(recolored, 850, syf, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
+                gc.drawImage(coloredPlayer, 850, syf, 50, 50, playerPos.x, playerPos.y, TILE_SIZE, TILE_SIZE);
             });
 
             lastTime = time;
         }
 
-  public static Image reColor(Image inputImage, Color oldColor, Color newColor) {
-    int W = (int) inputImage.getWidth();
-    int H = (int) inputImage.getHeight();
-    WritableImage outputImage = new WritableImage(W, H);
-    PixelReader reader = inputImage.getPixelReader();
-    PixelWriter writer = outputImage.getPixelWriter();
-    int ob=(int) oldColor.getBlue();
-    int or=(int) oldColor.getRed();
-    int og=(int) oldColor.getGreen();
-    int nb=(int) newColor.getBlue();
-    int nr=(int) newColor.getRed();
-    int ng=(int) newColor.getGreen();
-    for (int y = 0; y < H; y++) {
-      for (int x = 0; x < W; x++) {
-        int argb = reader.getArgb(x, y);
-        int a = (argb >> 24) & 0xFF;
-        int r = (argb >> 16) & 0xFF;
-        int g = (argb >>  8) & 0xFF;
-        int b =  argb        & 0xFF;
-        if (x==875&&y==25 || x==875&&y==27 || x==874&&y==25) {
-            System.out.println(a + " " + r + " " + g  + " " + b);
+        public Image colorPlayer(int nr, int ng, int nb) {
+            int W = (int)spriteSheet.getWidth();
+            int H = (int)spriteSheet.getHeight();
+            WritableImage outputImage = new WritableImage(W, H);
+            PixelReader reader = spriteSheet.getPixelReader();
+            PixelWriter writer = outputImage.getPixelWriter();
+            // Yellow (the player)
+            int or= 255;
+            int og= 241;
+            int ob= 0;
+            for (int y = 0; y < H; y++) {
+                for (int x = 0; x < W; x++) {
+                    int argb = reader.getArgb(x, y);
+                    int a = (argb >> 24) & 0xFF;
+                    int r = (argb >> 16) & 0xFF;
+                    int g = (argb >>  8) & 0xFF;
+                    int b =  argb        & 0xFF;
+                    if (g==og && r==or && b==ob) {
+                        r=nr;
+                        g=ng;
+                        b=nb;
+                    }
+                    argb = (a << 24) | (r << 16) | (g << 8) | b;
+                    writer.setArgb(x, y, argb);
+                }
+            }
+            return outputImage;
         }
-        if (g==og && r==or && b==ob) {
-          r=nr;
-          g=ng;
-          b=nb;
-        }
-
-        argb = (a << 24) | (r << 16) | (g << 8) | b;
-        writer.setArgb(x, y, argb);
-      }
-    }
-    return outputImage;
-  }
 
         private void drawGhosts() {
             gameState.ghosts().forEach(ghost -> {
