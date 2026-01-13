@@ -20,8 +20,8 @@ import com.example.model.Position;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Player Game Logic and Lobby Interaction Tests")
@@ -41,7 +41,7 @@ public class PlayerLogicTest extends BaseTest {
         return 200;
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         controller = new ClientGameController();
         Ghost.setFrightenedTimerSec(0.0);

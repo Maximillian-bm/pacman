@@ -20,8 +20,8 @@ import com.example.model.Position;
 import com.example.model.TileType;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Client Game Controller Logic and State Management Tests")
@@ -40,7 +40,7 @@ public class ClientGameControllerTest extends BaseTest {
         return 200;
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         controller = new ClientGameController();
 

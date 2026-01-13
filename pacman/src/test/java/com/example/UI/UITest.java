@@ -15,16 +15,16 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.testfx.framework.junit.ApplicationTest;
+import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.util.WaitForAsyncUtils;
 
 @DisplayName("User Interface and Frontend Interaction Tests")
 public class UITest extends ApplicationTest {
 
-    @BeforeClass
+    @BeforeAll
     public static void setupHeadless() {
 
         if (Boolean.getBoolean("headless")) {

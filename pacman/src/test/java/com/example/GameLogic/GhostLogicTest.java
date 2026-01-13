@@ -15,8 +15,8 @@ import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
 import java.util.ArrayList;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Ghost AI and Movement Logic Tests")
@@ -35,7 +35,7 @@ public class GhostLogicTest extends BaseTest {
         return 200;
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         controller = new ClientGameController();
         state = controller.initializeGameState(2);

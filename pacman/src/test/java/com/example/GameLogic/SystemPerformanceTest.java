@@ -13,8 +13,8 @@ import com.example.model.GameState;
 import com.example.model.Ghost;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Game Performance, Scalability and Concurrency Tests")
@@ -28,7 +28,7 @@ public class SystemPerformanceTest extends BaseTest {
         return 1000;
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         controller = new ClientGameController();
         initialState = controller.initializeGameState(4);

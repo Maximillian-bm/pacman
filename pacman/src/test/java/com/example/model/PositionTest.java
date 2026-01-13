@@ -8,7 +8,7 @@ import static org.junit.Assert.fail;
 
 import com.example.common.BaseTest;
 import javafx.util.Pair;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 @DisplayName("Position and Coordinate Conversion Logic Tests")
