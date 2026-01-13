@@ -28,6 +28,7 @@ import lombok.Getter;
 
 public class ClientGameController extends GameController {
 
+    //Skal bruge den
     @Getter
     private Player localPlayer;
 
