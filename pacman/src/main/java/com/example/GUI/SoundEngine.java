@@ -8,7 +8,7 @@ public class SoundEngine {
 
     private MediaPlayer creditMediaPlayer = new MediaPlayer(new Media(new File("src/main/resources/sounds/01. Credit Sound.mp3").toURI().toString()));
     private MediaPlayer startMusicMediaPlayer = new MediaPlayer(new Media(new File("src/main/resources/sounds/02. Start Music.mp3").toURI().toString()));
-    private MediaPlayer eatDotMediaPlayer = new MediaPlayer(new Media(new File("src/main/resources/sounds/03 PAC-MAN - Eating The Pac-dots.mp3").toURI().toString()));
+    private MediaPlayer eatDotMediaPlayer = new MediaPlayer(new Media(new File("src/main/resources/sounds/03. PAC-MAN - Eating The Pac-dots.mp3").toURI().toString()));
     private MediaPlayer turningCornerMediaPlayer = new MediaPlayer(new Media(new File("src/main/resources/sounds/04. PAC-MAN - Turning The Corner While Eating The Pac-dots.mp3").toURI().toString()));
     private MediaPlayer extendSoundMediaPlayer = new MediaPlayer(new Media(new File("src/main/resources/sounds/05. Extend Sound.mp3").toURI().toString()));
     private MediaPlayer ghostNormalMoveMediaPlayer = new MediaPlayer(new Media(new File("src/main/resources/sounds/06. Ghost - Normal Move.mp3").toURI().toString()));

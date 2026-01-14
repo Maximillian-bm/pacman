@@ -157,6 +157,7 @@ public class UI extends Application {
                 Constants.INIT_SCREEN_HEIGHT);
 
         joinLobbyButton.setOnAction(e -> {
+            soundEngine.eatFruit();
             String input = lobbyIDInput.getText();
             System.out.println("Connecting to: " + input);
             errorText.setText("");
@@ -201,7 +202,10 @@ public class UI extends Application {
             startRoot.getChildren().add(joinedLobbyText);
         };
 
-        createLobbyButton.setOnAction(e -> createLobby.run());
+        createLobbyButton.setOnAction(e -> {
+            createLobby.run();
+            soundEngine.eatFruit();
+        });
 
         startButton.setOnAction(e -> {
             startLobby(stage);
