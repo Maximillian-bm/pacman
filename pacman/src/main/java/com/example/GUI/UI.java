@@ -308,7 +308,7 @@ public class UI extends Application {
 
                 StringBuilder hearts = new StringBuilder("");
                 for (int j = 0; j < players.get(i).getLives(); j++) {
-                    hearts.append("❤️");
+                    hearts.append("♡ ");
                 }
                 for (int j = 0; j < 5 - players.get(i).getLives(); j++) {
                     hearts.append("   ");
