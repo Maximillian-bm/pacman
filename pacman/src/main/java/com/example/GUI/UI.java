@@ -14,6 +14,7 @@ import com.example.model.GameState;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
+import com.example.model.Sound;
 import java.util.List;
 import java.util.Objects;
 import javafx.animation.AnimationTimer;
@@ -157,7 +158,7 @@ public class UI extends Application {
                 Constants.INIT_SCREEN_HEIGHT);
 
         joinLobbyButton.setOnAction(e -> {
-            soundEngine.eatFruit();
+            soundEngine.play(Sound.EAT_FRUIT);
             String input = lobbyIDInput.getText();
             System.out.println("Connecting to: " + input);
             errorText.setText("");
@@ -204,12 +205,12 @@ public class UI extends Application {
 
         createLobbyButton.setOnAction(e -> {
             createLobby.run();
-            soundEngine.eatFruit();
+            soundEngine.play(Sound.EAT_FRUIT);
         });
 
         startButton.setOnAction(e -> {
             startLobby(stage);
-            soundEngine.startMusic();
+            soundEngine.play(Sound.START_MUSIC);
         });
 
         stage.setScene(startScene);
