@@ -10,7 +10,7 @@ public class Constants {
 
     //Constants
     public final static long LOBBY_TTL = 300000;
-    public final static int NR_OF_LOBBYS_CAP = 10;
+    public final static int NR_OF_LOBBYS_CAP = 100;
     public static ActionList cleanActions = new ActionList();
 
     public static String REMOTE_PUBLIC_URI;
