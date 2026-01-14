@@ -31,9 +31,10 @@ public class Player extends Entity {
     private Position spawnPosition;
 
     @Getter @Setter
-    @Getter @Setter
     private double powerUpTimer = 0.0;
-    
+    @Getter @Setter
+    private double invulnerableTimer = 0.0;
+
     public Player(int id) {
         this.id = id;
         this.alive = true;

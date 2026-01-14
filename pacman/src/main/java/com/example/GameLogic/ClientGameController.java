@@ -39,6 +39,8 @@ public class ClientGameController extends GameController {
 
         updateRespawnTimers(gameState);
         updatePlayerPowerTimers(gameState);
+        updateInvulnerabilityTimers(gameState);
+
         if (Ghost.getFrightenedTimerSec() > 0.0) {
             Ghost.setFrightenedTimerSec(Ghost.getFrightenedTimerSec() - (1.0 / TARGET_FPS));
             if (Ghost.getFrightenedTimerSec() < 0.0) {
@@ -799,64 +801,50 @@ public class ClientGameController extends GameController {
     }
 
     private void handleGhostPlayerCollisions(GameState gameState) {
-        if (gameState.players() == null || gameState.ghosts() == null) {
-            return;
-        }
+    if (gameState.players() == null || gameState.ghosts() == null) return;
 
-        boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
+    boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
 
-        for (Player player : gameState.players()) {
-            if (player == null || player.getPosition() == null) {
+    for (Player player : gameState.players()) {
+        if (player == null || player.getPosition() == null) continue;
+        if (!player.isAlive() || player.getRespawnTimer() > 0.0) continue;
+
+        // NEW: spawn protection
+        if (isInvulnerable(player)) continue;
+
+        for (Ghost ghost : gameState.ghosts()) {
+            if (ghost == null || ghost.getPosition() == null) continue;
+            if (ghost.getRespawnTimer() > 0.0) continue;
+
+            if (!collision(player.getPosition(), ghost.getPosition())) continue;
+
+            if (frightened) {
+                // player eats ghost
+                player.addPoints(200);
+                ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
+                ghost.setPosition(new Position(-1000, -1000));
                 continue;
             }
-            if (!player.isAlive()) {
-                continue;
+
+            int livesLeft = Math.max(0, player.getLives() - 1);
+            player.setLives(livesLeft);
+
+            if (livesLeft <= 0) {
+                player.setAlive(false);
+                player.setIntendedDirection(null);
+                player.setPosition(new Position(-1000, -1000));
+                break;
             }
-            if (player.getRespawnTimer() > 0.0) {
-                continue;
-            }
 
-            for (Ghost ghost : gameState.ghosts()) {
-                if (ghost == null || ghost.getPosition() == null) {
-                    continue;
-                }
-                if (ghost.getRespawnTimer() > 0.0) {
-                    continue;
-                }
+            player.setAlive(false);
+            player.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
+            player.setPosition(new Position(-1000, -1000));
+            player.setIntendedDirection(null);
 
-                if (!collision(player.getPosition(), ghost.getPosition())) {
-                    continue;
-                }
-
-                if (frightened) {
-                    // Player eats ghost (only this ghost is affected)
-                    player.addPoints(200);
-                    ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
-                    ghost.setPosition(new Position(-1000, -1000));
-                    return;
-                } else {
-                    // Ghost kills this player (only this player is affected)
-                    int livesLeft = Math.max(0, player.getLives() - 1);
-                    player.setLives(livesLeft);
-
-                    if (livesLeft <= 0) {
-                        // Dead forever (no respawn)
-                        player.setAlive(false);
-                        player.setIntendedDirection(null);
-                        player.setPosition(new Position(-1000, -1000));
-                        return;
-                    }
-
-                    // Start respawn timer for THIS player only
-                    player.setAlive(false);
-                    player.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
-                    player.setPosition(new Position(-1000, -1000)); // hide during timer
-                    player.setIntendedDirection(null);
-                    return;
-                }
-            }
+            break;
         }
     }
+}
 
     private void updateRespawnTimers(GameState gameState) {
         double dt = 1.0 / TARGET_FPS;
@@ -877,6 +865,7 @@ public class ClientGameController extends GameController {
                     p.setAlive(true);
                     p.setDirection(Direction.WEST);
                     p.setIntendedDirection(null);
+                    p.setInvulnerableTimer(Constants.PLAYER_SPAWN_PROTECT_SEC);
                 }
             }
         }
@@ -937,7 +926,7 @@ private void handlePvPcollitions(GameState gameState) {
                 Player victim = aPow ? b : a;
 
                 eatPlayer(gameState, eater, victim);
-                return;
+                break;
             }
             resolvePlayerOverlap(a, b);
         }
@@ -948,8 +937,10 @@ private boolean isPlayerCollidable(Player p) {
     return p != null
         && p.getPosition() != null
         && p.isAlive()
-        && p.getRespawnTimer() <= 0.0;
+        && p.getRespawnTimer() <= 0.0
+        && !isInvulnerable(p);
 }
+
 
 private void eatPlayer(GameState gameState, Player eater, Player victim) {
     eater.addPoints(500);
@@ -994,5 +985,22 @@ private void resolvePlayerOverlap(Player a, Player b) {
     a.setPosition(pa);
     b.setPosition(pb);
 }
+private void updateInvulnerabilityTimers(GameState gameState) {
+    double dt = 1.0 / TARGET_FPS;
+
+    for (Player p : gameState.players()) {
+        if (p == null) continue;
+
+        if (p.getInvulnerableTimer() > 0.0) {
+            p.setInvulnerableTimer(Math.max(0.0, p.getInvulnerableTimer() - dt));
+        }
+    }
+}
+
+private boolean isInvulnerable(Player p) {
+    return p != null && p.getInvulnerableTimer() > 0.0;
+}
+
+
 
 }
