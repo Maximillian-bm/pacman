@@ -43,6 +43,8 @@ import java.text.DecimalFormat;
 
 public class UI extends Application {
 
+    private final SoundEngine soundEngine = new SoundEngine();
+
     private final ConnectToLobby lobbyHandler = new ConnectToLobby();
 
     private final ClientGameController gameController = new ClientGameController();
@@ -201,7 +203,10 @@ public class UI extends Application {
 
         createLobbyButton.setOnAction(e -> createLobby.run());
 
-        startButton.setOnAction(e -> startLobby(stage));
+        startButton.setOnAction(e -> {
+            startLobby(stage);
+            soundEngine.startMusic();
+        });
 
         stage.setScene(startScene);
 
