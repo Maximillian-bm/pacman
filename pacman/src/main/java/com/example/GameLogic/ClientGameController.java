@@ -1000,7 +1000,4 @@ private void updateInvulnerabilityTimers(GameState gameState) {
 private boolean isInvulnerable(Player p) {
     return p != null && p.getInvulnerableTimer() > 0.0;
 }
-
-
-
 }
