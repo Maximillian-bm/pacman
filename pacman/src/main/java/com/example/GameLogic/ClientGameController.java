@@ -809,7 +809,7 @@ public class ClientGameController extends GameController {
             if (ghost == null || ghost.getPosition() == null) continue;
             if (ghost.getRespawnTimer() > 0.0) continue;
 
-            if (player.distanceTo(ghost) > Constants.COLLISION_DISTANCE) continue;
+            if (player.distanceTo(ghost) > Constants.COLLISION_DISTANCE_PVG) continue;
 
             if (frightened) {
                 // player eats ghost
@@ -909,7 +909,7 @@ private void handlePvPcollitions(GameState gameState) {
             Player b = players.get(j);
             if (!isPlayerCollidable(b)) continue;
 
-            if (a.distanceTo(b) > Constants.COLLISION_DISTANCE) continue;
+            if (a.distanceTo(b) > Constants.COLLISION_DISTANCE_PVP) continue;
 
             boolean aPow = isPowered(a);
             boolean bPow = isPowered(b);
