@@ -793,13 +793,6 @@ public class ClientGameController extends GameController {
         }
     }
 
-    private boolean collision(Position pos1, Position pos2) {
-        return pos1.x < pos2.x + TILE_SIZE &&
-            pos1.x + TILE_SIZE > pos2.x &&
-            pos1.y < pos2.y + TILE_SIZE &&
-            pos1.y + TILE_SIZE > pos2.y;
-    }
-
     private void handleGhostPlayerCollisions(GameState gameState) {
     if (gameState.players() == null || gameState.ghosts() == null) return;
 
@@ -816,7 +809,7 @@ public class ClientGameController extends GameController {
             if (ghost == null || ghost.getPosition() == null) continue;
             if (ghost.getRespawnTimer() > 0.0) continue;
 
-            if (!collision(player.getPosition(), ghost.getPosition())) continue;
+            if (player.distanceTo(ghost) > Constants.COLLISION_DISTANCE) continue;
 
             if (frightened) {
                 // player eats ghost
@@ -916,7 +909,7 @@ private void handlePvPcollitions(GameState gameState) {
             Player b = players.get(j);
             if (!isPlayerCollidable(b)) continue;
 
-            if (!collision(a.getPosition(), b.getPosition())) continue;
+            if (a.distanceTo(b) > Constants.COLLISION_DISTANCE) continue;
 
             boolean aPow = isPowered(a);
             boolean bPow = isPowered(b);
