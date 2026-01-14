@@ -39,6 +39,9 @@ public class LobbyActionHandler implements Runnable{
 
     public void stop() {
         running = false;
+        repository.remove(lobbyID+"rawAction");
+        repository.remove(lobbyID+"cleanAction");
+        repository.remove(lobbyID+"sync");
     }
     
 }
