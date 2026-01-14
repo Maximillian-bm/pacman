@@ -58,6 +58,11 @@ public class LobbyCleaner implements Runnable{
                 System.out.println("Closing lobby "+lobby.getLobbyID());
                 lobby.stop();
                 toBeRemoved.add(lobby);
+                try {
+                    space1.put(lobby.getLobbyID());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 }
                 System.out.println("All lobbys have been closed");
                 closeAllLobbys = false;
