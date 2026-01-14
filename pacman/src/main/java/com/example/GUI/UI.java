@@ -277,7 +277,6 @@ public class UI extends Application {
                 drawCountdown();
                 Constants.clock++;
                 return;
-            } else {
             }
 
             List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
@@ -318,10 +317,19 @@ public class UI extends Application {
         }
 
         private void drawCountdown() {
-            gc.setFill(Color.RED);
-            gc.setFont(new javafx.scene.text.Font(80));
+            Color playerColor = gameState.players().get(lobbyHandler.getPlayerID()).getColor();
             float seconds = -1 * (float) (Constants.clock) / Constants.TARGET_FPS;
-            gc.fillText(seconds + "", Constants.INIT_SCREEN_WIDTH / 2 - 40, Constants.INIT_SCREEN_HEIGHT / 2 - 40);
+
+            gc.setFill(playerColor);
+            gc.setFont(new javafx.scene.text.Font(80));
+            gc.fillText((int)seconds + "", Constants.INIT_SCREEN_WIDTH / 2 - 20, Constants.INIT_SCREEN_HEIGHT / 2 - 40);
+            gc.setFont(new javafx.scene.text.Font(80));
+            gc.fillText((int)seconds + "", Constants.INIT_SCREEN_WIDTH / 2 - 20, Constants.INIT_SCREEN_HEIGHT / 2 - 40);
+
+            gc.fillRect(0, 0, Constants.INIT_SCREEN_WIDTH, 4);
+            gc.fillRect(0, 0, 4, Constants.INIT_SCREEN_HEIGHT);
+            gc.fillRect(Constants.INIT_SCREEN_WIDTH-4, 0, 4, Constants.INIT_SCREEN_HEIGHT);
+            gc.fillRect(0, Constants.INIT_SCREEN_HEIGHT-4, Constants.INIT_SCREEN_WIDTH, 4);
         }
 
         private void drawPoints() {
