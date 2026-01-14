@@ -3,11 +3,6 @@ package com.example.model;
 import static com.example.model.Maps.map1;
 
 public class Constants {
-    //Varibles
-    public static int clock = 0;
-    public static int actionOffset = 6;
-    public static long timeOffset = 0;
-
     //Constants
     public final static long LOBBY_TTL = 300000;
     public final static int NR_OF_LOBBYS_CAP = 100;
@@ -37,7 +32,7 @@ public class Constants {
     public final static long TARGET_FPS = 20;
     public static final double CENTER_EPS_PX = 1.5;
 
-    // public final static float COUNTDOWN_DURATION = 3;
+    public final static int COUNTDOWN_DURATION_TICKS = 60;
 
     // Player
     public final static int PLAYER_LIVES = 3;
@@ -46,4 +41,9 @@ public class Constants {
     // Ghost
     public static final double GHOST_RESPAWN_DELAY_SEC  = 3.0;
     public final static double FRIGHTENED_DURATION_SEC = 8.0;
+
+    //Varibles
+    public static int clock = -COUNTDOWN_DURATION_TICKS;
+    public static int actionOffset = 6;
+    public static long timeOffset = 0;
 }
