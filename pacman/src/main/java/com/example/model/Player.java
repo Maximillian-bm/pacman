@@ -13,14 +13,6 @@ public class Player extends Entity {
     private int
         points = 0,
         lives = Constants.PLAYER_LIVES;
-
-    @Getter
-    @Setter
-    private Position position = new Position();
-    @Getter
-    @Setter
-    private Direction direction = Direction.EAST;
-
     @Getter @Setter
     private Direction intendedDirection;
     @Getter @Setter
