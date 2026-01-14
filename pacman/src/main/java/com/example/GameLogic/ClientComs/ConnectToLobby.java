@@ -32,12 +32,8 @@ public class ConnectToLobby {
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
             playerID = (int) t[0];
             this.nrOfPlayers = (int) t[1];
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create lobby", e);
         }
         System.out.println("Created lobby with ID: "+lobbyID);
     }
@@ -49,13 +45,32 @@ public class ConnectToLobby {
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
             playerID = (int) t[0];
             nrOfPlayers = (int) t[1];
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid lobby ID: " + lobbyID);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Lobby " + lobbyID + " not found or connection failed.");
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Join interrupted", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to join lobby: " + e.getMessage(), e);
         }
+    }
+
+    public void joinLobby(String lobbyID, long timeoutMs) throws java.util.concurrent.TimeoutException {
+        throw new UnsupportedOperationException("TDD: Implement join with timeout.");
+    }
+
+    public void leaveLobby() {
+        throw new UnsupportedOperationException("TDD: Implement this method to handle player disconnection.");
+    }
+
+    public Object getGameState() {
+        throw new UnsupportedOperationException("TDD: Implement this method to retrieve current game state for testing.");
+    }
+
+    public boolean isPlayerInGame(int playerID) {
+        throw new UnsupportedOperationException("TDD: Implement this method to check if a player is currently in the active game.");
     }
 
     public void startGame() {

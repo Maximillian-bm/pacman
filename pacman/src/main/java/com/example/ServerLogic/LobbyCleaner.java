@@ -5,12 +5,16 @@ import java.util.List;
 
 import org.jspace.Space;
 
+import com.example.model.Constants;
+
 public class LobbyCleaner implements Runnable{
 
     private List<Lobby> lobbys;
     private Space space1;
     private boolean running = true;
     private List<Lobby> toBeAdded = new ArrayList<>();
+    private boolean showActiveLobbys = false;
+    private boolean closeAllLobbys = false;
 
     public LobbyCleaner(List<Lobby> lobbys, Space space1){
         this.lobbys = lobbys;
@@ -27,8 +31,7 @@ public class LobbyCleaner implements Runnable{
             }
             List<Lobby> toBeRemoved = new ArrayList<>();
             for (Lobby lobby : lobbys) {
-                System.out.println("Lobby "+lobby.getLobbyID()+" is active");
-                if(System.currentTimeMillis() - lobby.getTimeOfCreation() > 300000){
+                if(System.currentTimeMillis() - lobby.getTimeOfCreation() > Constants.LOBBY_TTL){
                     int lobbyID = lobby.getLobbyID();
                     lobby.stop();
                     toBeRemoved.add(lobby);
@@ -37,12 +40,42 @@ public class LobbyCleaner implements Runnable{
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                }              
+                }
+            }
+            if(showActiveLobbys){
+                if(lobbys.isEmpty()){
+                    System.out.println("No active lobbys");
+                }else{
+                    for(Lobby lobby : lobbys) {
+                    System.out.println("Lobby "+lobby.getLobbyID()+" is active");
+                    }
+                }
+                System.out.println("All lobbys have been displayed");
+                showActiveLobbys = false;
+            }
+            if(closeAllLobbys){
+                for(Lobby lobby : lobbys) {
+                System.out.println("Closing lobby "+lobby.getLobbyID());
+                lobby.stop();
+                toBeRemoved.add(lobby);
+                }
+                System.out.println("All lobbys have been closed");
+                closeAllLobbys = false;
             }
             lobbys.removeAll(toBeRemoved);
             lobbys.addAll(toBeAdded);
             toBeAdded.removeAll(toBeAdded);
         }
+    }
+
+    public void closeAllLobbys(){
+        System.out.println("Closing all lobbys...");
+        closeAllLobbys = true;
+    }
+
+    public void showActiveLobbys(){
+        System.out.println("Loading active lobbys...");
+        showActiveLobbys = true;
     }
 
     public void stop(){
