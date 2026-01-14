@@ -9,6 +9,8 @@ public class Player extends Entity {
     @Getter
     private final int id;
 
+    private int ghostsEatenThisEnergizer;
+
     @Getter @Setter
     private int
         points = 0,
@@ -45,7 +47,6 @@ public class Player extends Entity {
      * From: "https://pacman.fandom.com/wiki/Power_Pellet"
      * If consecutive ghosts are eaten during the same Energizer effect, they will give out 400, 800 and 1,600 point bonuses for each of the consecutive ghosts in order.
      */
-    private int ghostsEatenThisEnergizer;
 
     public void addPoints(int points) {
         this.points += points;
