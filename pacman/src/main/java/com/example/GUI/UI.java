@@ -260,6 +260,10 @@ public class UI extends Application {
             if (time-(startTime+Constants.timeOffset) < Constants.clock*(1000000000/TARGET_FPS)) {
                 return;
             }
+            if (Constants.clock < 100) { 
+                Constants.clock++; 
+                return;
+            }
 
             List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
             if (gameState == null) { 

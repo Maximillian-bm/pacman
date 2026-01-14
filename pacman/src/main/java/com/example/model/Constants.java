@@ -37,6 +37,8 @@ public class Constants {
     public final static long TARGET_FPS = 20;
     public static final double CENTER_EPS_PX = 1.5;
 
+    // public final static float COUNTDOWN_DURATION = 3;
+
     // Player
     public final static int PLAYER_LIVES = 3;
     public final static double PLAYER_SPEED = 175;
