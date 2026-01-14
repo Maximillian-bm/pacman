@@ -9,10 +9,6 @@ public class Ghost extends Entity {
     @Getter
     private GhostType type;
     @Getter @Setter
-    private Position position;
-    @Getter @Setter
-    private Direction direction = Direction.WEST;
-    @Getter @Setter
     private static double GHOSTSPEED = PLAYER_SPEED * 0.8;
     @Getter @Setter
     private static boolean ghostScatterMode = true;
@@ -29,5 +25,6 @@ public class Ghost extends Entity {
 
     public Ghost(GhostType type) {
         this.type = type;
+        super.direction = Direction.WEST;
     }
 }
