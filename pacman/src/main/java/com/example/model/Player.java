@@ -29,8 +29,11 @@ public class Player extends Entity {
 
     @Getter @Setter
     private Position spawnPosition;
+
     @Getter @Setter
-    private boolean isEnergized;
+    private double powerUpTimer = 0.0;
+    @Getter @Setter
+    private double invulnerableTimer = 0.0;
 
     public Player(int id) {
         this.id = id;

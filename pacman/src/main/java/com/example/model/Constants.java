@@ -37,6 +37,8 @@ public class Constants {
     // Player
     public final static int PLAYER_LIVES = 3;
     public final static double PLAYER_SPEED = 175;
+    public final static double PLAYER_SPAWN_PROTECT_SEC = 2.0;
+
 
     // Ghost
     public static final double GHOST_RESPAWN_DELAY_SEC  = 3.0;

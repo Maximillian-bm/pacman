@@ -38,6 +38,8 @@ public class ClientGameController extends GameController {
     public GameState updateGameState(GameState gameState, List<Action> actions) {
 
         updateRespawnTimers(gameState);
+        updatePlayerPowerTimers(gameState);
+        updateInvulnerabilityTimers(gameState);
 
         if (Ghost.getFrightenedTimerSec() > 0.0) {
             Ghost.setFrightenedTimerSec(Ghost.getFrightenedTimerSec() - (1.0 / TARGET_FPS));
@@ -48,10 +50,11 @@ public class ClientGameController extends GameController {
 
         handleActions(gameState, actions);
         stepMovement(gameState);
+        handlePvPcollitions(gameState);
         GhostMovement(gameState);
         handleGhostPlayerCollisions(gameState);
         handlePlayerGridPosition(gameState);
-
+        
         GameState newGameState = new GameState(
             Constants.clock,
             gameState.players(),
@@ -336,14 +339,17 @@ public class ClientGameController extends GameController {
             TileType tileType = tiles[tileX][tileY];
             player.addPoints(tileType.points);
 
-            if (isPowerup(tileType)) {
-                Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
-                for (Ghost g : gameState.ghosts()) {
-                    g.setDirection(oppositeDir(getGhostDir(g)));
-                }
-                tiles[tileX][tileY] = TileType.EMPTY;
-                return;
-            }
+        if (isPowerup(tileType)) {
+            player.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
+            Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
+
+        for (Ghost g : gameState.ghosts()) {
+            g.setDirection(oppositeDir(getGhostDir(g)));
+        }
+
+            tiles[tileX][tileY] = TileType.EMPTY;
+            return;
+        }
             switch (tileType) {
                 case EMPTY -> {
                 }
@@ -795,64 +801,50 @@ public class ClientGameController extends GameController {
     }
 
     private void handleGhostPlayerCollisions(GameState gameState) {
-        if (gameState.players() == null || gameState.ghosts() == null) {
-            return;
-        }
+    if (gameState.players() == null || gameState.ghosts() == null) return;
 
-        boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
+    boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
 
-        for (Player player : gameState.players()) {
-            if (player == null || player.getPosition() == null) {
+    for (Player player : gameState.players()) {
+        if (player == null || player.getPosition() == null) continue;
+        if (!player.isAlive() || player.getRespawnTimer() > 0.0) continue;
+
+        // NEW: spawn protection
+        if (isInvulnerable(player)) continue;
+
+        for (Ghost ghost : gameState.ghosts()) {
+            if (ghost == null || ghost.getPosition() == null) continue;
+            if (ghost.getRespawnTimer() > 0.0) continue;
+
+            if (!collision(player.getPosition(), ghost.getPosition())) continue;
+
+            if (frightened) {
+                // player eats ghost
+                player.addPoints(200);
+                ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
+                ghost.setPosition(new Position(-1000, -1000));
                 continue;
             }
-            if (!player.isAlive()) {
-                continue;
+
+            int livesLeft = Math.max(0, player.getLives() - 1);
+            player.setLives(livesLeft);
+
+            if (livesLeft <= 0) {
+                player.setAlive(false);
+                player.setIntendedDirection(null);
+                player.setPosition(new Position(-1000, -1000));
+                break;
             }
-            if (player.getRespawnTimer() > 0.0) {
-                continue;
-            }
 
-            for (Ghost ghost : gameState.ghosts()) {
-                if (ghost == null || ghost.getPosition() == null) {
-                    continue;
-                }
-                if (ghost.getRespawnTimer() > 0.0) {
-                    continue;
-                }
+            player.setAlive(false);
+            player.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
+            player.setPosition(new Position(-1000, -1000));
+            player.setIntendedDirection(null);
 
-                if (!collision(player.getPosition(), ghost.getPosition())) {
-                    continue;
-                }
-
-                if (frightened) {
-                    // Player eats ghost (only this ghost is affected)
-                    player.addPoints(200);
-                    ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
-                    ghost.setPosition(new Position(-1000, -1000));
-                    return;
-                } else {
-                    // Ghost kills this player (only this player is affected)
-                    int livesLeft = Math.max(0, player.getLives() - 1);
-                    player.setLives(livesLeft);
-
-                    if (livesLeft <= 0) {
-                        // Dead forever (no respawn)
-                        player.setAlive(false);
-                        player.setIntendedDirection(null);
-                        player.setPosition(new Position(-1000, -1000));
-                        return;
-                    }
-
-                    // Start respawn timer for THIS player only
-                    player.setAlive(false);
-                    player.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
-                    player.setPosition(new Position(-1000, -1000)); // hide during timer
-                    player.setIntendedDirection(null);
-                    return;
-                }
-            }
+            break;
         }
     }
+}
 
     private void updateRespawnTimers(GameState gameState) {
         double dt = 1.0 / TARGET_FPS;
@@ -873,6 +865,7 @@ public class ClientGameController extends GameController {
                     p.setAlive(true);
                     p.setDirection(Direction.WEST);
                     p.setIntendedDirection(null);
+                    p.setInvulnerableTimer(Constants.PLAYER_SPAWN_PROTECT_SEC);
                 }
             }
         }
@@ -895,4 +888,116 @@ public class ClientGameController extends GameController {
             }
         }
     }
+private void updatePlayerPowerTimers(GameState gameState) {
+    double dt = 1.0 / TARGET_FPS;
+
+    for (Player p : gameState.players()) {
+        if (p == null) continue;
+
+        if (p.getPowerUpTimer() > 0.0) {
+            p.setPowerUpTimer(Math.max(0.0, p.getPowerUpTimer() - dt));
+        }
+    }
+}
+
+private boolean isPowered(Player p) {
+    return p != null && p.getPowerUpTimer() > 0.0;
+}
+
+private void handlePvPcollitions(GameState gameState) {
+    List<Player> players = gameState.players();
+    if (players == null || players.size() < 2) return;
+
+    for (int i = 0; i < players.size(); i++) {
+        Player a = players.get(i);
+        if (!isPlayerCollidable(a)) continue;
+
+        for (int j = i + 1; j < players.size(); j++) {
+            Player b = players.get(j);
+            if (!isPlayerCollidable(b)) continue;
+
+            if (!collision(a.getPosition(), b.getPosition())) continue;
+
+            boolean aPow = isPowered(a);
+            boolean bPow = isPowered(b);
+
+            if (aPow ^ bPow) {
+                Player eater = aPow ? a : b;
+                Player victim = aPow ? b : a;
+
+                eatPlayer(gameState, eater, victim);
+                break;
+            }
+            resolvePlayerOverlap(a, b);
+        }
+    }
+}
+
+private boolean isPlayerCollidable(Player p) {
+    return p != null
+        && p.getPosition() != null
+        && p.isAlive()
+        && p.getRespawnTimer() <= 0.0
+        && !isInvulnerable(p);
+}
+
+
+private void eatPlayer(GameState gameState, Player eater, Player victim) {
+    eater.addPoints(500);
+
+    int livesLeft = Math.max(0, victim.getLives() - 1);
+    victim.setLives(livesLeft);
+
+    if (livesLeft <= 0) {
+        victim.setAlive(false);
+        victim.setIntendedDirection(null);
+        victim.setPosition(new Position(-1000, -1000));
+        return;
+    }
+
+    victim.setAlive(false);
+    victim.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
+    victim.setPosition(new Position(-1000, -1000));
+    victim.setIntendedDirection(null);
+
+    victim.setPowerUpTimer(0.0);
+}
+
+private void resolvePlayerOverlap(Player a, Player b) {
+    Position pa = a.getPosition();
+    Position pb = b.getPosition();
+
+    double overlapX = Math.min(pa.x + TILE_SIZE, pb.x + TILE_SIZE) - Math.max(pa.x, pb.x);
+    double overlapY = Math.min(pa.y + TILE_SIZE, pb.y + TILE_SIZE) - Math.max(pa.y, pb.y);
+
+    if (overlapX <= 0 || overlapY <= 0) return;
+
+    if (overlapX < overlapY) {
+        double push = overlapX / 2.0;
+        if (pa.x < pb.x) { pa.x -= push; pb.x += push; }
+        else            { pa.x += push; pb.x -= push; }
+    } else {
+        double push = overlapY / 2.0;
+        if (pa.y < pb.y) { pa.y -= push; pb.y += push; }
+        else            { pa.y += push; pb.y -= push; }
+    }
+
+    a.setPosition(pa);
+    b.setPosition(pb);
+}
+private void updateInvulnerabilityTimers(GameState gameState) {
+    double dt = 1.0 / TARGET_FPS;
+
+    for (Player p : gameState.players()) {
+        if (p == null) continue;
+
+        if (p.getInvulnerableTimer() > 0.0) {
+            p.setInvulnerableTimer(Math.max(0.0, p.getInvulnerableTimer() - dt));
+        }
+    }
+}
+
+private boolean isInvulnerable(Player p) {
+    return p != null && p.getInvulnerableTimer() > 0.0;
+}
 }
