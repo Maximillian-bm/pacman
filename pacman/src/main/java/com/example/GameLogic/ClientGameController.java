@@ -462,6 +462,7 @@ public class ClientGameController extends GameController {
             int tileY = gp.getValue();
 
             TileType tileType = tiles[tileY][tileX];
+        if(tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON) player.setAteFruit(true);
 
             if (Player.isAnyPowerActive() && !Player.isPowerOwner(player)) {
                 return;
@@ -478,6 +479,7 @@ public class ClientGameController extends GameController {
                     }
                 }
 
+                player.setAtePowerUp(true);
                 player.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
                 Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
 
@@ -969,8 +971,7 @@ public class ClientGameController extends GameController {
                     continue;
                 }
 
-                int livesLeft = Math.max(0, player.getLives() - 1);
-                player.setLives(livesLeft);
+                int livesLeft = player.loseLife();
 
                 if (livesLeft <= 0) {
                     player.setAlive(false);
