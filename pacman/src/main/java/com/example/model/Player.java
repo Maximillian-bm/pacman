@@ -154,4 +154,20 @@ public class Player extends Entity {
             default: return Color.rgb(255, 241, 0);
         }
     }
+
+    public Player copy() {
+        Player copy = new Player(this.id);
+        copy.position = this.position != null ? new Position(this.position.x, this.position.y) : null;
+        copy.direction = this.direction;
+        copy.points = this.points;
+        copy.lives = this.lives;
+        copy.intendedDirection = this.intendedDirection;
+        copy.respawnTimer = this.respawnTimer;
+        copy.alive = this.alive;
+        copy.spawnPosition = this.spawnPosition != null ? new Position(this.spawnPosition.x, this.spawnPosition.y) : null;
+        copy.powerUpTimer = this.powerUpTimer;
+        copy.invulnerableTimer = this.invulnerableTimer;
+        copy.ghostsEatenThisEnergizer = this.ghostsEatenThisEnergizer;
+        return copy;
+    }
 }
