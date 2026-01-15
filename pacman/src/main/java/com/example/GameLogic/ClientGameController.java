@@ -12,6 +12,7 @@ import static com.example.model.Constants.TILE_SIZE;
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.Direction;
+import com.example.model.EntityTracker;
 import com.example.model.GameState;
 import com.example.model.Ghost;
 import com.example.model.GhostType;
@@ -58,7 +59,7 @@ public class ClientGameController extends GameController {
             System.arraycopy(originalTiles[i], 0, copiedTiles[i], 0, originalTiles[i].length);
         }
 
-        return new GameState(state.clock(), copiedPlayers, copiedGhosts, copiedTiles, state.winner());
+        return new GameState(state.clock(), copiedPlayers, copiedGhosts, copiedTiles, state.winner(), state.entityTracker().copy());
     }
 
     public GameState updateGameState(GameState gameState, List<Action> actions) {
@@ -137,7 +138,8 @@ public class ClientGameController extends GameController {
             gameState.players(),
             gameState.ghosts(),
             tiles,
-            winner
+            winner,
+            gameState.entityTracker()
         );
 
         return newGameState;
@@ -282,7 +284,8 @@ public class ClientGameController extends GameController {
             players,
             ghosts,
             tiles,
-            null
+            null,
+            new EntityTracker()
         );
     }
 
