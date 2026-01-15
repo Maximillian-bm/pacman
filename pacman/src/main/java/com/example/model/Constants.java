@@ -43,7 +43,7 @@ public class Constants {
     public final static double PLAYER_SPAWN_PROTECT_SEC = 2.0;
 
     // Ghost
-    public static final double GHOST_RESPAWN_DELAY_SEC  = 3.0;
+    public static final double GHOST_RESPAWN_DELAY_SEC  = 8.0;
     public final static double FRIGHTENED_DURATION_SEC = 8.0;
 
     //Varibles
