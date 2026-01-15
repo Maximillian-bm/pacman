@@ -79,7 +79,6 @@ public class Player extends Entity {
             }
         }
     }
-
     if (owner == null
         || owner.getPowerUpTimer() <= 0.0
         || !owner.isAlive()

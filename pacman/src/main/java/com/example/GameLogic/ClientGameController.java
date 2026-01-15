@@ -802,6 +802,7 @@ private void handlePlayerGridPosition(GameState gameState) {
             ghost.setPosition(pos);
         }
     }
+
 private void handleGhostPlayerCollisions(GameState gameState) {
     if (gameState.players() == null || gameState.ghosts() == null) return;
 
@@ -820,11 +821,12 @@ private void handleGhostPlayerCollisions(GameState gameState) {
 
             if (player.distanceTo(ghost) > Constants.COLLISION_DISTANCE_PVG) continue;
 
-            if (frightened && Player.isPowerOwner(player)) {
-                player.eatGhost();
-
-                ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
-                ghost.setPosition(new Position(-1000, -1000));
+            if (frightened) {
+                if (Player.isPowerOwner(player)) {
+                    player.eatGhost(); 
+                    ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
+                    ghost.setPosition(new Position(-1000, -1000));
+                }
                 continue;
             }
 
