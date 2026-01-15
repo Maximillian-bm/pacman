@@ -365,14 +365,13 @@ public class UI extends Application {
                 default:
                     break;
             }
-            if(gameState.tiles()[pos.getKey()+xOffset][pos.getValue()+yOffset] == TileType.PAC_DOT){
-                if(!eatingDot){
-                    eatingDot = true;
-                    soundEngine.loop(Sound.EAT_DOT);
-                }else{
-                    eatingDot = false;
-                    soundEngine.stop(Sound.EAT_DOT);
-                }
+            System.out.println(gameState.tiles()[pos.getKey()+xOffset%Constants.TILES_WIDE][pos.getValue()+yOffset%Constants.TILES_TALL].toString());
+            if(!eatingDot && gameState.tiles()[pos.getKey()+xOffset%Constants.TILES_WIDE][pos.getValue()+yOffset%Constants.TILES_TALL] == TileType.PAC_DOT){
+                eatingDot = true;
+                soundEngine.play(Sound.EAT_DOT);
+            }else{
+                eatingDot = false;
+                soundEngine.stop(Sound.EAT_DOT);
             }
         }
 
