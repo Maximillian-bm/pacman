@@ -24,6 +24,16 @@ public class PowerupState {
     @Setter
     private int powerOwnerId = -1;
 
+    public PowerupState() {}
+
+    public PowerupState(double ghostSpeed, boolean ghostScatterMode, double ghostChaseTimer, double frightenedTimerSec, int powerOwnerId) {
+        this.ghostSpeed = ghostSpeed;
+        this.ghostScatterMode = ghostScatterMode;
+        this.ghostChaseTimer = ghostChaseTimer;
+        this.frightenedTimerSec = frightenedTimerSec;
+        this.powerOwnerId = powerOwnerId;
+    }
+
     public void clearPowerOwner() {
         this.powerOwnerId = -1;
     }

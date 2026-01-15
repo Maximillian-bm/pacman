@@ -654,7 +654,8 @@ public class ClientGameControllerTest extends BaseTest {
             initialState.players(),
             initialState.ghosts(),
             initialState.tiles(),
-            null
+            null,
+            initialState.powerupState()
         );
 
         GameState nextState = controller.updateGameState(highClockState, new ArrayList<>());
@@ -921,7 +922,7 @@ public class ClientGameControllerTest extends BaseTest {
     public void testUpdateGameStateForClockRegression() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
-        GameState futureState = new GameState(10, initialState.players(), initialState.ghosts(), initialState.tiles(), null);
+        GameState futureState = new GameState(10, initialState.players(), initialState.ghosts(), initialState.tiles(), null, initialState.powerupState());
 
         // targetClock (5) < futureState.clock() (10)
         GameState resultState = controller.updateGameStateFor(futureState, 5);

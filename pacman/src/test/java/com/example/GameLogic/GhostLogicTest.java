@@ -60,7 +60,8 @@ public class GhostLogicTest extends BaseTest {
             state.players(),
             state.ghosts(),
             boxMap,
-            null
+            null,
+            state.powerupState()
         );
 
         Ghost g = boxState.ghosts().getFirst();

@@ -18,6 +18,7 @@ import com.example.model.GhostType;
 import com.example.model.Maps;
 import com.example.model.Player;
 import com.example.model.Position;
+import com.example.model.PowerupState;
 import com.example.model.TileType;
 
 import java.util.ArrayList;
@@ -58,14 +59,12 @@ public class ClientGameController extends GameController {
             System.arraycopy(originalTiles[i], 0, copiedTiles[i], 0, originalTiles[i].length);
         }
 
-        GameState copy = new GameState(state.clock(), copiedPlayers, copiedGhosts, copiedTiles, state.winner());
-        // Copy mutable state fields
-        copy.powerupState().setGhostSpeed(state.powerupState().getGhostSpeed());
-        copy.powerupState().setGhostScatterMode(state.powerupState().isGhostScatterMode());
-        copy.powerupState().setGhostChaseTimer(state.powerupState().getGhostChaseTimer());
-        copy.powerupState().setFrightenedTimerSec(state.powerupState().getFrightenedTimerSec());
-        copy.powerupState().setPowerOwnerId(state.powerupState().getPowerOwnerId());
-        return copy;
+        PowerupState ps = state.powerupState();
+        PowerupState newPs = (ps != null) 
+            ? new PowerupState(ps.getGhostSpeed(), ps.isGhostScatterMode(), ps.getGhostChaseTimer(), ps.getFrightenedTimerSec(), ps.getPowerOwnerId())
+            : new PowerupState();
+
+        return new GameState(state.clock(), copiedPlayers, copiedGhosts, copiedTiles, state.winner(), newPs);
     }
 
     public GameState updateGameState(GameState gameState, List<Action> actions) {
@@ -139,21 +138,14 @@ public class ClientGameController extends GameController {
         // Handle fruit spawning based on pellets eaten
         handleFruitSpawning(gameState);
 
-        GameState newGameState = new GameState(
+        return new GameState(
             newClock,
             gameState.players(),
             gameState.ghosts(),
             tiles,
-            winner
+            winner,
+            gameState.powerupState()
         );
-        // Copy mutable state to the new GameState
-        newGameState.powerupState().setGhostSpeed(gameState.powerupState().getGhostSpeed());
-        newGameState.powerupState().setGhostScatterMode(gameState.powerupState().isGhostScatterMode());
-        newGameState.powerupState().setGhostChaseTimer(gameState.powerupState().getGhostChaseTimer());
-        newGameState.powerupState().setFrightenedTimerSec(gameState.powerupState().getFrightenedTimerSec());
-        newGameState.powerupState().setPowerOwnerId(gameState.powerupState().getPowerOwnerId());
-
-        return newGameState;
     }
 
     private void handleFruitSpawning(GameState gameState) {
@@ -207,7 +199,8 @@ public class ClientGameController extends GameController {
             players,
             ghosts,
             tiles,
-            null
+            null,
+            new PowerupState()
         );
 
         for (int i = 0; i < nrOfPlayers; i++) {
