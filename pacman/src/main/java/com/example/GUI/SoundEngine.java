@@ -15,7 +15,8 @@ public class SoundEngine {
     private final Map<Sound, AudioClip> soundLoopers = new EnumMap<>(Sound.class);
 
     public SoundEngine() {
-        for (Sound sound : Sound.values()) {
+        try {
+            for (Sound sound : Sound.values()) {
             String url = getClass().getResource("/" + sound.getPath()).toExternalForm();
             AudioClip player = new AudioClip(url);
             AudioClip looper = new AudioClip(url);
@@ -23,28 +24,47 @@ public class SoundEngine {
             soundPlayers.put(sound, player);
             soundLoopers.put(sound, looper);
         }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void play(Sound sound) {
-        AudioClip player = soundPlayers.get(sound);
-        player.stop();   // IMPORTANT: restart sound if already playing
-        player.play();
+        try {
+            AudioClip player = soundPlayers.get(sound);
+            player.stop();   // IMPORTANT: restart sound if already playing
+            player.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void loop(Sound sound) {
-        AudioClip looper = soundLoopers.get(sound);
-        looper.stop();   // IMPORTANT: restart sound if already playing
-        looper.play();
+        try {
+            AudioClip looper = soundLoopers.get(sound);
+            looper.stop();   // IMPORTANT: restart sound if already playing
+            looper.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void stop(Sound sound) {
-        soundPlayers.get(sound).stop();
-        soundPlayers.get(sound).stop();
+        try {
+            soundPlayers.get(sound).stop();
+            soundPlayers.get(sound).stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setVolume(double volume) {
-        soundPlayers.values().forEach(p -> p.setVolume(volume));
-        soundLoopers.values().forEach(p -> p.setVolume(volume));
+        try {
+            soundPlayers.values().forEach(p -> p.setVolume(volume));
+            soundLoopers.values().forEach(p -> p.setVolume(volume));    
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 
