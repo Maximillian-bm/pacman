@@ -32,6 +32,7 @@ public class Constants {
     public final static long TARGET_FPS = 20;
     public static final double CENTER_EPS_PX = 1.5;
 
+    
     public final static int COUNTDOWN_DURATION_TICKS = 60;
     public static final double COLLISION_DISTANCE_PVG = TILE_SIZE/2;
     public static final double COLLISION_DISTANCE_PVP = TILE_SIZE;
@@ -40,7 +41,6 @@ public class Constants {
     public final static int PLAYER_LIVES = 3;
     public final static double PLAYER_SPEED = 175;
     public final static double PLAYER_SPAWN_PROTECT_SEC = 2.0;
-
 
     // Ghost
     public static final double GHOST_RESPAWN_DELAY_SEC  = 3.0;
