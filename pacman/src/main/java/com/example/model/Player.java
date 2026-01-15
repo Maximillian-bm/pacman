@@ -11,6 +11,7 @@ public class Player extends Entity {
     @Getter
     private final int id;
 
+    @Setter
     private int ghostsEatenThisEnergizer;
 
     @Getter @Setter
@@ -43,63 +44,6 @@ public class Player extends Entity {
     private boolean ateGhost = false;
     @Getter @Setter
     private boolean atePowerUp = false;
-
-
-
-    private static int powerOwnerId = -1;
-
-    public static int getPowerOwnerId() {
-        return powerOwnerId;
-    }
-
-    public static void setPowerOwnerId(int playerId) {
-        powerOwnerId = playerId;
-    }
-
-    public static void clearPowerOwner() {
-        powerOwnerId = -1;
-    }
-
-    public static boolean isAnyPowerActive() {
-        return powerOwnerId != -1;
-    }
-
-    public static boolean isPowerOwner(Player p) {
-        return p != null
-            && p.getId() == powerOwnerId
-            && p.getPowerUpTimer() > 0.0
-            && p.isAlive()
-            && p.getRespawnTimer() <= 0.0;
-    }
-
-    public static void assignPowerTo(Player owner) {
-        if (owner == null) return;
-        powerOwnerId = owner.getId();
-        owner.ghostsEatenThisEnergizer = 0;
-    }
-    public static boolean clearPowerIfOwnerInvalid(List<Player> players) {
-    if (powerOwnerId == -1) return false;
-
-    Player owner = null;
-    if (players != null) {
-        for (Player p : players) {
-            if (p != null && p.getId() == powerOwnerId) {
-                owner = p;
-                break;
-            }
-        }
-    }
-    if (owner == null
-        || owner.getPowerUpTimer() <= 0.0
-        || !owner.isAlive()
-        || owner.getRespawnTimer() > 0.0) {
-
-        powerOwnerId = -1;
-        return true;
-    }
-
-    return false;
-}
 
     public Player(int id) {
         this.id = id;

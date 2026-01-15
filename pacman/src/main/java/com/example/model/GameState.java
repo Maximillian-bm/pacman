@@ -7,5 +7,6 @@ public record GameState(
     List<Player> players,
     List<Ghost> ghosts,
     TileType[][] tiles,
-    Player winner
+    Player winner,
+    EntityTracker entityTracker
 ) { }
