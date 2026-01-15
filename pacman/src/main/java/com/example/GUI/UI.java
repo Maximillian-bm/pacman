@@ -341,7 +341,7 @@ public class UI extends Application {
             for (int i = 0; i < players.size(); i++) {
                 gc.setFill(players.get(i).getColor());
                 gc.fillText("Score: " + players.get(i).getPoints(), 
-                    Constants.INIT_SCREEN_WIDTH/2-padding+110, 
+                    Constants.INIT_SCREEN_WIDTH/2-padding+100, 
                     Constants.INIT_SCREEN_HEIGHT/2-padding+(i+2)*40
                 );
             }

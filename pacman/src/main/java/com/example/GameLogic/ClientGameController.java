@@ -56,9 +56,10 @@ public class ClientGameController extends GameController {
         handlePlayerGridPosition(gameState);
 
         Player winner = gameState.winner();
-        if (allPlayersDead(gameState) || allPointsGathered(gameState)) {
-            winner = getWinner(gameState);
-            System.out.println("winner found");
+        if (winner == null) {
+            if (allPlayersDead(gameState) || allPointsGathered(gameState)) {
+                winner = getWinner(gameState);
+            }
         }
 
         GameState newGameState = new GameState(
@@ -98,6 +99,8 @@ public class ClientGameController extends GameController {
                     spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
                     break;
             }
+            player.clearPowerOwner();
+            Ghost.setFrightenedTimerSec(0.0);
             player.setSpawnPosition(spawnPosition);
             player.setPosition(new Position(spawnPosition.x, spawnPosition.y));
             player.setLives(PLAYER_LIVES);
@@ -330,41 +333,49 @@ public class ClientGameController extends GameController {
             player.setPosition(pos);
         });
     }
+private void handlePlayerGridPosition(GameState gameState) {
+    gameState.players().forEach(player -> {
+        if (player == null || !player.isAlive() || player.getRespawnTimer() > 0.0) return;
 
-    private void handlePlayerGridPosition(GameState gameState) {
-        gameState.players().forEach(player -> {
-            if (player == null || !player.isAlive() || player.getRespawnTimer() > 0.0) {
-                return;
-            }
-            Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
+        Pair<Integer, Integer> gp = player.getPosition().ToGridPosition();
+        TileType[][] tiles = gameState.tiles();
+        int tileX = gp.getKey();
+        int tileY = gp.getValue();
 
-            TileType[][] tiles = gameState.tiles();
-            int tileX = playerGridPosition.getKey();
-            int tileY = playerGridPosition.getValue();
+        TileType tileType = tiles[tileX][tileY];
 
-            TileType tileType = tiles[tileX][tileY];
-            player.addPoints(tileType.points);
+        if (Player.isAnyPowerActive() && !Player.isPowerOwner(player)) {
+            return;
+        }
+
+        player.addPoints(tileType.points);
 
         if (isPowerup(tileType)) {
+            Player.assignPowerTo(player);
+
+            for (Player other : gameState.players()) {
+                if (other != null && other.getId() != player.getId()) {
+                    other.setPowerUpTimer(0.0);
+                }
+            }
+
             player.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
             Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
 
-        for (Ghost g : gameState.ghosts()) {
-            g.setDirection(oppositeDir(getGhostDir(g)));
-        }
+            for (Ghost g : gameState.ghosts()) {
+                g.setDirection(oppositeDir(getGhostDir(g)));
+            }
 
             tiles[tileX][tileY] = TileType.EMPTY;
             return;
         }
-            switch (tileType) {
-                case EMPTY -> {
-                }
-                case WALL -> {
-                }
-                default -> tiles[tileX][tileY] = TileType.EMPTY;
-            }
-        });
-    }
+
+        switch (tileType) {
+            case EMPTY, WALL -> { }
+            default -> tiles[tileX][tileY] = TileType.EMPTY;
+        }
+    });
+}
 
     private boolean isPowerup(TileType t) {
         return t == TileType.ENERGIZER;
@@ -799,7 +810,7 @@ public class ClientGameController extends GameController {
         }
     }
 
-    private void handleGhostPlayerCollisions(GameState gameState) {
+private void handleGhostPlayerCollisions(GameState gameState) {
     if (gameState.players() == null || gameState.ghosts() == null) return;
 
     boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
@@ -808,7 +819,7 @@ public class ClientGameController extends GameController {
         if (player == null || player.getPosition() == null) continue;
         if (!player.isAlive() || player.getRespawnTimer() > 0.0) continue;
 
-        // NEW: spawn protection
+        // spawn protection
         if (isInvulnerable(player)) continue;
 
         for (Ghost ghost : gameState.ghosts()) {
@@ -818,10 +829,11 @@ public class ClientGameController extends GameController {
             if (player.distanceTo(ghost) > Constants.COLLISION_DISTANCE_PVG) continue;
 
             if (frightened) {
-                // player eats ghost
-                player.addPoints(200);
-                ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
-                ghost.setPosition(new Position(-1000, -1000));
+                if (Player.isPowerOwner(player)) {
+                    player.eatGhost(); 
+                    ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
+                    ghost.setPosition(new Position(-1000, -1000));
+                }
                 continue;
             }
 
@@ -839,7 +851,6 @@ public class ClientGameController extends GameController {
             player.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
             player.setPosition(new Position(-1000, -1000));
             player.setIntendedDirection(null);
-
             break;
         }
     }
@@ -887,7 +898,7 @@ public class ClientGameController extends GameController {
             }
         }
     }
-private void updatePlayerPowerTimers(GameState gameState) {
+    private void updatePlayerPowerTimers(GameState gameState) {
     double dt = 1.0 / TARGET_FPS;
 
     for (Player p : gameState.players()) {
@@ -897,11 +908,18 @@ private void updatePlayerPowerTimers(GameState gameState) {
             p.setPowerUpTimer(Math.max(0.0, p.getPowerUpTimer() - dt));
         }
     }
+
+    boolean cleared = Player.clearPowerIfOwnerInvalid(gameState.players());
+    if (cleared) {
+        Ghost.setFrightenedTimerSec(0.0);
+    }
 }
 
+
 private boolean isPowered(Player p) {
-    return p != null && p.getPowerUpTimer() > 0.0;
+    return Player.isPowerOwner(p);
 }
+
 
 private void handlePvPcollitions(GameState gameState) {
     List<Player> players = gameState.players();
