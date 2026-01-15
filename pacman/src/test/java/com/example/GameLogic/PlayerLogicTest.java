@@ -1,5 +1,6 @@
 package com.example.GameLogic;
 
+import static com.example.model.Constants.FRIGHTENED_DURATION_SEC;
 import static com.example.model.Constants.TILE_SIZE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -57,8 +58,8 @@ public class PlayerLogicTest extends BaseTest {
         Player predator = initialState.players().getFirst();
         Player prey = initialState.players().get(1);
 
-        predator.setEnergized(true);
-        prey.setEnergized(false);
+        predator.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
+        prey.setPowerUpTimer(0.0);
 
         predator.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
         prey.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
@@ -80,8 +81,8 @@ public class PlayerLogicTest extends BaseTest {
         Player p1 = initialState.players().getFirst();
         Player p2 = initialState.players().get(1);
 
-        p1.setEnergized(false);
-        p2.setEnergized(false);
+        p1.setPowerUpTimer(0.0);
+        p2.setPowerUpTimer(0.0);
 
         p1.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
         p1.setDirection(Direction.EAST);
