@@ -204,8 +204,8 @@ public class UI extends Application {
         };
 
         createLobbyButton.setOnAction(e -> {
-            createLobby.run();
             soundEngine.play(Sound.EAT_FRUIT);
+            createLobby.run();
         });
 
         startButton.setOnAction(e -> {
