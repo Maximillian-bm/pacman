@@ -10,6 +10,7 @@ import com.example.GameLogic.ClientComs.KeyHandler;
 import com.example.GameLogic.ClientGameController;
 import com.example.model.Action;
 import com.example.model.Constants;
+import com.example.model.Direction;
 import com.example.model.GameState;
 import com.example.model.Ghost;
 import com.example.model.Player;
@@ -41,6 +42,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Pair;
+
 import java.text.DecimalFormat;
 
 public class UI extends Application {
@@ -66,6 +69,8 @@ public class UI extends Application {
     private Runnable createLobby;
 
     private Text notificationText;
+
+    private boolean eatingDot = false;
 
     record TilePos(int x, int y) {
     }
@@ -338,6 +343,35 @@ public class UI extends Application {
                 if(p.isAtePowerUp()){
                     soundEngine.play(Sound.GHOST_BLUE);
                     p.setAtePowerUp(false);
+                }
+            }
+
+            Pair<Integer, Integer> pos = localPlayer.getPosition().ToGridPosition();
+            int xOffset = 0;
+            int yOffset = 0;
+            switch (localPlayer.getDirection()) {
+                case Direction.NORTH:
+                    yOffset = -1;
+                    break;
+                case Direction.SOUTH:
+                    yOffset = 1;
+                    break;
+                case Direction.EAST:
+                    xOffset = 1;
+                    break;
+                case Direction.WEST:
+                    xOffset = -1;
+                    break;
+                default:
+                    break;
+            }
+            if(gameState.tiles()[pos.getKey()+xOffset][pos.getValue()+yOffset] == TileType.PAC_DOT){
+                if(!eatingDot){
+                    eatingDot = true;
+                    soundEngine.loop(Sound.EAT_DOT);
+                }else{
+                    eatingDot = false;
+                    soundEngine.stop(Sound.EAT_DOT);
                 }
             }
         }
