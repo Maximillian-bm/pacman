@@ -283,11 +283,10 @@ public class UI extends Application {
                 return;
             }
 
-            List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
-            if (Constants.cleanActions.missedAction()) {
+            if (Constants.cleanActions.missedAction(Constants.clock)) {
                 gameState = gameController.updateGameStateFor(savedState, Constants.clock);
-                Constants.cleanActions.fixedMissedAction();
             } else {
+                List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
                 if (!ActionOfClock.isEmpty())
                     savedState = gameController.deepCopyGameState(gameState);
                 gameState = gameController.updateGameState(gameState, ActionOfClock);
