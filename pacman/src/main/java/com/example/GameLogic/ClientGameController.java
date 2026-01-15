@@ -856,7 +856,6 @@ private void handleGhostPlayerCollisions(GameState gameState) {
             if (p == null) {
                 continue;
             }
-
             if (p.getRespawnTimer() > 0.0) {
                 p.setRespawnTimer(Math.max(0.0, p.getRespawnTimer() - dt));
 
