@@ -65,16 +65,18 @@ public class ClientGameController extends GameController {
     public GameState updateGameState(GameState gameState, List<Action> actions) {
         gameState = deepCopyGameState(gameState);
 
+        EntityTracker entityTracker = gameState.entityTracker();
+
         int newClock = gameState.clock() + 1;
 
         updateRespawnTimers(gameState);
         updatePlayerPowerTimers(gameState);
         updateInvulnerabilityTimers(gameState);
 
-        if (Ghost.getFrightenedTimerSec() > 0.0) {
-            Ghost.setFrightenedTimerSec(Ghost.getFrightenedTimerSec() - (1.0 / TARGET_FPS));
-            if (Ghost.getFrightenedTimerSec() < 0.0) {
-                Ghost.setFrightenedTimerSec(0.0);
+        if (entityTracker.getFrightenedTimerSec() > 0.0) {
+            entityTracker.setFrightenedTimerSec(entityTracker.getFrightenedTimerSec() - (1.0 / TARGET_FPS));
+            if (entityTracker.getFrightenedTimerSec() < 0.0) {
+                entityTracker.setFrightenedTimerSec(0.0);
             }
         }
 
@@ -105,7 +107,7 @@ public class ClientGameController extends GameController {
             tiles = newTiles;
 
             // Increase ghost speed for next level
-            Ghost.setGHOSTSPEED(Ghost.getGHOSTSPEED() * 1.1);
+            entityTracker.setGhostSpeed(entityTracker.getGhostSpeed() * 1.1);
 
             // Reset player positions
             for (Player p : gameState.players()) {
@@ -210,8 +212,6 @@ public class ClientGameController extends GameController {
                     spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
                     break;
             }
-            player.clearPowerOwner();
-            Ghost.setFrightenedTimerSec(0.0);
             player.setSpawnPosition(spawnPosition);
             player.setPosition(new Position(spawnPosition.x, spawnPosition.y));
             player.setLives(PLAYER_LIVES);
@@ -456,6 +456,7 @@ public class ClientGameController extends GameController {
     }
 
     private void handlePlayerGridPosition(GameState gameState) {
+        EntityTracker entityTracker = gameState.entityTracker();
         gameState.players().forEach(player -> {
             if (player == null || !player.isAlive() || player.getRespawnTimer() > 0.0) return;
 
@@ -467,14 +468,14 @@ public class ClientGameController extends GameController {
             TileType tileType = tiles[tileY][tileX];
         if(tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON) player.setAteFruit(true);
 
-            if (Player.isAnyPowerActive() && !Player.isPowerOwner(player)) {
+            if (entityTracker.isAnyPowerActive() && !entityTracker.isPowerOwner(player)) {
                 return;
             }
 
             player.addPoints(tileType.points);
 
             if (isPowerup(tileType)) {
-                Player.assignPowerTo(player);
+                entityTracker.assignPowerTo(player);
 
                 for (Player other : gameState.players()) {
                     if (other != null && other.getId() != player.getId()) {
@@ -484,7 +485,7 @@ public class ClientGameController extends GameController {
 
                 player.setAtePowerUp(true);
                 player.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
-                Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
+                entityTracker.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
 
                 for (Ghost g : gameState.ghosts()) {
                     g.setDirection(oppositeDir(getGhostDir(g)));
@@ -711,8 +712,7 @@ public class ClientGameController extends GameController {
         return best;
     }
 
-    private Pair<Integer, Integer> computeGhostTargetTile(GameState gameState, Ghost ghost, Player pac,
-                                                          Ghost blinky) {
+    private Pair<Integer, Integer> computeGhostTargetTile(GameState gameState, Ghost ghost, Player pac, Ghost blinky) {
         Pair<Integer, Integer> pacGrid = pac.getPosition().ToGridPosition();
         int px = pacGrid.getKey();
         int py = pacGrid.getValue();
@@ -727,7 +727,7 @@ public class ClientGameController extends GameController {
         Pair<Integer, Integer> orangeCorner = new Pair<>(0, maxY);
         Pair<Integer, Integer> purpleCorner = new Pair<>(maxX / 2, maxY / 2);
 
-        if (Ghost.isGhostScatterMode()) {
+        if (gameState.entityTracker().isGhostScatterMode()) {
             return switch (ghost.getType()) {
                 case RED -> redCorner;
                 case PINK -> pinkCorner;
@@ -792,6 +792,8 @@ public class ClientGameController extends GameController {
 
     private void GhostMovement(GameState gameState) {
 
+        EntityTracker entityTracker = gameState.entityTracker();
+
         if (gameState.ghosts() == null || gameState.ghosts().isEmpty()) {
             return;
         }
@@ -804,20 +806,20 @@ public class ClientGameController extends GameController {
             return;
         }
 
-        boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
+        boolean frightened = entityTracker.getFrightenedTimerSec() > 0.0;
 
         if (!frightened) {
-            Ghost.setGhostChaseTimer(Ghost.getGhostChaseTimer() + (1.0 / TARGET_FPS));
-            if (Ghost.isGhostScatterMode() && Ghost.getGhostChaseTimer() >= 7.0) {
-                Ghost.setGhostScatterMode(false);
-                Ghost.setGhostChaseTimer(0.0);
+            entityTracker.setGhostChaseTimer(entityTracker.getGhostChaseTimer() + (1.0 / TARGET_FPS));
+            if (entityTracker.isGhostScatterMode() && entityTracker.getGhostChaseTimer() >= 7.0) {
+                entityTracker.setGhostScatterMode(false);
+                entityTracker.setGhostChaseTimer(0.0);
                 for (Ghost g : gameState.ghosts()) {
                     g.setDirection(oppositeDir(getGhostDir(g)));
 
                 }
-            } else if (!Ghost.isGhostScatterMode() && Ghost.getGhostChaseTimer() >= 20.0) {
-                Ghost.setGhostScatterMode(true);
-                Ghost.setGhostChaseTimer(0.0);
+            } else if (!entityTracker.isGhostScatterMode() && entityTracker.getGhostChaseTimer() >= 20.0) {
+                entityTracker.setGhostScatterMode(true);
+                entityTracker.setGhostChaseTimer(0.0);
                 for (Ghost g : gameState.ghosts()) {
                     g.setDirection(oppositeDir(getGhostDir(g)));
                 }
@@ -829,7 +831,7 @@ public class ClientGameController extends GameController {
             .findFirst()
             .orElse(null);
 
-        double speed = frightened ? (Ghost.getGHOSTSPEED() * 0.75) : Ghost.getGHOSTSPEED();
+        double speed = frightened ? (entityTracker.getGhostSpeed() * 0.75) : entityTracker.getGhostSpeed();
         double movePerFrame = speed / TARGET_FPS;
 
         for (Ghost ghost : gameState.ghosts()) {
@@ -948,9 +950,10 @@ public class ClientGameController extends GameController {
     }
 
     private void handleGhostPlayerCollisions(GameState gameState) {
+        EntityTracker entityTracker = gameState.entityTracker();
         if (gameState.players() == null || gameState.ghosts() == null) return;
 
-        boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
+        boolean frightened = entityTracker.getFrightenedTimerSec() > 0.0;
 
         for (Player player : gameState.players()) {
             if (player == null || player.getPosition() == null) continue;
@@ -966,7 +969,7 @@ public class ClientGameController extends GameController {
                 if (player.distanceTo(ghost) > Constants.COLLISION_DISTANCE_PVG) continue;
 
                 if (frightened) {
-                    if (Player.isPowerOwner(player)) {
+                    if (entityTracker.isPowerOwner(player)) {
                         player.eatGhost();
                         ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
                         ghost.setPosition(new Position(-1000, -1000));
@@ -1013,7 +1016,7 @@ public class ClientGameController extends GameController {
 
                     // Check if spawning directly on a ghost (unsafe respawn)
                     boolean unsafeRespawn = false;
-                    if (sp != null && Ghost.getFrightenedTimerSec() <= 0.0) {
+                    if (sp != null && gameState.entityTracker().getFrightenedTimerSec() <= 0.0) {
                         for (Ghost g : gameState.ghosts()) {
                             if (g == null || g.getRespawnTimer() > 0.0) continue;
                             Position gp = g.getPosition();
@@ -1061,6 +1064,7 @@ public class ClientGameController extends GameController {
     }
 
     private void updatePlayerPowerTimers(GameState gameState) {
+        EntityTracker entityTracker = gameState.entityTracker();
         double dt = 1.0 / TARGET_FPS;
 
         for (Player p : gameState.players()) {
@@ -1071,17 +1075,18 @@ public class ClientGameController extends GameController {
             }
         }
 
-        boolean cleared = Player.clearPowerIfOwnerInvalid(gameState.players());
+        boolean cleared = entityTracker.clearPowerIfOwnerInvalid(gameState.players());
         if (cleared) {
-            Ghost.setFrightenedTimerSec(0.0);
+            entityTracker.setFrightenedTimerSec(0.0);
         }
     }
 
-    private boolean isPowered(Player p) {
-        return Player.isPowerOwner(p);
+    private boolean isPowered(Player p, EntityTracker entityTracker) {
+        return entityTracker.isPowerOwner(p);
     }
 
     private void handlePvPcollitions(GameState gameState) {
+        EntityTracker entityTracker = gameState.entityTracker();
         List<Player> players = gameState.players();
         if (players == null || players.size() < 2) return;
 
@@ -1095,8 +1100,8 @@ public class ClientGameController extends GameController {
 
                 if (a.distanceTo(b) > Constants.COLLISION_DISTANCE_PVP) continue;
 
-                boolean aPow = isPowered(a);
-                boolean bPow = isPowered(b);
+                boolean aPow = isPowered(a, entityTracker);
+                boolean bPow = isPowered(b, entityTracker);
 
                 if (aPow ^ bPow) {
                     Player eater = aPow ? a : b;

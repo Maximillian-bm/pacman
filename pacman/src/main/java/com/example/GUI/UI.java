@@ -556,7 +556,7 @@ public class UI extends Application {
                     case PURPLE -> 250; // ("Sue");
                 };
 
-                double fTimer = ghost.getFrightenedTimerSec();
+                double fTimer = gameState.entityTracker().getFrightenedTimerSec();
 
                 if (fTimer > 0) {
                     sy += 50 * 11;
