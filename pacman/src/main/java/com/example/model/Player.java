@@ -28,6 +28,15 @@ public class Player extends Entity {
     private double powerUpTimer = 0.0;
     @Getter @Setter
     private double invulnerableTimer = 0.0;
+    @Getter @Setter
+    private boolean lostHeart = false;
+    @Getter @Setter
+    private boolean ateFruit = false;
+    @Getter @Setter
+    private boolean ateGhost = false;
+    @Getter @Setter
+    private boolean atePowerUp = false;
+
 
     public Player(int id) {
         this.id = id;
@@ -53,6 +62,7 @@ public class Player extends Entity {
     }
 
     public void eatGhost() {
+        ateGhost = true;
         points += switch (ghostsEatenThisEnergizer) {
             case 0 -> 200;
             case 1 -> 400;
@@ -65,6 +75,7 @@ public class Player extends Entity {
     }
 
     public void loseLife() {
+        lostHeart = true;
         if (!isDead()) lives--;
     }
 

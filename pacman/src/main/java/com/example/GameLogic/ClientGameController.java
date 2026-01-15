@@ -337,9 +337,11 @@ public class ClientGameController extends GameController {
             int tileY = playerGridPosition.getValue();
 
             TileType tileType = tiles[tileX][tileY];
+            if(tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON) player.setAteFruit(true);
             player.addPoints(tileType.points);
 
         if (isPowerup(tileType)) {
+            player.setAtePowerUp(true);
             player.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
             Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
 
