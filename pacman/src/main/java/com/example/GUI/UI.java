@@ -240,7 +240,7 @@ public class UI extends Application {
 
     private void startGame(Stage stage) {
         gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
-        savedState = gameState;
+        savedState = gameController.deepCopyGameState(gameState);
 
         final Group root = new Group();
 
@@ -289,7 +289,7 @@ public class UI extends Application {
                 Constants.cleanActions.fixedMissedAction();
             } else {
                 if (!ActionOfClock.isEmpty())
-                    savedState = gameState;
+                    savedState = gameController.deepCopyGameState(gameState);
                 gameState = gameController.updateGameState(gameState, ActionOfClock);
             }
 

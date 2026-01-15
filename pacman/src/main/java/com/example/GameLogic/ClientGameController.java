@@ -40,7 +40,7 @@ public class ClientGameController extends GameController {
         return gameState;
     }
 
-    private GameState deepCopyGameState(GameState state) {
+    public GameState deepCopyGameState(GameState state) {
         List<Player> copiedPlayers = new ArrayList<>();
         for (Player p : state.players()) {
             copiedPlayers.add(p.copy());
