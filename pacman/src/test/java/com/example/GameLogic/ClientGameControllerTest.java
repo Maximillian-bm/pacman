@@ -127,7 +127,7 @@ public class ClientGameControllerTest extends BaseTest {
         initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
         TileType[][] tiles = initialState.tiles();
-        double mapWidth = tiles.length * TILE_SIZE;
+        double mapWidth = tiles[0].length * TILE_SIZE;
 
         player.setPosition(new Position(-20, 8 * TILE_SIZE));
         player.setDirection(Direction.WEST);
@@ -567,7 +567,7 @@ public class ClientGameControllerTest extends BaseTest {
         Player player = initialState.players().getFirst();
         TileType[][] tiles = initialState.tiles();
 
-        tiles[2][1] = TileType.ENERGIZER;
+        tiles[1][2] = TileType.ENERGIZER;
 
         player.setPosition(new Position(1.5 * TILE_SIZE, TILE_SIZE));
         player.setDirection(Direction.EAST);
@@ -579,7 +579,7 @@ public class ClientGameControllerTest extends BaseTest {
 
         assertFalse(player.isAlive(), "Player should be dead (Collision priority over Powerup)");
         assertEquals(TileType.ENERGIZER,
-            tiles[2][1], "Energizer should theoretically remain if player died before eating");
+            tiles[1][2], "Energizer should theoretically remain if player died before eating");
     }
 
     @Test
@@ -731,7 +731,7 @@ public class ClientGameControllerTest extends BaseTest {
     public void testTeleportationBoundary() {
 
         Player p = initialState.players().getFirst();
-        double mapWidth = initialState.tiles().length * TILE_SIZE;
+        double mapWidth = initialState.tiles()[0].length * TILE_SIZE;
         double moveAmount = Constants.PLAYER_SPEED / Constants.TARGET_FPS;
 
         // Position such that one move puts us 0.1 past the map width

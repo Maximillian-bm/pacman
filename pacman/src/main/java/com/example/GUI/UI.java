@@ -363,31 +363,31 @@ public class UI extends Application {
                         case PAC_DOT:
                             double pacDotSize = TILE_SIZE / 8.0;
                             gc.setFill(Color.YELLOW);
-                            gc.fillRect(y * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0,
-                                    x * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
+                            gc.fillRect(x * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0,
+                                    y * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
                             break;
                         case CHERRY:
-                            gc.drawImage(spriteSheet, 600, 0, 50, 50, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 600, 0, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
                         case STRAWBERRY:
-                            gc.drawImage(spriteSheet, 600, 50, 50, 50, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 600, 50, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
                         case ORANGE:
-                            gc.drawImage(spriteSheet, 600, 100, 50, 50, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 600, 100, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
                         case APPLE:
-                            gc.drawImage(spriteSheet, 600, 150, 50, 50, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 600, 150, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
                         case MELON:
-                            gc.drawImage(spriteSheet, 600, 200, 50, 50, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 600, 200, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
                         case ENERGIZER:
-                            gc.drawImage(spriteSheet, 415, 415, 25, 25, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 415, 415, 25, 25, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
 
@@ -524,31 +524,31 @@ public class UI extends Application {
             final int N = tiles.length;
             final int M = tiles[0].length;
 
-            boolean nWall = 0 > x - 1 || tiles[y][x - 1] != TileType.WALL;
-            boolean wWall = 0 > y - 1 || tiles[y - 1][x] != TileType.WALL;
-            boolean sWall = M <= x + 1 || tiles[y][x + 1] != TileType.WALL;
-            boolean eWall = N <= y + 1 || tiles[y + 1][x] != TileType.WALL;
+            boolean nWall = 0 > y - 1 || tiles[y - 1][x] != TileType.WALL;
+            boolean wWall = 0 > x - 1 || tiles[y][x - 1] != TileType.WALL;
+            boolean sWall = N <= y + 1 || tiles[y + 1][x] != TileType.WALL;
+            boolean eWall = M <= x + 1 || tiles[y][x + 1] != TileType.WALL;
 
-            boolean neWall = 0 > x - 1 || N <= y + 1 || tiles[y + 1][x - 1] != TileType.WALL;
-            boolean nwWall = 0 > x - 1 || 0 > y - 1 || tiles[y - 1][x - 1] != TileType.WALL;
-            boolean seWall = M <= x + 1 || N <= y + 1 || tiles[y + 1][x + 1] != TileType.WALL;
-            boolean swWall = M <= x + 1 || 0 > y - 1 || tiles[y - 1][x + 1] != TileType.WALL;
+            boolean neWall = 0 > y - 1 || M <= x + 1 || tiles[y - 1][x + 1] != TileType.WALL;
+            boolean nwWall = 0 > y - 1 || 0 > x - 1 || tiles[y - 1][x - 1] != TileType.WALL;
+            boolean seWall = N <= y + 1 || M <= x + 1 || tiles[y + 1][x + 1] != TileType.WALL;
+            boolean swWall = N <= y + 1 || 0 > x - 1 || tiles[y + 1][x - 1] != TileType.WALL;
 
             if (wWall) {
                 if (sWall) {
                     if (eWall) {
-                        gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 2, 32, 32, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                        gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                 TILE_SIZE);
                     } else {
                         if (nWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 0, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE);
                         } else {
                             if (neWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 2, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 2, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             }
                         }
@@ -556,23 +556,23 @@ public class UI extends Application {
                 } else {
                     if (eWall) {
                         if (nWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 0, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 6, 32, 32, 32, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 6, 32, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                         }
                     } else {
                         if (nWall) {
                             if (seWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 0, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 0, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             }
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 0, 32, 32, 32, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 0, 32, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                         }
                     }
@@ -581,70 +581,70 @@ public class UI extends Application {
                 if (eWall) {
                     if (nWall) {
                         if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 9, 32 * 0, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 9, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE);
                         } else {
                             if (swWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 0, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 0, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             }
                         }
                     } else {
                         if (sWall) {
                             if (nwWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 2, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 2, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             }
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 2, 32, 32, 32, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 2, 32, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                         }
                     }
                 } else {
                     if (nWall) {
                         if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 8, 32 * 0, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 8, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 4, 32 * 0, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 4, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE);
                         }
                     } else {
                         if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32, 32 * 2, 32, 32, y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                         } else {
                             if (neWall) {
                                 if (seWall) {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                             TILE_SIZE, TILE_SIZE);
                                     gc.drawImage(wallSpriteSheet, 32 * 3 + 16, 32 * 1, 32 / 2.0, 32,
-                                            y * TILE_SIZE + TILE_SIZE / 2.0, x * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
+                                            x * TILE_SIZE + TILE_SIZE / 2.0, y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
                                             TILE_SIZE);
                                 } else {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                             TILE_SIZE, TILE_SIZE);
                                     gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 1 + 16, 32 / 2.0, 32 / 2.0,
-                                            y * TILE_SIZE + TILE_SIZE / 2.0, x * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
+                                            x * TILE_SIZE + TILE_SIZE / 2.0, y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
                                             TILE_SIZE - TILE_SIZE / 2.0);
                                 }
                             } else if (nwWall) {
                                 if (swWall) {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                             TILE_SIZE, TILE_SIZE);
-                                    gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 1, 32 / 2.0, 32, y * TILE_SIZE,
-                                            x * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0, TILE_SIZE);
+                                    gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 1, 32 / 2.0, 32, x * TILE_SIZE,
+                                            y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0, TILE_SIZE);
                                 } else {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, y * TILE_SIZE, x * TILE_SIZE,
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                             TILE_SIZE, TILE_SIZE);
                                     gc.drawImage(wallSpriteSheet, 32 * 7 + 16, 32 * 1 + 16, 32 / 2.0, 32 / 2.0,
-                                            y * TILE_SIZE, x * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
+                                            x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
                                             TILE_SIZE - TILE_SIZE / 2.0);
                                 }
                             }

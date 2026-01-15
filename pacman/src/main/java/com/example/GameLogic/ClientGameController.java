@@ -460,7 +460,7 @@ public class ClientGameController extends GameController {
             int tileX = playerGridPosition.getKey();
             int tileY = playerGridPosition.getValue();
 
-            TileType tileType = tiles[tileX][tileY];
+            TileType tileType = tiles[tileY][tileX];
             player.addPoints(tileType.points);
 
         if (isPowerup(tileType)) {
@@ -471,7 +471,7 @@ public class ClientGameController extends GameController {
             g.setDirection(oppositeDir(getGhostDir(g)));
         }
 
-            tiles[tileX][tileY] = TileType.EMPTY;
+            tiles[tileY][tileX] = TileType.EMPTY;
             return;
         }
             switch (tileType) {
@@ -479,7 +479,7 @@ public class ClientGameController extends GameController {
                 }
                 case WALL -> {
                 }
-                default -> tiles[tileX][tileY] = TileType.EMPTY;
+                default -> tiles[tileY][tileX] = TileType.EMPTY;
             }
         });
     }
