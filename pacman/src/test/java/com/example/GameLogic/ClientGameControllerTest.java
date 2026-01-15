@@ -196,10 +196,10 @@ public class ClientGameControllerTest extends BaseTest {
         Player player = initialState.players().getFirst();
         TileType[][] tiles = initialState.tiles();
 
-        for (int x = 0; x < tiles.length; x++) {
-            for (int y = 0; y < tiles[0].length; y++) {
-                if (tiles[x][y] == TileType.PAC_DOT || tiles[x][y] == TileType.ENERGIZER) {
-                    tiles[x][y] = TileType.EMPTY;
+        for (int y = 0; y < tiles.length; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                if (tiles[y][x] == TileType.PAC_DOT || tiles[y][x] == TileType.ENERGIZER) {
+                    tiles[y][x] = TileType.EMPTY;
                 }
             }
         }
@@ -222,9 +222,9 @@ public class ClientGameControllerTest extends BaseTest {
         TileType[][] tiles = initialState.tiles();
 
         boolean foundFruit = false;
-        for (TileType[] tile : tiles) {
-            for (int y = 0; y < tiles[0].length; y++) {
-                if (tile[y] == TileType.CHERRY) {
+        for (TileType[] row : tiles) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                if (row[x] == TileType.CHERRY) {
                     foundFruit = true;
                     break;
                 }
@@ -233,10 +233,10 @@ public class ClientGameControllerTest extends BaseTest {
         assertFalse(foundFruit, "Fruit (Cherry) should NOT be on the map initially");
 
         int dotsEaten = 0;
-        for (int x = 0; x < tiles.length && dotsEaten < 70; x++) {
-            for (int y = 0; y < tiles[0].length && dotsEaten < 70; y++) {
-                if (tiles[x][y] == TileType.PAC_DOT) {
-                    tiles[x][y] = TileType.EMPTY;
+        for (int y = 0; y < tiles.length && dotsEaten < 70; y++) {
+            for (int x = 0; x < tiles[0].length && dotsEaten < 70; x++) {
+                if (tiles[y][x] == TileType.PAC_DOT) {
+                    tiles[y][x] = TileType.EMPTY;
                     player.addPoints(10);
                     dotsEaten++;
                 }
@@ -245,9 +245,9 @@ public class ClientGameControllerTest extends BaseTest {
 
         controller.updateGameState(initialState, new ArrayList<>());
 
-        for (TileType[] tile : tiles) {
-            for (int y = 0; y < tiles[0].length; y++) {
-                if (tile[y] == TileType.CHERRY) {
+        for (TileType[] row : tiles) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                if (row[x] == TileType.CHERRY) {
                     foundFruit = true;
                     break;
                 }
@@ -264,9 +264,9 @@ public class ClientGameControllerTest extends BaseTest {
         Player player = initialState.players().getFirst();
         TileType[][] tiles = initialState.tiles();
 
-        for (int x = 0; x < tiles.length; x++) {
-            for (int y = 0; y < tiles[0].length; y++) {
-                tiles[x][y] = TileType.EMPTY;
+        for (int y = 0; y < tiles.length; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                tiles[y][x] = TileType.EMPTY;
             }
         }
 
@@ -298,9 +298,9 @@ public class ClientGameControllerTest extends BaseTest {
 
         initialState.ghosts().clear();
         TileType[][] tiles = initialState.tiles();
-        for (int x = 0; x < tiles.length; x++) {
-            for (int y = 0; y < tiles[0].length; y++) {
-                tiles[x][y] = TileType.EMPTY;
+        for (int y = 0; y < tiles.length; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                tiles[y][x] = TileType.EMPTY;
             }
         }
 
@@ -316,9 +316,9 @@ public class ClientGameControllerTest extends BaseTest {
         initialState.ghosts().clear();
         TileType[][] tiles = initialState.tiles();
 
-        for (int x = 0; x < tiles.length; x++) {
-            for (int y = 0; y < tiles[0].length; y++) {
-                tiles[x][y] = TileType.EMPTY;
+        for (int y = 0; y < tiles.length; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                tiles[y][x] = TileType.EMPTY;
             }
         }
 
@@ -642,9 +642,9 @@ public class ClientGameControllerTest extends BaseTest {
         initialState.ghosts().clear();
         TileType[][] tiles = initialState.tiles();
 
-        for (int x = 0; x < tiles.length; x++) {
-            for (int y = 0; y < tiles[0].length; y++) {
-                tiles[x][y] = TileType.EMPTY;
+        for (int y = 0; y < tiles.length; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                tiles[y][x] = TileType.EMPTY;
             }
         }
 
@@ -669,14 +669,15 @@ public class ClientGameControllerTest extends BaseTest {
             }
         }
 
+        int threshold = 70;
         Player p = initialState.players().getFirst();
-        p.addPoints(70 * 10);
+        p.addPoints(threshold * 10);
 
         int removed = 0;
-        for (int x = 0; x < tiles.length && removed < 70; x++) {
-            for (int y = 0; y < tiles[0].length && removed < 70; y++) {
-                if (tiles[x][y] == TileType.PAC_DOT) {
-                    tiles[x][y] = TileType.EMPTY;
+        for (int y = 0; y < tiles.length && removed < threshold; y++) {
+            for (int x = 0; x < tiles[0].length && removed < threshold; x++) {
+                if (tiles[y][x] == TileType.PAC_DOT) {
+                    tiles[y][x] = TileType.EMPTY;
                     removed++;
                 }
             }
@@ -692,7 +693,7 @@ public class ClientGameControllerTest extends BaseTest {
                 }
             }
         }
-        assertEquals(pellets - 70, remainingPellets, "Pellets should be removed from map");
+        assertEquals(pellets - removed, remainingPellets, "Pellets should be removed from map");
 
         boolean foundFruit = false;
         for (TileType[] row : initialState.tiles()) {
@@ -731,8 +732,10 @@ public class ClientGameControllerTest extends BaseTest {
 
         Player p = initialState.players().getFirst();
         double mapWidth = initialState.tiles().length * TILE_SIZE;
+        double moveAmount = Constants.PLAYER_SPEED / Constants.TARGET_FPS;
 
-        p.setPosition(new Position(mapWidth - (TILE_SIZE / 2.0) + 0.1, TILE_SIZE));
+        // Position such that one move puts us 0.1 past the map width
+        p.setPosition(new Position(mapWidth - moveAmount + 0.1, TILE_SIZE));
         p.setDirection(Direction.EAST);
 
         controller.updateGameState(initialState, new ArrayList<>());
@@ -746,6 +749,7 @@ public class ClientGameControllerTest extends BaseTest {
     public void testUpdateGameStateForBasicMovement() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
+        initialState.ghosts().clear();
         Player player = initialState.players().getFirst();
         player.setPosition(new Position(TILE_SIZE, TILE_SIZE));
         player.setDirection(Direction.EAST);
@@ -796,6 +800,7 @@ public class ClientGameControllerTest extends BaseTest {
         player.setLives(3);
 
         Ghost ghost = initialState.ghosts().getFirst();
+        ghost.setRespawnTimer(0.0);
         ghost.setPosition(new Position(5 * TILE_SIZE, 3 * TILE_SIZE));
         ghost.setDirection(Direction.WEST);
         

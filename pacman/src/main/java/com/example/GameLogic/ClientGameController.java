@@ -60,6 +60,8 @@ public class ClientGameController extends GameController {
     }
 
     public GameState updateGameState(GameState gameState, List<Action> actions) {
+        gameState = deepCopyGameState(gameState);
+
         int newClock = gameState.clock() + 1;
 
         updateRespawnTimers(gameState);
@@ -162,14 +164,14 @@ public class ClientGameController extends GameController {
 
             if (!hasFruit) {
                 // Find an empty tile near center to spawn fruit
-                int centerX = tiles.length / 2;
-                int centerY = tiles[0].length / 2;
-                for (int dx = 0; dx < tiles.length; dx++) {
-                    for (int dy = 0; dy < tiles[0].length; dy++) {
-                        int x = (centerX + dx) % tiles.length;
-                        int y = (centerY + dy) % tiles[0].length;
-                        if (tiles[x][y] == TileType.EMPTY) {
-                            tiles[x][y] = TileType.CHERRY;
+                int centerX = tiles[0].length / 2;
+                int centerY = tiles.length / 2;
+                for (int dx = 0; dx < tiles[0].length; dx++) {
+                    for (int dy = 0; dy < tiles.length; dy++) {
+                        int x = (centerX + dx) % tiles[0].length;
+                        int y = (centerY + dy) % tiles.length;
+                        if (tiles[y][x] == TileType.EMPTY) {
+                            tiles[y][x] = TileType.CHERRY;
                             return;
                         }
                     }
@@ -334,21 +336,17 @@ public class ClientGameController extends GameController {
 
                     switch (player.getDirection()) {
                         case WEST, EAST -> {
-                            double distanceToCenter = Math.abs(pos.x - gridCenterX);
                             double nextX = pos.x + (player.getDirection() == Direction.EAST ? movementPerFrame
                                 : -movementPerFrame);
                             boolean wouldCrossCenter = (pos.x <= gridCenterX && nextX >= gridCenterX) ||
-                                (pos.x >= gridCenterX && nextX <= gridCenterX) ||
-                                distanceToCenter <= movementPerFrame;
+                                (pos.x >= gridCenterX && nextX <= gridCenterX);
                             shouldTurn = wouldCrossCenter;
                         }
                         case NORTH, SOUTH -> {
-                            double distanceToCenter = Math.abs(pos.y - gridCenterY);
                             double nextY = pos.y + (player.getDirection() == Direction.SOUTH ? movementPerFrame
                                 : -movementPerFrame);
                             boolean wouldCrossCenter = (pos.y <= gridCenterY && nextY >= gridCenterY) ||
-                                (pos.y >= gridCenterY && nextY <= gridCenterY) ||
-                                distanceToCenter <= movementPerFrame;
+                                (pos.y >= gridCenterY && nextY <= gridCenterY);
                             shouldTurn = wouldCrossCenter;
                         }
                     }
@@ -364,9 +362,9 @@ public class ClientGameController extends GameController {
                         }
 
                         TileType[][] tiles = gameState.tiles();
-                        if (nextGridX >= 0 && nextGridX < tiles.length &&
-                            nextGridY >= 0 && nextGridY < tiles[0].length &&
-                            tiles[nextGridX][nextGridY] != TileType.WALL) {
+                        if (nextGridX >= 0 && nextGridX < tiles[0].length &&
+                            nextGridY >= 0 && nextGridY < tiles.length &&
+                            tiles[nextGridY][nextGridX] != TileType.WALL) {
 
                             pos.x = gridCenterX;
                             pos.y = gridCenterY;
@@ -393,33 +391,27 @@ public class ClientGameController extends GameController {
 
             TileType[][] tiles = gameState.tiles();
 
-            double mapWidth = tiles.length * TILE_SIZE;
-            double mapHeight = tiles[0].length * TILE_SIZE;
+            double mapWidth = tiles[0].length * TILE_SIZE;
+            double mapHeight = tiles.length * TILE_SIZE;
 
-            // Wrap around with preserved overflow - wrap at position boundaries
-            double rightBoundary = mapWidth - TILE_SIZE / 2.0;
-            double bottomBoundary = mapHeight - TILE_SIZE / 2.0;
-
-            if (pos.x <= -TILE_SIZE / 2.0) {
-                double overflow = -TILE_SIZE / 2.0 - pos.x;
-                pos.x = rightBoundary - overflow;
-            } else if (pos.x >= rightBoundary) {
-                double overflow = pos.x - rightBoundary;
-                pos.x = -TILE_SIZE / 2.0 + overflow;
+            // Wrap around at map boundaries
+            if (pos.x < 0) {
+                pos.x += mapWidth;
+            } else if (pos.x >= mapWidth) {
+                pos.x -= mapWidth;
             }
 
-            if (pos.y <= -TILE_SIZE / 2.0) {
-                double overflow = -TILE_SIZE / 2.0 - pos.y;
-                pos.y = bottomBoundary - overflow;
-            } else if (pos.y >= bottomBoundary) {
-                double overflow = pos.y - bottomBoundary;
-                pos.y = -TILE_SIZE / 2.0 + overflow;
+            if (pos.y < 0) {
+                pos.y += mapHeight;
+            } else if (pos.y >= mapHeight) {
+                pos.y -= mapHeight;
             }
 
-            // Skip wall collision check if player is in wrap-around zone (negative or beyond bounds)
-            boolean inWrapZone = pos.x < 0 || pos.y < 0 ||
-                                 pos.x >= rightBoundary ||
-                                 pos.y >= bottomBoundary;
+            // Skip wall collision check if player is in wrap-around zone (at the edges)
+            // A small margin helps avoid getting stuck on walls exactly at the boundary
+            boolean inWrapZone = pos.x < 1.0 || pos.y < 1.0 ||
+                                 pos.x >= mapWidth - 1.0 ||
+                                 pos.y >= mapHeight - 1.0;
 
             if (!inWrapZone) {
                 double margin = 0.1;
@@ -436,9 +428,9 @@ public class ClientGameController extends GameController {
                     int maxIterations = tiles.length + tiles[0].length;
                     int iterations = 0;
                     while (iterations < maxIterations) {
-                        if (targetGridX >= 0 && targetGridX < tiles.length &&
-                            targetGridY >= 0 && targetGridY < tiles[0].length &&
-                            tiles[targetGridX][targetGridY] != TileType.WALL) {
+                        if (targetGridX >= 0 && targetGridX < tiles[0].length &&
+                            targetGridY >= 0 && targetGridY < tiles.length &&
+                            tiles[targetGridY][targetGridX] != TileType.WALL) {
                             break;
                         }
                         targetGridX -= dx;
@@ -510,11 +502,11 @@ public class ClientGameController extends GameController {
         int gridX = (int) (x / TILE_SIZE);
         int gridY = (int) (y / TILE_SIZE);
 
-        if (gridX < 0 || gridX >= tiles.length || gridY < 0 || gridY >= tiles[0].length) {
+        if (gridX < 0 || gridX >= tiles[0].length || gridY < 0 || gridY >= tiles.length) {
             return false;
         }
 
-        return tiles[gridX][gridY] == TileType.WALL;
+        return tiles[gridY][gridX] == TileType.WALL;
     }
 
     private Direction getGhostDir(Ghost ghost) {
@@ -549,10 +541,10 @@ public class ClientGameController extends GameController {
     }
 
     private boolean isWalkable(TileType[][] tiles, int x, int y) {
-        if (x < 0 || x >= tiles.length || y < 0 || y >= tiles[0].length) {
+        if (x < 0 || x >= tiles[0].length || y < 0 || y >= tiles.length) {
             return true;
         }
-        return tiles[x][y] != TileType.WALL;
+        return tiles[y][x] != TileType.WALL;
     }
 
     private boolean isWalkableInDir(TileType[][] tiles, int x, int y, Direction d) {
@@ -708,8 +700,8 @@ public class ClientGameController extends GameController {
         int py = pacGrid.getValue();
         Direction pDir = pac.getDirection();
 
-        int maxX = gameState.tiles().length - 1;
-        int maxY = gameState.tiles()[0].length - 1;
+        int maxX = gameState.tiles()[0].length - 1;
+        int maxY = gameState.tiles().length - 1;
 
         Pair<Integer, Integer> redCorner = new Pair<>(maxX, 0);
         Pair<Integer, Integer> pinkCorner = new Pair<>(0, 0);
@@ -837,8 +829,8 @@ public class ClientGameController extends GameController {
             Position pos = ghost.getPosition();
             Direction dir = getGhostDir(ghost);
 
-            double mapWidth = tiles.length * TILE_SIZE;
-            double mapHeight = tiles[0].length * TILE_SIZE;
+            double mapWidth = tiles[0].length * TILE_SIZE;
+            double mapHeight = tiles.length * TILE_SIZE;
 
             Pair<Integer, Integer> gridPos = pos.ToGridPosition();
             int gx = gridPos.getKey();
@@ -886,21 +878,21 @@ public class ClientGameController extends GameController {
             pos.x += dx * movePerFrame;
             pos.y += dy * movePerFrame;
 
-            if (pos.x + TILE_SIZE / 2.0 <= 0) {
-                pos.x = mapWidth - TILE_SIZE / 2.0;
-            } else if (pos.x + TILE_SIZE / 2.0 >= mapWidth) {
-                pos.x = -TILE_SIZE / 2.0;
+            if (pos.x < 0) {
+                pos.x += mapWidth;
+            } else if (pos.x >= mapWidth) {
+                pos.x -= mapWidth;
             }
-            if (pos.y + TILE_SIZE / 2.0 <= 0) {
-                pos.y = mapHeight - TILE_SIZE / 2.0;
-            } else if (pos.y + TILE_SIZE / 2.0 >= mapHeight) {
-                pos.y = -TILE_SIZE / 2.0;
+            if (pos.y < 0) {
+                pos.y += mapHeight;
+            } else if (pos.y >= mapHeight) {
+                pos.y -= mapHeight;
             }
 
             // Skip wall collision check if ghost is in wrap-around zone
-            boolean inWrapZone = pos.x < 0 || pos.y < 0 ||
-                                 pos.x >= mapWidth - TILE_SIZE / 2.0 ||
-                                 pos.y >= mapHeight - TILE_SIZE / 2.0;
+            boolean inWrapZone = pos.x < 1.0 || pos.y < 1.0 ||
+                                 pos.x >= mapWidth - 1.0 ||
+                                 pos.y >= mapHeight - 1.0;
 
             if (!inWrapZone) {
                 double margin = 0.1;
@@ -916,9 +908,9 @@ public class ClientGameController extends GameController {
                     int maxIterations = tiles.length + tiles[0].length;
                     int iterations = 0;
                     while (iterations < maxIterations) {
-                        if (targetGridX >= 0 && targetGridX < tiles.length &&
-                            targetGridY >= 0 && targetGridY < tiles[0].length &&
-                            tiles[targetGridX][targetGridY] != TileType.WALL) {
+                        if (targetGridX >= 0 && targetGridX < tiles[0].length &&
+                            targetGridY >= 0 && targetGridY < tiles.length &&
+                            tiles[targetGridY][targetGridX] != TileType.WALL) {
                             break;
                         }
                         targetGridX -= dx;
@@ -1174,10 +1166,10 @@ private boolean isInvulnerable(Player p) {
     }
 
     public boolean allPointsGathered(GameState gameState) {
-        TileType tiles[][] = gameState.tiles();
-        for (int y = 0; y < tiles.length; y++) {
+        TileType[][] tiles = gameState.tiles();
+        for (TileType[] row : tiles) {
             for (int x = 0; x < tiles[0].length; x++) {
-                switch(tiles[x][y]) {
+                switch (row[x]) {
                     case TileType.PAC_DOT:
                         return false;
                     case TileType.ENERGIZER:

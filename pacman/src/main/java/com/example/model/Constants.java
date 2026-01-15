@@ -1,6 +1,6 @@
 package com.example.model;
 
-import static com.example.model.Maps.map1;
+import static com.example.model.Maps.getMap1;
 
 public class Constants {
     //Constants
@@ -20,10 +20,10 @@ public class Constants {
         }
     }
 
-    public final static int TILE_SIZE = 48;
 
-    public final static int TILES_WIDE = map1[0].length;
-    public final static int TILES_TALL = map1.length;
+    public final static int TILES_WIDE = getMap1()[0].length;
+    public final static int TILES_TALL = getMap1().length;
+    public final static int TILE_SIZE = 800 / TILES_TALL;
     public final static int INIT_SCREEN_WIDTH = TILES_WIDE * TILE_SIZE;
     public final static int INIT_SCREEN_HEIGHT = TILES_TALL * TILE_SIZE;
     
