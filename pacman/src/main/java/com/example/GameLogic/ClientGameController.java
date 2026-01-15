@@ -54,7 +54,12 @@ public class ClientGameController extends GameController {
         GhostMovement(gameState);
         handleGhostPlayerCollisions(gameState);
         handlePlayerGridPosition(gameState);
-        
+
+        System.out.println(gameState.winner());
+        if (allPlayersDead(gameState) || allPointsGathered(gameState)) {
+
+        }
+
         GameState newGameState = new GameState(
             Constants.clock,
             gameState.players(),
@@ -993,4 +998,44 @@ private void updateInvulnerabilityTimers(GameState gameState) {
 private boolean isInvulnerable(Player p) {
     return p != null && p.getInvulnerableTimer() > 0.0;
 }
+
+    public boolean allPlayersDead(GameState gameState) {
+        for (Player player : gameState.players()) {
+            if (0 < player.getLives()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean allPointsGathered(GameState gameState) {
+        TileType tiles[][] = gameState.tiles();
+        for (int y = 0; y < tiles.length; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                switch(tiles[x][y]) {
+                    case TileType.PAC_DOT:
+                        return false;
+                    case TileType.ENERGIZER:
+                        return false;
+                    case TileType.CHERRY:
+                        return false;
+                    case TileType.STRAWBERRY:
+                        return false;
+                    case TileType.ORANGE:
+                        return false;
+                    case TileType.APPLE:
+                        return false;
+                    case TileType.MELON:
+                        return false;
+                    case TileType.GALAXIAN:
+                        return false;
+                    case TileType.BELL:
+                        return false;
+                    case TileType.KEY:
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
 }
