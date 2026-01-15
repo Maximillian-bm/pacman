@@ -19,8 +19,10 @@ import com.example.model.Maps;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import javafx.util.Pair;
 
 public class ClientGameController extends GameController {
@@ -191,21 +193,23 @@ public class ClientGameController extends GameController {
             Position spawnPosition;
             switch (i) {
                 case 0:
-                    spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
+                    spawnPosition = new Position(1 * TILE_SIZE, 1 * TILE_SIZE);
                     break;
                 case 1:
-                    spawnPosition = new Position(10 * TILE_SIZE, 3 * TILE_SIZE);
+                    spawnPosition = new Position(15 * TILE_SIZE, 1 * TILE_SIZE);
                     break;
                 case 2:
-                    spawnPosition = new Position(3 * TILE_SIZE, 10 * TILE_SIZE);
+                    spawnPosition = new Position(1 * TILE_SIZE, 15 * TILE_SIZE);
                     break;
                 case 3:
-                    spawnPosition = new Position(10 * TILE_SIZE, 10 * TILE_SIZE);
+                    spawnPosition = new Position(15 * TILE_SIZE, 15 * TILE_SIZE);
                     break;
                 default:
                     spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
                     break;
             }
+            player.clearPowerOwner();
+            Ghost.setFrightenedTimerSec(0.0);
             player.setSpawnPosition(spawnPosition);
             player.setPosition(new Position(spawnPosition.x, spawnPosition.y));
             player.setLives(PLAYER_LIVES);
@@ -410,8 +414,8 @@ public class ClientGameController extends GameController {
             // Skip wall collision check if player is in wrap-around zone (at the edges)
             // A small margin helps avoid getting stuck on walls exactly at the boundary
             boolean inWrapZone = pos.x < 1.0 || pos.y < 1.0 ||
-                                 pos.x >= mapWidth - 1.0 ||
-                                 pos.y >= mapHeight - 1.0;
+                pos.x >= mapWidth - 1.0 ||
+                pos.y >= mapHeight - 1.0;
 
             if (!inWrapZone) {
                 double margin = 0.1;
@@ -451,24 +455,30 @@ public class ClientGameController extends GameController {
 
     private void handlePlayerGridPosition(GameState gameState) {
         gameState.players().forEach(player -> {
-            if (player == null || !player.isAlive() || player.getRespawnTimer() > 0.0) {
-                return;
-            }
-            Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
+            if (player == null || !player.isAlive() || player.getRespawnTimer() > 0.0) return;
 
+            Pair<Integer, Integer> gp = player.getPosition().ToGridPosition();
             TileType[][] tiles = gameState.tiles();
-            int tileX = playerGridPosition.getKey();
-            int tileY = playerGridPosition.getValue();
-
-            // Safety check for bounds
-            if (tileY < 0 || tileY >= tiles.length || tileX < 0 || tileX >= tiles[0].length) {
-                return;
-            }
+            int tileX = gp.getKey();
+            int tileY = gp.getValue();
 
             TileType tileType = tiles[tileY][tileX];
+
+            if (Player.isAnyPowerActive() && !Player.isPowerOwner(player)) {
+                return;
+            }
+
             player.addPoints(tileType.points);
 
             if (isPowerup(tileType)) {
+                Player.assignPowerTo(player);
+
+                for (Player other : gameState.players()) {
+                    if (other != null && other.getId() != player.getId()) {
+                        other.setPowerUpTimer(0.0);
+                    }
+                }
+
                 player.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
                 Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
 
@@ -479,10 +489,9 @@ public class ClientGameController extends GameController {
                 tiles[tileY][tileX] = TileType.EMPTY;
                 return;
             }
+
             switch (tileType) {
-                case EMPTY -> {
-                }
-                case WALL -> {
+                case EMPTY, WALL -> {
                 }
                 default -> tiles[tileY][tileX] = TileType.EMPTY;
             }
@@ -562,7 +571,7 @@ public class ClientGameController extends GameController {
     }
 
     private Direction chooseBestDirTowardTarget(TileType[][] tiles, int gx, int gy, Direction currentDir,
-        int targetX, int targetY) {
+                                                int targetX, int targetY) {
         List<Direction> candidates = new ArrayList<>(4);
 
         for (Direction d : Direction.values()) {
@@ -581,10 +590,6 @@ public class ClientGameController extends GameController {
                     candidates.add(d);
                 }
             }
-        }
-
-        if (candidates.isEmpty()) {
-            return currentDir; // Stay in same direction if trapped
         }
 
         List<Direction> tieBreak = List.of(Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST);
@@ -614,7 +619,7 @@ public class ClientGameController extends GameController {
     }
 
     private Direction chooseBestDirAwayFromPlayer(TileType[][] tiles, int gx, int gy, Direction currentDir,
-        int playerX, int playerY) {
+                                                  int playerX, int playerY) {
         List<Direction> candidates = new ArrayList<>(4);
 
         for (Direction d : Direction.values()) {
@@ -633,10 +638,6 @@ public class ClientGameController extends GameController {
                     candidates.add(d);
                 }
             }
-        }
-
-        if (candidates.isEmpty()) {
-            return currentDir;
         }
 
         List<Direction> tieBreak = List.of(Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST);
@@ -681,7 +682,7 @@ public class ClientGameController extends GameController {
         int bestDist2 = Integer.MAX_VALUE;
 
         for (Player p : gameState.players()) {
-            if (p == null || p.getPosition() == null || !p.isAlive() || p.getRespawnTimer() > 0.0) {
+            if (p == null || p.getPosition() == null) {
                 continue;
             }
 
@@ -707,7 +708,7 @@ public class ClientGameController extends GameController {
     }
 
     private Pair<Integer, Integer> computeGhostTargetTile(GameState gameState, Ghost ghost, Player pac,
-        Ghost blinky) {
+                                                          Ghost blinky) {
         Pair<Integer, Integer> pacGrid = pac.getPosition().ToGridPosition();
         int px = pacGrid.getKey();
         int py = pacGrid.getValue();
@@ -836,10 +837,6 @@ public class ClientGameController extends GameController {
             }
             Player targetPlayer = findNearestPlayer(gameState, ghost);
             if (targetPlayer == null) {
-                // If no player to target, maybe go to corner
-                Pair<Integer, Integer> targetTile = computeGhostTargetTile(gameState, ghost, null, blinky);
-                // Wait, computeGhostTargetTile needs a player. 
-                // Let's just skip if no player.
                 continue;
             }
 
@@ -908,8 +905,8 @@ public class ClientGameController extends GameController {
 
             // Skip wall collision check if ghost is in wrap-around zone
             boolean inWrapZone = pos.x < 1.0 || pos.y < 1.0 ||
-                                 pos.x >= mapWidth - 1.0 ||
-                                 pos.y >= mapHeight - 1.0;
+                pos.x >= mapWidth - 1.0 ||
+                pos.y >= mapHeight - 1.0;
 
             if (!inWrapZone) {
                 double margin = 0.1;
@@ -955,6 +952,7 @@ public class ClientGameController extends GameController {
             if (player == null || player.getPosition() == null) continue;
             if (!player.isAlive() || player.getRespawnTimer() > 0.0) continue;
 
+            // spawn protection
             if (isInvulnerable(player)) continue;
 
             for (Ghost ghost : gameState.ghosts()) {
@@ -964,9 +962,11 @@ public class ClientGameController extends GameController {
                 if (player.distanceTo(ghost) > Constants.COLLISION_DISTANCE_PVG) continue;
 
                 if (frightened) {
-                    player.addPoints(200);
-                    ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
-                    ghost.setPosition(new Position(-1000, -1000));
+                    if (Player.isPowerOwner(player)) {
+                        player.eatGhost();
+                        ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
+                        ghost.setPosition(new Position(-1000, -1000));
+                    }
                     continue;
                 }
 
@@ -984,7 +984,6 @@ public class ClientGameController extends GameController {
                 player.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
                 player.setPosition(new Position(-1000, -1000));
                 player.setIntendedDirection(null);
-
                 break;
             }
         }
@@ -997,7 +996,6 @@ public class ClientGameController extends GameController {
             if (p == null) {
                 continue;
             }
-
             if (p.getRespawnTimer() > 0.0) {
                 p.setRespawnTimer(Math.max(0.0, p.getRespawnTimer() - dt));
 
@@ -1010,6 +1008,7 @@ public class ClientGameController extends GameController {
                     p.setDirection(Direction.WEST);
                     p.setIntendedDirection(null);
 
+                    // Check if spawning directly on a ghost (unsafe respawn)
                     boolean unsafeRespawn = false;
                     if (sp != null && Ghost.getFrightenedTimerSec() <= 0.0) {
                         for (Ghost g : gameState.ghosts()) {
@@ -1025,6 +1024,7 @@ public class ClientGameController extends GameController {
                     }
 
                     if (unsafeRespawn) {
+                        // Die immediately on unsafe respawn
                         int livesLeft = Math.max(0, p.getLives() - 1);
                         p.setLives(livesLeft);
                         p.setAlive(false);
@@ -1067,10 +1067,15 @@ public class ClientGameController extends GameController {
                 p.setPowerUpTimer(Math.max(0.0, p.getPowerUpTimer() - dt));
             }
         }
+
+        boolean cleared = Player.clearPowerIfOwnerInvalid(gameState.players());
+        if (cleared) {
+            Ghost.setFrightenedTimerSec(0.0);
+        }
     }
 
     private boolean isPowered(Player p) {
-        return p != null && p.getPowerUpTimer() > 0.0;
+        return Player.isPowerOwner(p);
     }
 
     private void handlePvPcollitions(GameState gameState) {
@@ -1143,12 +1148,22 @@ public class ClientGameController extends GameController {
 
         if (overlapX < overlapY) {
             double push = overlapX / 2.0;
-            if (pa.x < pb.x) { pa.x -= push; pb.x += push; }
-            else            { pa.x += push; pb.x -= push; }
+            if (pa.x < pb.x) {
+                pa.x -= push;
+                pb.x += push;
+            } else {
+                pa.x += push;
+                pb.x -= push;
+            }
         } else {
             double push = overlapY / 2.0;
-            if (pa.y < pb.y) { pa.y -= push; pb.y += push; }
-            else            { pa.y += push; pb.y -= push; }
+            if (pa.y < pb.y) {
+                pa.y -= push;
+                pb.y += push;
+            } else {
+                pa.y += push;
+                pb.y -= push;
+            }
         }
 
         a.setPosition(pa);
@@ -1186,18 +1201,25 @@ public class ClientGameController extends GameController {
             for (int x = 0; x < tiles[0].length; x++) {
                 switch (row[x]) {
                     case TileType.PAC_DOT:
+                        return false;
                     case TileType.ENERGIZER:
+                        return false;
                     case TileType.CHERRY:
+                        return false;
                     case TileType.STRAWBERRY:
+                        return false;
                     case TileType.ORANGE:
+                        return false;
                     case TileType.APPLE:
+                        return false;
                     case TileType.MELON:
+                        return false;
                     case TileType.GALAXIAN:
+                        return false;
                     case TileType.BELL:
+                        return false;
                     case TileType.KEY:
                         return false;
-                    default:
-                        break;
                 }
             }
         }
