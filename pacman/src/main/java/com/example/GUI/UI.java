@@ -9,6 +9,7 @@ import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
 import com.example.GameLogic.ClientGameController;
 import com.example.model.Action;
+import com.example.model.ActionList;
 import com.example.model.Constants;
 import com.example.model.GameState;
 import com.example.model.Player;
@@ -44,6 +45,7 @@ import javafx.stage.Stage;
 import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.stream.Collectors;
+import javafx.geometry.Insets;
 
 public class UI extends Application {
 
@@ -241,7 +243,8 @@ public class UI extends Application {
         gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
         savedState = gameState;
 
-        final Group root = new Group();
+        // final Group root = new Group();
+        final StackPane root = new StackPane();
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
@@ -252,11 +255,28 @@ public class UI extends Application {
 
         stage.setScene(scene);
 
-        canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
-        root.getChildren().add(canvas);
+        Button restartButton = new Button("Restart Game");
+        restartButton.setPrefSize(200, 100);
+        restartButton.setTranslateX(Constants.INIT_SCREEN_WIDTH/100);
+        restartButton.setTranslateY(Constants.INIT_SCREEN_HEIGHT/50);
+        restartButton.setVisible(false);
 
-        final AnimationTimer tm = new GameAnimator();
-        tm.start();
+        final GameAnimator gameAnimator = new GameAnimator(restartButton);
+        gameAnimator.start();
+
+        restartButton.setOnAction(e -> {
+            Constants.cleanActions = new ActionList();
+            gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
+            Constants.clock = -Constants.COUNTDOWN_DURATION_TICKS;
+            Constants.actionOffset = 6;
+            Constants.timeOffset = 0;
+            gameAnimator.resetTime();
+        });
+
+        canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
+
+        root.getChildren().add(canvas);
+        root.getChildren().add(restartButton);
 
         gc = canvas.getGraphicsContext2D();
 
@@ -264,7 +284,13 @@ public class UI extends Application {
     }
 
     private class GameAnimator extends AnimationTimer {
-        long startTime = 0;
+        private Button restartButton;
+        private long startTime;
+
+        public GameAnimator(Button button) {
+            restartButton = button;
+            startTime = 0;
+        }
 
         @Override
         public void handle(long time) {
@@ -306,6 +332,10 @@ public class UI extends Application {
             Constants.clock++;
         }
 
+        public void resetTime() {
+            startTime = 0;
+        }
+
         private void draw(long time) {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -318,8 +348,10 @@ public class UI extends Application {
 
             if (gameState.winner() == null) {
                 drawPoints();
+                restartButton.setVisible(false);
             } else {
                 drawEndscreen();
+                restartButton.setVisible(true);
             }
         }
 
