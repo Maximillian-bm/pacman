@@ -32,11 +32,8 @@ public class ClientGameController extends GameController {
         // Create a deep copy to avoid mutating the original state
         gameState = deepCopyGameState(gameState);
 
-        int clock = gameState.clock();
-        while (clock < targetClock) {
-            int currentClock = ++clock;
-            List<Action> ActionOfClock = Constants.cleanActions.getActions(currentClock);
-            gameState = updateGameState(gameState, ActionOfClock);
+        while(gameState.clock() < targetClock){
+            gameState = updateGameState(gameState, Constants.cleanActions.getActions(gameState.clock()+1));
         }
         return gameState;
     }
@@ -141,7 +138,7 @@ public class ClientGameController extends GameController {
             gameState.ghosts(),
             tiles,
             winner,
-            gameState.entityTracker()
+            gameState.entityTracker().copy()
         );
 
         return newGameState;
@@ -280,7 +277,7 @@ public class ClientGameController extends GameController {
         ghost5.setDirection(Direction.NORTH);
 
         return new GameState(
-            Constants.clock,
+            -1,
             players,
             ghosts,
             tiles,
