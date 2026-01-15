@@ -365,8 +365,7 @@ public class UI extends Application {
                 default:
                     break;
             }
-            System.out.println(gameState.tiles()[pos.getKey()+xOffset%Constants.TILES_WIDE][pos.getValue()+yOffset%Constants.TILES_TALL].toString());
-            if(!eatingDot && gameState.tiles()[pos.getKey()+xOffset%Constants.TILES_WIDE][pos.getValue()+yOffset%Constants.TILES_TALL] == TileType.PAC_DOT){
+            if(!eatingDot && gameState.tiles()[Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)][Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)] == TileType.PAC_DOT){
                 eatingDot = true;
                 soundEngine.play(Sound.EAT_DOT);
             }else{
