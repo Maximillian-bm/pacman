@@ -10,7 +10,9 @@ import com.example.GameLogic.ClientComs.KeyHandler;
 import com.example.GameLogic.ClientGameController;
 import com.example.model.Action;
 import com.example.model.Constants;
+import com.example.model.Direction;
 import com.example.model.GameState;
+import com.example.model.Ghost;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
@@ -38,6 +40,8 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Pair;
+
 import java.text.DecimalFormat;
 
 public class UI extends Application {
@@ -63,6 +67,8 @@ public class UI extends Application {
     private Runnable createLobby;
 
     private Text notificationText;
+
+    private boolean eatingDot = false;
 
     record TilePos(int x, int y) {
     }
@@ -202,8 +208,8 @@ public class UI extends Application {
         };
 
         createLobbyButton.setOnAction(e -> {
-            createLobby.run();
             soundEngine.play(Sound.EAT_FRUIT);
+            createLobby.run();
         });
 
         startButton.setOnAction(e -> {
@@ -295,7 +301,7 @@ public class UI extends Application {
              * }
              * }
              */
-
+            playSounds();
             draw(time);
 
             Constants.clock++;
@@ -312,6 +318,56 @@ public class UI extends Application {
             drawGhosts(time);
 
             drawPoints();
+        }
+
+        private void playSounds(){
+            Player localPlayer = gameState.players().get(lobbyHandler.getPlayerID());
+            if(localPlayer.isLostHeart()){
+                soundEngine.play(Sound.FAIL);
+                localPlayer.setLostHeart(false);
+            }
+            if(localPlayer.isAteFruit()){
+                soundEngine.play(Sound.EAT_FRUIT);
+                localPlayer.setAteFruit(false);
+            }
+            if(localPlayer.isAteGhost()){
+                soundEngine.play(Sound.EAT_GHOST);
+                soundEngine.play(Sound.GHOST_HOME);
+                localPlayer.setAteGhost(false);
+            }
+            for (Player p : gameState.players()) {
+                if(p.isAtePowerUp()){
+                    soundEngine.play(Sound.GHOST_BLUE);
+                    p.setAtePowerUp(false);
+                }
+            }
+
+            Pair<Integer, Integer> pos = localPlayer.getPosition().ToGridPosition();
+            int xOffset = 0;
+            int yOffset = 0;
+            switch (localPlayer.getDirection()) {
+                case Direction.NORTH:
+                    yOffset = -1;
+                    break;
+                case Direction.SOUTH:
+                    yOffset = 1;
+                    break;
+                case Direction.EAST:
+                    xOffset = 1;
+                    break;
+                case Direction.WEST:
+                    xOffset = -1;
+                    break;
+                default:
+                    break;
+            }
+            if(!eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] == TileType.PAC_DOT){
+                eatingDot = true;
+                soundEngine.play(Sound.EAT_DOT);
+            }else if(eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] != TileType.PAC_DOT){
+                eatingDot = false;
+                soundEngine.stop(Sound.EAT_DOT);
+            }
         }
 
         private void drawCountdown() {
