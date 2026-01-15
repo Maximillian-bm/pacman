@@ -303,7 +303,7 @@ public class UI extends Application {
              * }
              * }
              */
-
+            playSounds();
             draw(time);
 
             Constants.clock++;
@@ -312,8 +312,6 @@ public class UI extends Application {
         private void draw(long time) {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-            playSounds();
 
             drawMap();
 
@@ -368,7 +366,7 @@ public class UI extends Application {
             if(!eatingDot && gameState.tiles()[Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)][Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)] == TileType.PAC_DOT){
                 eatingDot = true;
                 soundEngine.play(Sound.EAT_DOT);
-            }else{
+            }else if(eatingDot && gameState.tiles()[Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)][Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)] != TileType.PAC_DOT){
                 eatingDot = false;
                 soundEngine.stop(Sound.EAT_DOT);
             }
