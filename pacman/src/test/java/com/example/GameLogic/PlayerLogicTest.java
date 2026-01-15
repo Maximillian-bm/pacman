@@ -59,6 +59,7 @@ public class PlayerLogicTest extends BaseTest {
         Player prey = initialState.players().get(1);
 
         predator.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
+        Player.assignPowerTo(predator);
         prey.setPowerUpTimer(0.0);
 
         predator.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
@@ -68,7 +69,9 @@ public class PlayerLogicTest extends BaseTest {
         prey.setAlive(true);
         int initialPoints = predator.getPoints();
 
-        controller.updateGameState(initialState, new ArrayList<>());
+        initialState = controller.updateGameState(initialState, new ArrayList<>());
+        predator = initialState.players().getFirst();
+        prey = initialState.players().get(1);
 
         assertEquals(2, prey.getLives(), "Prey should lose a life when eaten by energized player");
         assertFalse(prey.isAlive(), "Prey should be dead/respawning");
@@ -90,7 +93,9 @@ public class PlayerLogicTest extends BaseTest {
         p2.setPosition(new Position(4 * TILE_SIZE, 3 * TILE_SIZE));
         p2.setDirection(Direction.WEST);
 
-        controller.updateGameState(initialState, new ArrayList<>());
+        initialState = controller.updateGameState(initialState, new ArrayList<>());
+        p1 = initialState.players().getFirst();
+        p2 = initialState.players().get(1);
 
         double distance = Math.abs(p1.getPosition().x - p2.getPosition().x);
         assertTrue(distance >= TILE_SIZE - 1.0, "Players should be at least one tile apart (collision blocked). Distance: " + distance);
@@ -109,7 +114,8 @@ public class PlayerLogicTest extends BaseTest {
         p2.setPosition(new Position(4 * TILE_SIZE, 5 * TILE_SIZE));
         p2.setDirection(Direction.EAST);
 
-        controller.updateGameState(initialState, new ArrayList<>());
+        initialState = controller.updateGameState(initialState, new ArrayList<>());
+        p2 = initialState.players().get(1);
 
         double p2X = p2.getPosition().x;
         assertTrue(p2X <= 4 * TILE_SIZE + 2.0, "Moving player should be blocked by stationary player. Pos: " + p2X);
@@ -130,7 +136,8 @@ public class PlayerLogicTest extends BaseTest {
         p.setRespawnTimer(0.01);
         p.setLives(2);
 
-        controller.updateGameState(initialState, new ArrayList<>());
+        initialState = controller.updateGameState(initialState, new ArrayList<>());
+        p = initialState.players().getFirst();
 
         if (!p.isAlive()) {
             assertEquals(1, p.getLives(), "Player should lose a life immediately if spawn is camped");
@@ -149,7 +156,8 @@ public class PlayerLogicTest extends BaseTest {
         spamActions.add(new Action(p.getId(), 0, 3));
         spamActions.add(new Action(p.getId(), 0, 4));
 
-        controller.updateGameState(initialState, spamActions);
+        initialState = controller.updateGameState(initialState, spamActions);
+        p = initialState.players().getFirst();
 
         assertNotNull(p.getIntendedDirection());
     }

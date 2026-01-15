@@ -87,7 +87,7 @@ public class SystemPerformanceTest extends BaseTest {
         }
 
         long startTime = System.nanoTime();
-        controller.updateGameState(stressState, new ArrayList<>());
+        stressState = controller.updateGameState(stressState, new ArrayList<>());
         long endTime = System.nanoTime();
 
         double durationMs = (endTime - startTime) / 1_000_000.0;

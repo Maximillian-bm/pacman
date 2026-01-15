@@ -592,9 +592,13 @@ public class ClientGameController extends GameController {
             }
         }
 
+        if (candidates.isEmpty()) {
+            return currentDir;
+        }
+
         List<Direction> tieBreak = List.of(Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST);
 
-        Direction best = candidates.get(0);
+        Direction best = candidates.getFirst();
         int bestDist = Integer.MAX_VALUE;
 
         for (Direction d : tieBreak) {
@@ -640,9 +644,13 @@ public class ClientGameController extends GameController {
             }
         }
 
+        if (candidates.isEmpty()) {
+            return currentDir;
+        }
+
         List<Direction> tieBreak = List.of(Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST);
 
-        Direction best = candidates.get(0);
+        Direction best = candidates.getFirst();
         int bestDist = Integer.MIN_VALUE;
 
         for (Direction d : tieBreak) {

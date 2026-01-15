@@ -67,7 +67,8 @@ public class GhostLogicTest extends BaseTest {
         Ghost g = boxState.ghosts().getFirst();
         g.setPosition(new Position(2 * TILE_SIZE, 2 * TILE_SIZE));
 
-        controller.updateGameState(boxState, new ArrayList<>());
+        boxState = controller.updateGameState(boxState, new ArrayList<>());
+        g = boxState.ghosts().getFirst();
 
         assertEquals(2 * TILE_SIZE, g.getPosition().x, 0.1);
         assertEquals(2 * TILE_SIZE, g.getPosition().y, 0.1);
@@ -91,10 +92,15 @@ public class GhostLogicTest extends BaseTest {
 
         Player p = state.players().getFirst();
         p.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE));
+        
+        p.setPowerUpTimer(10.0);
+        Player.assignPowerTo(p);
 
         Ghost.setFrightenedTimerSec(10.0);
 
-        controller.updateGameState(state, new ArrayList<>());
+        state = controller.updateGameState(state, new ArrayList<>());
+        g1 = state.ghosts().getFirst();
+        g2 = state.ghosts().get(1);
 
         assertTrue(g1.getRespawnTimer() > 0, "Ghost 1 should be eaten (respawning)");
         assertTrue(g2.getRespawnTimer() > 0, "Ghost 2 should be eaten (respawning)");
@@ -106,7 +112,8 @@ public class GhostLogicTest extends BaseTest {
         Ghost g = state.ghosts().getFirst();
         g.setRespawnTimer(0.0000001);
 
-        controller.updateGameState(state, new ArrayList<>());
+        state = controller.updateGameState(state, new ArrayList<>());
+        g = state.ghosts().getFirst();
 
         assertEquals(0.0, g.getRespawnTimer(), 0.00001, "Respawn timer should cap at 0.0");
     }
@@ -118,7 +125,7 @@ public class GhostLogicTest extends BaseTest {
             g.setRespawnTimer(0.001);
         }
 
-        controller.updateGameState(state, new ArrayList<>());
+        state = controller.updateGameState(state, new ArrayList<>());
 
         for (Ghost g : state.ghosts()) {
             assertEquals(0.0, g.getRespawnTimer(), 0.001, "All ghosts should have respawned at their base points");
@@ -129,7 +136,7 @@ public class GhostLogicTest extends BaseTest {
     @Test
     @DisplayName("Ghost should ignore respawning players when selecting a target")
     public void testGhostDoesNotTargetRespawningPlayer() {
-        Player p1 = state.players().get(0);
+        Player p1 = state.players().getFirst();
         Player p2 = state.players().get(1);
         Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
             .orElseThrow(() -> new AssertionError("Blinky not found"));
@@ -145,7 +152,9 @@ public class GhostLogicTest extends BaseTest {
         p2.setRespawnTimer(1.0);
         p2.setPosition(new Position(-1000, -1000));
 
-        controller.updateGameState(state, new ArrayList<>());
+        state = controller.updateGameState(state, new ArrayList<>());
+        blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
+            .orElseThrow(() -> new AssertionError("Blinky not found"));
 
         assertEquals(Direction.EAST, blinky.getDirection(), "Ghost should target the only alive player (East)");
     }
@@ -153,7 +162,7 @@ public class GhostLogicTest extends BaseTest {
     @Test
     @DisplayName("Ghost should ignore dead players when selecting a target")
     public void testGhostDoesNotTargetDeadPlayer() {
-        Player p1 = state.players().get(0);
+        Player p1 = state.players().getFirst();
         Player p2 = state.players().get(1);
         Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
             .orElseThrow(() -> new AssertionError("Blinky not found"));
@@ -169,7 +178,9 @@ public class GhostLogicTest extends BaseTest {
         p2.setLives(0);
         p2.setPosition(new Position(-1000, -1000));
 
-        controller.updateGameState(state, new ArrayList<>());
+        state = controller.updateGameState(state, new ArrayList<>());
+        blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
+            .orElseThrow(() -> new AssertionError("Blinky not found"));
 
         assertEquals(Direction.EAST, blinky.getDirection(), "Ghost should target the only alive player (East)");
     }
@@ -191,7 +202,9 @@ public class GhostLogicTest extends BaseTest {
         blinky.setPosition(new Position(startX, startY));
         blinky.setDirection(Direction.SOUTH);
 
-        controller.updateGameState(state, new ArrayList<>());
+        state = controller.updateGameState(state, new ArrayList<>());
+        blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
+            .orElseThrow(() -> new AssertionError("Blinky not found"));
 
         assertEquals(Direction.EAST, blinky.getDirection(), "Ghost should move towards its corner if no players are alive");
         assertTrue(blinky.getPosition().x > startX, "Ghost should have moved East");
@@ -201,7 +214,7 @@ public class GhostLogicTest extends BaseTest {
     @Test
     @DisplayName("Frightened ghost should flee from alive players and ignore dead ones")
     public void testFrightenedGhostFleesFromAlivePlayerIgnoringDeadOnes() {
-        Player p1 = state.players().get(0);
+        Player p1 = state.players().getFirst();
         Player p2 = state.players().get(1);
         Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
             .orElseThrow(() -> new AssertionError("Blinky not found"));
@@ -219,7 +232,9 @@ public class GhostLogicTest extends BaseTest {
         p2.setLives(0);
         p2.setPosition(new Position(-1000, -1000));
 
-        controller.updateGameState(state, new ArrayList<>());
+        state = controller.updateGameState(state, new ArrayList<>());
+        blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
+            .orElseThrow(() -> new AssertionError("Blinky not found"));
 
         assertEquals(Direction.WEST, blinky.getDirection(), "Frightened ghost should flee from the only alive player (West)");
         assertTrue(blinky.getPosition().x < startX, "Ghost should have moved West away from P1");
@@ -228,7 +243,7 @@ public class GhostLogicTest extends BaseTest {
     @Test
     @DisplayName("Ghost should immediately update its target when the primary player dies")
     public void testGhostChangesTargetImmediatelyWhenPlayerDies() {
-        Player p1 = state.players().get(0);
+        Player p1 = state.players().getFirst();
         Player p2 = state.players().get(1);
         Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
             .orElseThrow(() -> new AssertionError("Blinky not found"));
@@ -246,7 +261,9 @@ public class GhostLogicTest extends BaseTest {
         p1.setLives(0);
         p1.setPosition(new Position(-1000, -1000));
 
-        controller.updateGameState(state, new ArrayList<>());
+        state = controller.updateGameState(state, new ArrayList<>());
+        blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
+            .orElseThrow(() -> new AssertionError("Blinky not found"));
 
         assertEquals(Direction.EAST, blinky.getDirection(), "Ghost should immediately retarget to P2 after P1 dies");
     }
