@@ -31,7 +31,7 @@ public class ClientGameController extends GameController {
         // Create a deep copy to avoid mutating the original state
         gameState = deepCopyGameState(gameState);
 
-        int clock = gameState.clock();
+        int clock = gameState.getClock();
         while (clock < targetClock) {
             int currentClock = ++clock;
             List<Action> ActionOfClock = Constants.cleanActions.getActions(currentClock);
@@ -42,38 +42,45 @@ public class ClientGameController extends GameController {
 
     public GameState deepCopyGameState(GameState state) {
         List<Player> copiedPlayers = new ArrayList<>();
-        for (Player p : state.players()) {
+        for (Player p : state.getPlayers()) {
             copiedPlayers.add(p.copy());
         }
 
         List<Ghost> copiedGhosts = new ArrayList<>();
-        for (Ghost g : state.ghosts()) {
+        for (Ghost g : state.getGhosts()) {
             copiedGhosts.add(g.copy());
         }
 
         // Deep copy tiles
-        TileType[][] originalTiles = state.tiles();
+        TileType[][] originalTiles = state.getTiles();
         TileType[][] copiedTiles = new TileType[originalTiles.length][originalTiles[0].length];
         for (int i = 0; i < originalTiles.length; i++) {
             System.arraycopy(originalTiles[i], 0, copiedTiles[i], 0, originalTiles[i].length);
         }
 
-        return new GameState(state.clock(), copiedPlayers, copiedGhosts, copiedTiles, state.winner());
+        GameState copy = new GameState(state.getClock(), copiedPlayers, copiedGhosts, copiedTiles, state.getWinner());
+        // Copy mutable state fields
+        copy.setGhostSpeed(state.getGhostSpeed());
+        copy.setGhostScatterMode(state.isGhostScatterMode());
+        copy.setGhostChaseTimer(state.getGhostChaseTimer());
+        copy.setFrightenedTimerSec(state.getFrightenedTimerSec());
+        copy.setPowerOwnerId(state.getPowerOwnerId());
+        return copy;
     }
 
     public GameState updateGameState(GameState gameState, List<Action> actions) {
         gameState = deepCopyGameState(gameState);
 
-        int newClock = gameState.clock() + 1;
+        int newClock = gameState.getClock() + 1;
 
         updateRespawnTimers(gameState);
         updatePlayerPowerTimers(gameState);
         updateInvulnerabilityTimers(gameState);
 
-        if (Ghost.getFrightenedTimerSec() > 0.0) {
-            Ghost.setFrightenedTimerSec(Ghost.getFrightenedTimerSec() - (1.0 / TARGET_FPS));
-            if (Ghost.getFrightenedTimerSec() < 0.0) {
-                Ghost.setFrightenedTimerSec(0.0);
+        if (gameState.getFrightenedTimerSec() > 0.0) {
+            gameState.setFrightenedTimerSec(gameState.getFrightenedTimerSec() - (1.0 / TARGET_FPS));
+            if (gameState.getFrightenedTimerSec() < 0.0) {
+                gameState.setFrightenedTimerSec(0.0);
             }
         }
 
@@ -84,14 +91,14 @@ public class ClientGameController extends GameController {
         handleGhostPlayerCollisions(gameState);
         handlePlayerGridPosition(gameState);
 
-        Player winner = gameState.winner();
-        TileType[][] tiles = gameState.tiles();
+        Player winner = gameState.getWinner();
+        TileType[][] tiles = gameState.getTiles();
 
         if (allPointsGathered(gameState)) {
             // Find player with highest points as winner
             Player highestScorer = null;
             int highestPoints = -1;
-            for (Player p : gameState.players()) {
+            for (Player p : gameState.getPlayers()) {
                 if (p.getPoints() > highestPoints) {
                     highestPoints = p.getPoints();
                     highestScorer = p;
@@ -104,10 +111,10 @@ public class ClientGameController extends GameController {
             tiles = newTiles;
 
             // Increase ghost speed for next level
-            Ghost.setGHOSTSPEED(Ghost.getGHOSTSPEED() * 1.1);
+            gameState.setGhostSpeed(gameState.getGhostSpeed() * 1.1);
 
             // Reset player positions
-            for (Player p : gameState.players()) {
+            for (Player p : gameState.getPlayers()) {
                 Position sp = p.getSpawnPosition();
                 if (sp != null) {
                     p.setPosition(new Position(sp.x, sp.y));
@@ -117,7 +124,7 @@ public class ClientGameController extends GameController {
             }
 
             // Reset ghost positions
-            for (Ghost g : gameState.ghosts()) {
+            for (Ghost g : gameState.getGhosts()) {
                 Position sp = g.getSpawnPosition();
                 if (sp != null) {
                     g.setPosition(new Position(sp.x, sp.y));
@@ -134,11 +141,17 @@ public class ClientGameController extends GameController {
 
         GameState newGameState = new GameState(
             newClock,
-            gameState.players(),
-            gameState.ghosts(),
+            gameState.getPlayers(),
+            gameState.getGhosts(),
             tiles,
             winner
         );
+        // Copy mutable state to the new GameState
+        newGameState.setGhostSpeed(gameState.getGhostSpeed());
+        newGameState.setGhostScatterMode(gameState.isGhostScatterMode());
+        newGameState.setGhostChaseTimer(gameState.getGhostChaseTimer());
+        newGameState.setFrightenedTimerSec(gameState.getFrightenedTimerSec());
+        newGameState.setPowerOwnerId(gameState.getPowerOwnerId());
 
         return newGameState;
     }
@@ -146,13 +159,13 @@ public class ClientGameController extends GameController {
     private void handleFruitSpawning(GameState gameState) {
         // Count total points earned (approximation for pellets eaten)
         int totalPoints = 0;
-        for (Player p : gameState.players()) {
+        for (Player p : gameState.getPlayers()) {
             totalPoints += p.getPoints();
         }
 
         // Spawn cherry after ~70 pellets (700 points)
         if (totalPoints >= 700) {
-            TileType[][] tiles = gameState.tiles();
+            TileType[][] tiles = gameState.getTiles();
             boolean hasFruit = false;
             for (TileType[] row : tiles) {
                 for (TileType t : row) {
@@ -187,6 +200,14 @@ public class ClientGameController extends GameController {
         List<Ghost> ghosts = new ArrayList<>();
         TileType[][] tiles = Maps.getMap1();
 
+        GameState gameState = new GameState(
+            Constants.clock,
+            players,
+            ghosts,
+            tiles,
+            null
+        );
+
         for (int i = 0; i < nrOfPlayers; i++) {
             Player player = new Player(i);
 
@@ -208,8 +229,6 @@ public class ClientGameController extends GameController {
                     spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
                     break;
             }
-            player.clearPowerOwner();
-            Ghost.setFrightenedTimerSec(0.0);
             player.setSpawnPosition(spawnPosition);
             player.setPosition(new Position(spawnPosition.x, spawnPosition.y));
             player.setLives(PLAYER_LIVES);
@@ -219,6 +238,13 @@ public class ClientGameController extends GameController {
             player.setRespawnTimer(0.0);
             players.add(player);
         }
+
+        // Reset game state fields
+        gameState.clearPowerOwner();
+        gameState.setFrightenedTimerSec(0.0);
+        gameState.setGhostScatterMode(true);
+        gameState.setGhostChaseTimer(0.0);
+        gameState.setGhostSpeed(PLAYER_SPEED * 0.8);
 
         Ghost ghost1 = new Ghost(GhostType.RED);
         ghost1.setPosition(
@@ -277,13 +303,7 @@ public class ClientGameController extends GameController {
         ghost4.setDirection(Direction.NORTH);
         ghost5.setDirection(Direction.NORTH);
 
-        return new GameState(
-            Constants.clock,
-            players,
-            ghosts,
-            tiles,
-            null
-        );
+        return gameState;
     }
 
     private void handleActions(GameState gameState, List<Action> actions) {
@@ -296,7 +316,7 @@ public class ClientGameController extends GameController {
                 continue;
             }
 
-            Player player = gameState.players().stream()
+            Player player = gameState.getPlayers().stream()
                 .filter(p -> p.getId() == a.getPlayerId())
                 .findFirst()
                 .orElse(null);
@@ -314,7 +334,7 @@ public class ClientGameController extends GameController {
     }
 
     private void stepMovement(GameState gameState) {
-        gameState.players().forEach(player -> {
+        gameState.getPlayers().forEach(player -> {
             if (!player.isAlive()) {
                 return;
             }
@@ -364,7 +384,7 @@ public class ClientGameController extends GameController {
                             case SOUTH -> nextGridY++;
                         }
 
-                        TileType[][] tiles = gameState.tiles();
+                        TileType[][] tiles = gameState.getTiles();
                         if (nextGridX >= 0 && nextGridX < tiles[0].length &&
                             nextGridY >= 0 && nextGridY < tiles.length &&
                             tiles[nextGridY][nextGridX] != TileType.WALL) {
@@ -392,7 +412,7 @@ public class ClientGameController extends GameController {
             pos.x += dx * movementPerFrame;
             pos.y += dy * movementPerFrame;
 
-            TileType[][] tiles = gameState.tiles();
+            TileType[][] tiles = gameState.getTiles();
 
             double mapWidth = tiles[0].length * TILE_SIZE;
             double mapHeight = tiles.length * TILE_SIZE;
@@ -453,27 +473,27 @@ public class ClientGameController extends GameController {
     }
 
     private void handlePlayerGridPosition(GameState gameState) {
-        gameState.players().forEach(player -> {
+        gameState.getPlayers().forEach(player -> {
             if (player == null || !player.isAlive() || player.getRespawnTimer() > 0.0) return;
 
             Pair<Integer, Integer> gp = player.getPosition().ToGridPosition();
-            TileType[][] tiles = gameState.tiles();
+            TileType[][] tiles = gameState.getTiles();
             int tileX = gp.getKey();
             int tileY = gp.getValue();
 
             TileType tileType = tiles[tileY][tileX];
         if(tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON) player.setAteFruit(true);
 
-            if (Player.isAnyPowerActive() && !Player.isPowerOwner(player)) {
+            if (gameState.isAnyPowerActive() && !gameState.isPowerOwner(player)) {
                 return;
             }
 
             player.addPoints(tileType.points);
 
             if (isPowerup(tileType)) {
-                Player.assignPowerTo(player);
+                gameState.assignPowerTo(player);
 
-                for (Player other : gameState.players()) {
+                for (Player other : gameState.getPlayers()) {
                     if (other != null && other.getId() != player.getId()) {
                         other.setPowerUpTimer(0.0);
                     }
@@ -481,9 +501,9 @@ public class ClientGameController extends GameController {
 
                 player.setAtePowerUp(true);
                 player.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
-                Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
+                gameState.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
 
-                for (Ghost g : gameState.ghosts()) {
+                for (Ghost g : gameState.getGhosts()) {
                     g.setDirection(oppositeDir(getGhostDir(g)));
                 }
 
@@ -676,7 +696,7 @@ public class ClientGameController extends GameController {
     }
 
     private Player findNearestPlayer(GameState gameState, Ghost ghost) {
-        if (gameState.players() == null || gameState.players().isEmpty()) {
+        if (gameState.getPlayers() == null || gameState.getPlayers().isEmpty()) {
             return null;
         }
         if (ghost == null || ghost.getPosition() == null) {
@@ -690,7 +710,7 @@ public class ClientGameController extends GameController {
         Player best = null;
         int bestDist2 = Integer.MAX_VALUE;
 
-        for (Player p : gameState.players()) {
+        for (Player p : gameState.getPlayers()) {
             if (p == null || p.getPosition() == null) {
                 continue;
             }
@@ -723,8 +743,8 @@ public class ClientGameController extends GameController {
         int py = pacGrid.getValue();
         Direction pDir = pac.getDirection();
 
-        int maxX = gameState.tiles()[0].length - 1;
-        int maxY = gameState.tiles().length - 1;
+        int maxX = gameState.getTiles()[0].length - 1;
+        int maxY = gameState.getTiles().length - 1;
 
         Pair<Integer, Integer> redCorner = new Pair<>(maxX, 0);
         Pair<Integer, Integer> pinkCorner = new Pair<>(0, 0);
@@ -732,7 +752,7 @@ public class ClientGameController extends GameController {
         Pair<Integer, Integer> orangeCorner = new Pair<>(0, maxY);
         Pair<Integer, Integer> purpleCorner = new Pair<>(maxX / 2, maxY / 2);
 
-        if (Ghost.isGhostScatterMode()) {
+        if (gameState.isGhostScatterMode()) {
             return switch (ghost.getType()) {
                 case RED -> redCorner;
                 case PINK -> pinkCorner;
@@ -797,47 +817,47 @@ public class ClientGameController extends GameController {
 
     private void GhostMovement(GameState gameState) {
 
-        if (gameState.ghosts() == null || gameState.ghosts().isEmpty()) {
+        if (gameState.getGhosts() == null || gameState.getGhosts().isEmpty()) {
             return;
         }
-        if (gameState.players() == null || gameState.players().isEmpty()) {
+        if (gameState.getPlayers() == null || gameState.getPlayers().isEmpty()) {
             return;
         }
 
-        TileType[][] tiles = gameState.tiles();
+        TileType[][] tiles = gameState.getTiles();
         if (tiles == null) {
             return;
         }
 
-        boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
+        boolean frightened = gameState.getFrightenedTimerSec() > 0.0;
 
         if (!frightened) {
-            Ghost.setGhostChaseTimer(Ghost.getGhostChaseTimer() + (1.0 / TARGET_FPS));
-            if (Ghost.isGhostScatterMode() && Ghost.getGhostChaseTimer() >= 7.0) {
-                Ghost.setGhostScatterMode(false);
-                Ghost.setGhostChaseTimer(0.0);
-                for (Ghost g : gameState.ghosts()) {
+            gameState.setGhostChaseTimer(gameState.getGhostChaseTimer() + (1.0 / TARGET_FPS));
+            if (gameState.isGhostScatterMode() && gameState.getGhostChaseTimer() >= 7.0) {
+                gameState.setGhostScatterMode(false);
+                gameState.setGhostChaseTimer(0.0);
+                for (Ghost g : gameState.getGhosts()) {
                     g.setDirection(oppositeDir(getGhostDir(g)));
 
                 }
-            } else if (!Ghost.isGhostScatterMode() && Ghost.getGhostChaseTimer() >= 20.0) {
-                Ghost.setGhostScatterMode(true);
-                Ghost.setGhostChaseTimer(0.0);
-                for (Ghost g : gameState.ghosts()) {
+            } else if (!gameState.isGhostScatterMode() && gameState.getGhostChaseTimer() >= 20.0) {
+                gameState.setGhostScatterMode(true);
+                gameState.setGhostChaseTimer(0.0);
+                for (Ghost g : gameState.getGhosts()) {
                     g.setDirection(oppositeDir(getGhostDir(g)));
                 }
             }
         }
 
-        Ghost blinky = gameState.ghosts().stream()
+        Ghost blinky = gameState.getGhosts().stream()
             .filter(g -> g.getType() == GhostType.RED)
             .findFirst()
             .orElse(null);
 
-        double speed = frightened ? (Ghost.getGHOSTSPEED() * 0.75) : Ghost.getGHOSTSPEED();
+        double speed = frightened ? (gameState.getGhostSpeed() * 0.75) : gameState.getGhostSpeed();
         double movePerFrame = speed / TARGET_FPS;
 
-        for (Ghost ghost : gameState.ghosts()) {
+        for (Ghost ghost : gameState.getGhosts()) {
             if (ghost.getRespawnTimer() > 0.0) {
                 continue;
             }
@@ -953,25 +973,25 @@ public class ClientGameController extends GameController {
     }
 
     private void handleGhostPlayerCollisions(GameState gameState) {
-        if (gameState.players() == null || gameState.ghosts() == null) return;
+        if (gameState.getPlayers() == null || gameState.getGhosts() == null) return;
 
-        boolean frightened = Ghost.getFrightenedTimerSec() > 0.0;
+        boolean frightened = gameState.getFrightenedTimerSec() > 0.0;
 
-        for (Player player : gameState.players()) {
+        for (Player player : gameState.getPlayers()) {
             if (player == null || player.getPosition() == null) continue;
             if (!player.isAlive() || player.getRespawnTimer() > 0.0) continue;
 
             // spawn protection
             if (isInvulnerable(player)) continue;
 
-            for (Ghost ghost : gameState.ghosts()) {
+            for (Ghost ghost : gameState.getGhosts()) {
                 if (ghost == null || ghost.getPosition() == null) continue;
                 if (ghost.getRespawnTimer() > 0.0) continue;
 
                 if (player.distanceTo(ghost) > Constants.COLLISION_DISTANCE_PVG) continue;
 
                 if (frightened) {
-                    if (Player.isPowerOwner(player)) {
+                    if (gameState.isPowerOwner(player)) {
                         player.eatGhost();
                         ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
                         ghost.setPosition(new Position(-1000, -1000));
@@ -1000,7 +1020,7 @@ public class ClientGameController extends GameController {
     private void updateRespawnTimers(GameState gameState) {
         double dt = 1.0 / TARGET_FPS;
 
-        for (Player p : gameState.players()) {
+        for (Player p : gameState.getPlayers()) {
             if (p == null) {
                 continue;
             }
@@ -1018,8 +1038,8 @@ public class ClientGameController extends GameController {
 
                     // Check if spawning directly on a ghost (unsafe respawn)
                     boolean unsafeRespawn = false;
-                    if (sp != null && Ghost.getFrightenedTimerSec() <= 0.0) {
-                        for (Ghost g : gameState.ghosts()) {
+                    if (sp != null && gameState.getFrightenedTimerSec() <= 0.0) {
+                        for (Ghost g : gameState.getGhosts()) {
                             if (g == null || g.getRespawnTimer() > 0.0) continue;
                             Position gp = g.getPosition();
                             if (gp == null) continue;
@@ -1046,7 +1066,7 @@ public class ClientGameController extends GameController {
             }
         }
 
-        for (Ghost g : gameState.ghosts()) {
+        for (Ghost g : gameState.getGhosts()) {
             if (g == null) {
                 continue;
             }
@@ -1068,7 +1088,7 @@ public class ClientGameController extends GameController {
     private void updatePlayerPowerTimers(GameState gameState) {
         double dt = 1.0 / TARGET_FPS;
 
-        for (Player p : gameState.players()) {
+        for (Player p : gameState.getPlayers()) {
             if (p == null) continue;
 
             if (p.getPowerUpTimer() > 0.0) {
@@ -1076,18 +1096,18 @@ public class ClientGameController extends GameController {
             }
         }
 
-        boolean cleared = Player.clearPowerIfOwnerInvalid(gameState.players());
+        boolean cleared = gameState.clearPowerIfOwnerInvalid();
         if (cleared) {
-            Ghost.setFrightenedTimerSec(0.0);
+            gameState.setFrightenedTimerSec(0.0);
         }
     }
 
-    private boolean isPowered(Player p) {
-        return Player.isPowerOwner(p);
+    private boolean isPowered(GameState gameState, Player p) {
+        return gameState.isPowerOwner(p);
     }
 
     private void handlePvPcollitions(GameState gameState) {
-        List<Player> players = gameState.players();
+        List<Player> players = gameState.getPlayers();
         if (players == null || players.size() < 2) return;
 
         for (int i = 0; i < players.size(); i++) {
@@ -1100,8 +1120,8 @@ public class ClientGameController extends GameController {
 
                 if (a.distanceTo(b) > Constants.COLLISION_DISTANCE_PVP) continue;
 
-                boolean aPow = isPowered(a);
-                boolean bPow = isPowered(b);
+                boolean aPow = isPowered(gameState, a);
+                boolean bPow = isPowered(gameState, b);
 
                 if (aPow ^ bPow) {
                     Player eater = aPow ? a : b;
@@ -1181,7 +1201,7 @@ public class ClientGameController extends GameController {
     private void updateInvulnerabilityTimers(GameState gameState) {
         double dt = 1.0 / TARGET_FPS;
 
-        for (Player p : gameState.players()) {
+        for (Player p : gameState.getPlayers()) {
             if (p == null) continue;
 
             if (p.getInvulnerableTimer() > 0.0) {
@@ -1195,7 +1215,7 @@ public class ClientGameController extends GameController {
     }
 
     public boolean allPlayersDead(GameState gameState) {
-        for (Player player : gameState.players()) {
+        for (Player player : gameState.getPlayers()) {
             if (0 < player.getLives()) {
                 return false;
             }
@@ -1204,7 +1224,7 @@ public class ClientGameController extends GameController {
     }
 
     public boolean allPointsGathered(GameState gameState) {
-        TileType[][] tiles = gameState.tiles();
+        TileType[][] tiles = gameState.getTiles();
         for (TileType[] row : tiles) {
             for (int x = 0; x < tiles[0].length; x++) {
                 switch (row[x]) {

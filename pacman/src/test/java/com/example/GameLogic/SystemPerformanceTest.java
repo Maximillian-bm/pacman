@@ -52,16 +52,16 @@ public class SystemPerformanceTest extends BaseTest {
         double averageTimeMs = (totalTimeNs / (double) iterations) / 1_000_000.0;
 
         assertTrue(averageTimeMs < 1.0, "Game logic update took too long: " + averageTimeMs + "ms");
-        assertTrue(currentState.clock() > initialState.clock(), "Clock should have advanced");
-        assertNotEquals(initialState.players().getFirst().getPosition().x, 
-            currentState.players().getFirst().getPosition().x, 0.001, "Player position should have changed");
+        assertTrue(currentState.getClock() > initialState.getClock(), "Clock should have advanced");
+        assertNotEquals(initialState.getPlayers().getFirst().getPosition().x, 
+            currentState.getPlayers().getFirst().getPosition().x, 0.001, "Player position should have changed");
     }
 
     @Test
     @DisplayName("Catch-up mechanism should resimulate lag frames within latency limits")
     public void testCatchUpLag() {
         int lagFrames = 60;
-        int targetClock = initialState.clock() + lagFrames;
+        int targetClock = initialState.getClock() + lagFrames;
 
         long startTime = System.nanoTime();
         GameState nextState = controller.updateGameStateFor(initialState, targetClock);
@@ -69,7 +69,7 @@ public class SystemPerformanceTest extends BaseTest {
         long durationMs = (endTime - startTime) / 1_000_000;
 
         assertTrue(durationMs < 20, "Catch-up mechanism is too slow, UI will freeze. Took: " + durationMs + "ms");
-        assertEquals(targetClock, nextState.clock(), "State clock should match target after catch-up");
+        assertEquals(targetClock, nextState.getClock(), "State clock should match target after catch-up");
     }
 
     @Test
@@ -80,7 +80,7 @@ public class SystemPerformanceTest extends BaseTest {
             for (int i = 0; i < 100; i++) {
                 Ghost g = new Ghost(com.example.model.GhostType.RED);
                 g.setPosition(new com.example.model.Position(100, 100));
-                stressState.ghosts().add(g);
+                stressState.getGhosts().add(g);
             }
         } catch (UnsupportedOperationException e) {
             return;

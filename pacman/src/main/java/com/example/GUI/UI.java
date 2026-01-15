@@ -321,7 +321,7 @@ public class UI extends Application {
         }
 
         private void playSounds(){
-            Player localPlayer = gameState.players().get(lobbyHandler.getPlayerID());
+            Player localPlayer = gameState.getPlayers().get(lobbyHandler.getPlayerID());
             if(localPlayer.isLostHeart()){
                 soundEngine.play(Sound.FAIL);
                 localPlayer.setLostHeart(false);
@@ -335,7 +335,7 @@ public class UI extends Application {
                 soundEngine.play(Sound.GHOST_HOME);
                 localPlayer.setAteGhost(false);
             }
-            for (Player p : gameState.players()) {
+            for (Player p : gameState.getPlayers()) {
                 if(p.isAtePowerUp()){
                     soundEngine.play(Sound.GHOST_BLUE);
                     p.setAtePowerUp(false);
@@ -361,17 +361,17 @@ public class UI extends Application {
                 default:
                     break;
             }
-            if(!eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] == TileType.PAC_DOT){
+            if(!eatingDot && gameState.getTiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] == TileType.PAC_DOT){
                 eatingDot = true;
                 soundEngine.play(Sound.EAT_DOT);
-            }else if(eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] != TileType.PAC_DOT){
+            }else if(eatingDot && gameState.getTiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] != TileType.PAC_DOT){
                 eatingDot = false;
                 soundEngine.stop(Sound.EAT_DOT);
             }
         }
 
         private void drawCountdown() {
-            Color playerColor = gameState.players().get(lobbyHandler.getPlayerID()).getColor();
+            Color playerColor = gameState.getPlayers().get(lobbyHandler.getPlayerID()).getColor();
             float seconds = -1 * (float) (Constants.clock) / Constants.TARGET_FPS;
 
             gc.setFill(playerColor);
@@ -387,7 +387,7 @@ public class UI extends Application {
         }
 
         private void drawPoints() {
-            List<Player> players = gameState.players();
+            List<Player> players = gameState.getPlayers();
             for (int i = 0; i < players.size(); i++) {
                 gc.setFill(players.get(i).getColor());
                 gc.setFont(new javafx.scene.text.Font(20));
@@ -405,7 +405,7 @@ public class UI extends Application {
         }
 
         private void drawMap() {
-            TileType[][] tiles = gameState.tiles();
+            TileType[][] tiles = gameState.getTiles();
             for (int y = 0; y < tiles.length; y++) {
                 for (int x = 0; x < tiles[0].length; x++) {
                     switch (tiles[y][x]) {
@@ -453,7 +453,7 @@ public class UI extends Application {
                     /*
                      * int finalI = x;
                      * int finalJ = y;
-                     * gameState.players().forEach(player -> {
+                     * gameState.getPlayers().forEach(player -> {
                      * Pair<Integer, Integer> playerGridPosition =
                      * player.getPosition().ToGridPosition();
                      * System.out.println(playerGridPosition.getKey() + " " +
@@ -470,7 +470,7 @@ public class UI extends Application {
         }
 
         private void drawPlayers(long time) {
-            gameState.players().forEach(player -> {
+            gameState.getPlayers().forEach(player -> {
                 int sy = switch (player.getDirection()) {
                     case WEST -> 50 * 6;
                     case NORTH -> 50 * 9;
@@ -534,7 +534,7 @@ public class UI extends Application {
         }
 
         private void drawGhosts(long time) {
-            gameState.ghosts().forEach(ghost -> {
+            gameState.getGhosts().forEach(ghost -> {
                 int sy = 0, sx = 0;
                 switch (ghost.getDirection()) {
                     case WEST:
@@ -556,7 +556,7 @@ public class UI extends Application {
                     case PURPLE -> 250; // ("Sue");
                 };
 
-                double fTimer = ghost.getFrightenedTimerSec();
+                double fTimer = gameState.getFrightenedTimerSec();
 
                 if (fTimer > 0) {
                     sy += 50 * 11;
@@ -576,7 +576,7 @@ public class UI extends Application {
         }
 
         private void drawWall(int y, int x) {
-            TileType[][] tiles = gameState.tiles();
+            TileType[][] tiles = gameState.getTiles();
             final int N = tiles.length;
             final int M = tiles[0].length;
 

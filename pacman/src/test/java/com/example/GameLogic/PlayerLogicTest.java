@@ -45,9 +45,8 @@ public class PlayerLogicTest extends BaseTest {
     @BeforeEach
     public void setUp() {
         controller = new ClientGameController();
-        Ghost.setFrightenedTimerSec(0.0);
         initialState = controller.initializeGameState(2);
-        initialState.ghosts().clear();
+        initialState.getGhosts().clear();
 
         host = new ConnectToLobby();
     }
@@ -55,11 +54,11 @@ public class PlayerLogicTest extends BaseTest {
     @Test
     @DisplayName("Energized player should eat other players and gain points")
     public void testPlayerEatsPlayerWithEnergizer() {
-        Player predator = initialState.players().getFirst();
-        Player prey = initialState.players().get(1);
+        Player predator = initialState.getPlayers().getFirst();
+        Player prey = initialState.getPlayers().get(1);
 
         predator.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
-        Player.assignPowerTo(predator);
+        initialState.assignPowerTo(predator);
         prey.setPowerUpTimer(0.0);
 
         predator.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
@@ -70,8 +69,8 @@ public class PlayerLogicTest extends BaseTest {
         int initialPoints = predator.getPoints();
 
         initialState = controller.updateGameState(initialState, new ArrayList<>());
-        predator = initialState.players().getFirst();
-        prey = initialState.players().get(1);
+        predator = initialState.getPlayers().getFirst();
+        prey = initialState.getPlayers().get(1);
 
         assertEquals(2, prey.getLives(), "Prey should lose a life when eaten by energized player");
         assertFalse(prey.isAlive(), "Prey should be dead/respawning");
@@ -81,8 +80,8 @@ public class PlayerLogicTest extends BaseTest {
     @Test
     @DisplayName("Non-energized players should collide and block each other")
     public void testPlayerCollisionNoEnergizer() {
-        Player p1 = initialState.players().getFirst();
-        Player p2 = initialState.players().get(1);
+        Player p1 = initialState.getPlayers().getFirst();
+        Player p2 = initialState.getPlayers().get(1);
 
         p1.setPowerUpTimer(0.0);
         p2.setPowerUpTimer(0.0);
@@ -94,8 +93,8 @@ public class PlayerLogicTest extends BaseTest {
         p2.setDirection(Direction.WEST);
 
         initialState = controller.updateGameState(initialState, new ArrayList<>());
-        p1 = initialState.players().getFirst();
-        p2 = initialState.players().get(1);
+        p1 = initialState.getPlayers().getFirst();
+        p2 = initialState.getPlayers().get(1);
 
         double distance = Math.abs(p1.getPosition().x - p2.getPosition().x);
         assertTrue(distance >= TILE_SIZE - 1.0, "Players should be at least one tile apart (collision blocked). Distance: " + distance);
@@ -107,15 +106,15 @@ public class PlayerLogicTest extends BaseTest {
     @Test
     @DisplayName("Moving player should be blocked by stationary player")
     public void testPlayerCollisionSameSpot() {
-        Player p1 = initialState.players().getFirst();
-        Player p2 = initialState.players().get(1);
+        Player p1 = initialState.getPlayers().getFirst();
+        Player p2 = initialState.getPlayers().get(1);
 
         p1.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE));
         p2.setPosition(new Position(4 * TILE_SIZE, 5 * TILE_SIZE));
         p2.setDirection(Direction.EAST);
 
         initialState = controller.updateGameState(initialState, new ArrayList<>());
-        p2 = initialState.players().get(1);
+        p2 = initialState.getPlayers().get(1);
 
         double p2X = p2.getPosition().x;
         assertTrue(p2X <= 4 * TILE_SIZE + 2.0, "Moving player should be blocked by stationary player. Pos: " + p2X);
@@ -124,9 +123,9 @@ public class PlayerLogicTest extends BaseTest {
     @Test
     @DisplayName("Player should lose life if spawning directly on a ghost")
     public void testSimultaneousPlayerGhostSpawnCollision() {
-        Player p = initialState.players().getFirst();
+        Player p = initialState.getPlayers().getFirst();
         Ghost g = new Ghost(GhostType.RED);
-        initialState.ghosts().add(g);
+        initialState.getGhosts().add(g);
 
         Position deathSpot = new Position(5 * TILE_SIZE, 5 * TILE_SIZE);
         p.setSpawnPosition(deathSpot);
@@ -137,7 +136,7 @@ public class PlayerLogicTest extends BaseTest {
         p.setLives(2);
 
         initialState = controller.updateGameState(initialState, new ArrayList<>());
-        p = initialState.players().getFirst();
+        p = initialState.getPlayers().getFirst();
 
         if (!p.isAlive()) {
             assertEquals(1, p.getLives(), "Player should lose a life immediately if spawn is camped");
@@ -147,7 +146,7 @@ public class PlayerLogicTest extends BaseTest {
     @Test
     @DisplayName("Rapid direction switching should maintain intended direction")
     public void testRapidDirectionSwitching() {
-        Player p = initialState.players().getFirst();
+        Player p = initialState.getPlayers().getFirst();
         p.setPosition(new Position(TILE_SIZE, TILE_SIZE));
 
         List<Action> spamActions = new ArrayList<>();
@@ -157,7 +156,7 @@ public class PlayerLogicTest extends BaseTest {
         spamActions.add(new Action(p.getId(), 0, 4));
 
         initialState = controller.updateGameState(initialState, spamActions);
-        p = initialState.players().getFirst();
+        p = initialState.getPlayers().getFirst();
 
         assertNotNull(p.getIntendedDirection());
     }
@@ -165,7 +164,7 @@ public class PlayerLogicTest extends BaseTest {
     @Test
     @DisplayName("Score should handle potential integer overflow")
     public void testScoreCap() {
-        Player p = initialState.players().getFirst();
+        Player p = initialState.getPlayers().getFirst();
         p.addPoints(Integer.MAX_VALUE - 5);
         p.addPoints(10);
 
