@@ -297,7 +297,7 @@ public class UI extends Application {
             /*
              * if(ActionOfClock.size() != 0){
              * for (Action a : ActionOfClock) {
-             * System.out.println(a.getMove() +" "+ a.getClock());
+             * System.out.println(a.getMove() +" "+ a.clock());
              * }
              * }
              */
@@ -556,7 +556,7 @@ public class UI extends Application {
                     case PURPLE -> 250; // ("Sue");
                 };
 
-                double fTimer = ghost.getFrightenedTimerSec();
+                double fTimer = gameState.powerupState().getFrightenedTimerSec();
 
                 if (fTimer > 0) {
                     sy += 50 * 11;

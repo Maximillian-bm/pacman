@@ -9,10 +9,10 @@ import com.example.model.Constants;
 
 public class LobbyCleaner implements Runnable{
 
-    private List<Lobby> lobbys;
-    private Space space1;
+    private final List<Lobby> lobbys;
+    private final Space space1;
     private boolean running = true;
-    private List<Lobby> toBeAdded = new ArrayList<>();
+    private final List<Lobby> toBeAdded = new ArrayList<>();
     private boolean showActiveLobbys = false;
     private boolean closeAllLobbys = false;
 
