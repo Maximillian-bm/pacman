@@ -15,6 +15,7 @@ import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
 import com.example.model.Sound;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javafx.animation.AnimationTimer;
@@ -41,10 +42,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import java.text.DecimalFormat;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 public class UI extends Application {
 
-    private final SoundEngine soundEngine = new SoundEngine();
+    // private final SoundEngine soundEngine = new SoundEngine();
 
     private final ConnectToLobby lobbyHandler = new ConnectToLobby();
 
@@ -158,7 +161,7 @@ public class UI extends Application {
                 Constants.INIT_SCREEN_HEIGHT);
 
         joinLobbyButton.setOnAction(e -> {
-            soundEngine.play(Sound.EAT_FRUIT);
+            // soundEngine.play(Sound.EAT_FRUIT);
             String input = lobbyIDInput.getText();
             System.out.println("Connecting to: " + input);
             errorText.setText("");
@@ -205,12 +208,12 @@ public class UI extends Application {
 
         createLobbyButton.setOnAction(e -> {
             createLobby.run();
-            soundEngine.play(Sound.EAT_FRUIT);
+            // soundEngine.play(Sound.EAT_FRUIT);
         });
 
         startButton.setOnAction(e -> {
             startLobby(stage);
-            soundEngine.play(Sound.START_MUSIC);
+            // soundEngine.play(Sound.START_MUSIC);
         });
 
         stage.setScene(startScene);
@@ -313,7 +316,35 @@ public class UI extends Application {
 
             drawGhosts(time);
 
-            drawPoints();
+            if (gameState.winner() == null) {
+                drawPoints();
+            } else {
+                drawEndscreen();
+            }
+        }
+
+        private void drawEndscreen() {
+            gc.setFill(Color.GRAY);
+            int padding = 150;
+            gc.fillRect(
+                Constants.INIT_SCREEN_WIDTH/2-padding,
+                Constants.INIT_SCREEN_HEIGHT/2-padding,
+                padding*2,
+                padding*2
+            );
+            gc.setFont(new javafx.scene.text.Font(24));
+            List<Player> players = gameState.players()
+                    .stream()
+                    .sorted(Comparator.comparing((Player p) -> p.getPoints()))
+                        .collect(Collectors.toList());
+            Collections.reverse(players);
+            for (int i = 0; i < players.size(); i++) {
+                gc.setFill(players.get(i).getColor());
+                gc.fillText("Score: " + players.get(i).getPoints(), 
+                    Constants.INIT_SCREEN_WIDTH/2-padding+110, 
+                    Constants.INIT_SCREEN_HEIGHT/2-padding+(i+2)*40
+                );
+            }
         }
 
         private void drawCountdown() {

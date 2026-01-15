@@ -54,13 +54,19 @@ public class ClientGameController extends GameController {
         GhostMovement(gameState);
         handleGhostPlayerCollisions(gameState);
         handlePlayerGridPosition(gameState);
-        
+
+        Player winner = gameState.winner();
+        if (allPlayersDead(gameState) || allPointsGathered(gameState)) {
+            winner = getWinner(gameState);
+            System.out.println("winner found");
+        }
+
         GameState newGameState = new GameState(
             Constants.clock,
             gameState.players(),
             gameState.ghosts(),
             gameState.tiles(),
-            gameState.winner()
+            winner
         );
 
         return newGameState;
@@ -993,4 +999,55 @@ private void updateInvulnerabilityTimers(GameState gameState) {
 private boolean isInvulnerable(Player p) {
     return p != null && p.getInvulnerableTimer() > 0.0;
 }
+
+    private boolean allPlayersDead(GameState gameState) {
+        for (Player player : gameState.players()) {
+            if (0 < player.getLives()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean allPointsGathered(GameState gameState) {
+        TileType tiles[][] = gameState.tiles();
+        for (int y = 0; y < tiles.length; y++) {
+            for (int x = 0; x < tiles[0].length; x++) {
+                switch(tiles[x][y]) {
+                    case TileType.PAC_DOT:
+                        return false;
+                    case TileType.ENERGIZER:
+                        return false;
+                    case TileType.CHERRY:
+                        return false;
+                    case TileType.STRAWBERRY:
+                        return false;
+                    case TileType.ORANGE:
+                        return false;
+                    case TileType.APPLE:
+                        return false;
+                    case TileType.MELON:
+                        return false;
+                    case TileType.GALAXIAN:
+                        return false;
+                    case TileType.BELL:
+                        return false;
+                    case TileType.KEY:
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private Player getWinner(GameState gameState) {
+        List<Player> players = gameState.players();
+        Player winner = players.get(0);
+        for (Player player : players) {
+            if (winner.getPoints() < player.getPoints()) {
+                winner = player;
+            }
+        }
+        return winner;
+    }
 }
