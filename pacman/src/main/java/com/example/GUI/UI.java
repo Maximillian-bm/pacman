@@ -14,6 +14,7 @@ import com.example.model.GameState;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
+import com.example.model.Sound;
 import java.util.List;
 import java.util.Objects;
 import javafx.animation.AnimationTimer;
@@ -39,9 +40,12 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import java.text.DecimalFormat;
 
 public class UI extends Application {
-    
+
+    private final SoundEngine soundEngine = new SoundEngine();
+
     private final ConnectToLobby lobbyHandler = new ConnectToLobby();
 
     private final ClientGameController gameController = new ClientGameController();
@@ -52,9 +56,9 @@ public class UI extends Application {
     private Canvas canvas;
 
     private final Image spriteSheet = new Image(
-        Objects.requireNonNull(getClass().getResource("/tilesets/pacman-sprite-sheet.png")).toExternalForm());
+            Objects.requireNonNull(getClass().getResource("/tilesets/pacman-sprite-sheet.png")).toExternalForm());
     private final Image wallSpriteSheet = new Image(
-        Objects.requireNonNull(getClass().getResource("/tilesets/chompermazetiles.png")).toExternalForm());
+            Objects.requireNonNull(getClass().getResource("/tilesets/chompermazetiles.png")).toExternalForm());
 
     private KeyHandler keyHandler;
 
@@ -62,7 +66,8 @@ public class UI extends Application {
 
     private Text notificationText;
 
-    record TilePos(int x, int y) { }
+    record TilePos(int x, int y) {
+    }
 
     @Override
     public void start(Stage stage) {
@@ -104,16 +109,14 @@ public class UI extends Application {
         playerCountChoices.getItems().add("4");
         playerCountChoices.setValue("1");
         HBox createLobbyH = new HBox(
-            playerCountText,
-            playerCountChoices
-        );
+                playerCountText,
+                playerCountChoices);
         createLobbyH.setAlignment(Pos.CENTER);
 
         Button createLobbyButton = createTiledButton("Create Lobby", 6, 2);
         VBox createLobbyV = new VBox(
-            createLobbyH,
-            createLobbyButton
-        );
+                createLobbyH,
+                createLobbyButton);
         createLobbyV.setAlignment(Pos.CENTER);
 
         Button startButton = createTiledButton("Start Game", 6, 2);
@@ -124,16 +127,14 @@ public class UI extends Application {
         TextField lobbyIDInput = new TextField();
         lobbyIDInput.setMaxWidth(6 * TILE_SIZE);
         HBox joinLobbyH = new HBox(
-            LobbyIDText,
-            lobbyIDInput
-        );
+                LobbyIDText,
+                lobbyIDInput);
         joinLobbyH.setAlignment(Pos.CENTER);
 
         VBox joinLobbyV = new VBox(
-            joinLobbyH,
-            joinLobbyButton,
-            errorText
-        );
+                joinLobbyH,
+                joinLobbyButton,
+                errorText);
         joinLobbyV.setAlignment(Pos.CENTER);
 
         Text header = new Text("Pacman");
@@ -141,11 +142,10 @@ public class UI extends Application {
         header.setStyle("-fx-font: 48 arial;");
 
         VBox startRoot = new VBox(
-            header,
-            joinLobbyV,
-            createLobbyV,
-            notificationText
-        );
+                header,
+                joinLobbyV,
+                createLobbyV,
+                notificationText);
         startRoot.setAlignment(Pos.CENTER);
         startRoot.setSpacing(48);
 
@@ -153,12 +153,12 @@ public class UI extends Application {
         root.getChildren().addAll(backgroundCanvas, startRoot);
 
         Scene startScene = new Scene(
-            root,
-            Constants.INIT_SCREEN_WIDTH,
-            Constants.INIT_SCREEN_HEIGHT
-        );
+                root,
+                Constants.INIT_SCREEN_WIDTH,
+                Constants.INIT_SCREEN_HEIGHT);
 
         joinLobbyButton.setOnAction(e -> {
+            soundEngine.play(Sound.EAT_FRUIT);
             String input = lobbyIDInput.getText();
             System.out.println("Connecting to: " + input);
             errorText.setText("");
@@ -203,9 +203,15 @@ public class UI extends Application {
             startRoot.getChildren().add(joinedLobbyText);
         };
 
-        createLobbyButton.setOnAction(e -> createLobby.run());
+        createLobbyButton.setOnAction(e -> {
+            createLobby.run();
+            soundEngine.play(Sound.EAT_FRUIT);
+        });
 
-        startButton.setOnAction(e -> startLobby(stage));
+        startButton.setOnAction(e -> {
+            startLobby(stage);
+            soundEngine.play(Sound.START_MUSIC);
+        });
 
         stage.setScene(startScene);
 
@@ -223,12 +229,15 @@ public class UI extends Application {
         });
     }
 
-    private void startLobby(Stage stage){
+    private void startLobby(Stage stage) {
         lobbyHandler.startGame();
         startGame(stage);
     }
 
     private void startGame(Stage stage) {
+        gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
+        savedState = gameState;
+
         final Group root = new Group();
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
@@ -256,31 +265,38 @@ public class UI extends Application {
 
         @Override
         public void handle(long time) {
-            if (startTime == 0) {startTime = time;}
-            if (time-(startTime+Constants.timeOffset) < Constants.clock*(1000000000/TARGET_FPS)) {
+            if (startTime == 0) {
+                startTime = time;
+            }
+            if (time - (startTime + Constants.timeOffset) < (Constants.clock + Constants.COUNTDOWN_DURATION_TICKS)
+                    * (1000000000 / TARGET_FPS)) {
+                return;
+            }
+            if (Constants.clock < 0) {
+                draw(time);
+                drawCountdown();
+                Constants.clock++;
                 return;
             }
 
             List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
-            if (gameState == null) { 
-                // gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers(), lobbyHandler.getPlayerID());
-                gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
-                savedState = gameState;
-            }
-            if(Constants.cleanActions.missedAction()){
+            if (Constants.cleanActions.missedAction()) {
                 gameState = gameController.updateGameStateFor(savedState, Constants.clock);
                 Constants.cleanActions.fixedMissedAction();
-            }else{
-                if(!ActionOfClock.isEmpty()) savedState = gameState;
+            } else {
+                if (!ActionOfClock.isEmpty())
+                    savedState = gameState;
                 gameState = gameController.updateGameState(gameState, ActionOfClock);
             }
 
-            //Proof that action is sent to game controller
-            /*if(ActionOfClock.size() != 0){
-                for (Action a : ActionOfClock) {
-                    System.out.println(a.getMove() +" "+ a.getClock());
-                }
-            }*/
+            // Proof that action is sent to game controller
+            /*
+             * if(ActionOfClock.size() != 0){
+             * for (Action a : ActionOfClock) {
+             * System.out.println(a.getMove() +" "+ a.getClock());
+             * }
+             * }
+             */
 
             draw(time);
 
@@ -300,6 +316,22 @@ public class UI extends Application {
             drawPoints();
         }
 
+        private void drawCountdown() {
+            Color playerColor = gameState.players().get(lobbyHandler.getPlayerID()).getColor();
+            float seconds = -1 * (float) (Constants.clock) / Constants.TARGET_FPS;
+
+            gc.setFill(playerColor);
+            gc.setFont(new javafx.scene.text.Font(80));
+            gc.fillText((int)seconds + "", Constants.INIT_SCREEN_WIDTH / 2 - 20, Constants.INIT_SCREEN_HEIGHT / 2 - 40);
+            gc.setFont(new javafx.scene.text.Font(80));
+            gc.fillText((int)seconds + "", Constants.INIT_SCREEN_WIDTH / 2 - 20, Constants.INIT_SCREEN_HEIGHT / 2 - 40);
+
+            gc.fillRect(0, 0, Constants.INIT_SCREEN_WIDTH, 4);
+            gc.fillRect(0, 0, 4, Constants.INIT_SCREEN_HEIGHT);
+            gc.fillRect(Constants.INIT_SCREEN_WIDTH-4, 0, 4, Constants.INIT_SCREEN_HEIGHT);
+            gc.fillRect(0, Constants.INIT_SCREEN_HEIGHT-4, Constants.INIT_SCREEN_WIDTH, 4);
+        }
+
         private void drawPoints() {
             List<Player> players = gameState.players();
             for (int i = 0; i < players.size(); i++) {
@@ -314,7 +346,7 @@ public class UI extends Application {
                     hearts.append("   ");
                 }
 
-                gc.fillText(hearts + " Score: " + players.get(i).getPoints(), 10, (i+1)*20);
+                gc.fillText(hearts + " Score: " + players.get(i).getPoints(), 10, (i + 1) * 20);
             }
         }
 
@@ -324,8 +356,8 @@ public class UI extends Application {
                 for (int j = 0; j < tiles[0].length; j++) {
                     switch (tiles[i][j]) {
                         case EMPTY:
-                            //gc.setFill(Color.BLACK);
-                            //gc.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            // gc.setFill(Color.BLACK);
+                            // gc.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case WALL:
                             drawWall(i, j);
@@ -333,44 +365,56 @@ public class UI extends Application {
                         case PAC_DOT:
                             double pacDotSize = TILE_SIZE / 8.0;
                             gc.setFill(Color.YELLOW);
-                            gc.fillRect(i * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, j * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
+                            gc.fillRect(i * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0,
+                                    j * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
                             break;
                         case CHERRY:
-                            gc.drawImage(spriteSheet, 600, 0, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(spriteSheet, 600, 0, 50, 50, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                    TILE_SIZE);
                             break;
                         case STRAWBERRY:
-                            gc.drawImage(spriteSheet, 600, 50, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(spriteSheet, 600, 50, 50, 50, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                    TILE_SIZE);
                             break;
                         case ORANGE:
-                            gc.drawImage(spriteSheet, 600, 100, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(spriteSheet, 600, 100, 50, 50, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                    TILE_SIZE);
                             break;
                         case APPLE:
-                            gc.drawImage(spriteSheet, 600, 150, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(spriteSheet, 600, 150, 50, 50, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                    TILE_SIZE);
                             break;
                         case MELON:
-                            gc.drawImage(spriteSheet, 600, 200, 50, 50, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(spriteSheet, 600, 200, 50, 50, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                    TILE_SIZE);
                             break;
                         case ENERGIZER:
-                            gc.drawImage(spriteSheet, 415, 415, 25, 25, i*TILE_SIZE, j*TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(spriteSheet, 415, 415, 25, 25, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                    TILE_SIZE);
                             break;
 
                     }
 
                     // Show which tile the player is on
-                    /*int finalI = x;
-                    int finalJ = y;
-                    gameState.players().forEach(player -> {
-                        Pair<Integer, Integer> playerGridPosition = player.getPosition().ToGridPosition();
-                        System.out.println(playerGridPosition.getKey() + " " + playerGridPosition.getValue());
-                        if (playerGridPosition.getKey() == finalI && playerGridPosition.getValue() == finalJ) {
-                            gc.setFill(Color.DARKRED);
-                            gc.fillRect(finalI * TILE_SIZE, finalJ * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                        }
-                    });*/
+                    /*
+                     * int finalI = x;
+                     * int finalJ = y;
+                     * gameState.players().forEach(player -> {
+                     * Pair<Integer, Integer> playerGridPosition =
+                     * player.getPosition().ToGridPosition();
+                     * System.out.println(playerGridPosition.getKey() + " " +
+                     * playerGridPosition.getValue());
+                     * if (playerGridPosition.getKey() == finalI && playerGridPosition.getValue() ==
+                     * finalJ) {
+                     * gc.setFill(Color.DARKRED);
+                     * gc.fillRect(finalI * TILE_SIZE, finalJ * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                     * }
+                     * });
+                     */
                 }
             }
         }
-        
+
         private void drawPlayers(long time) {
             gameState.players().forEach(player -> {
                 int sy = switch (player.getDirection()) {
@@ -380,7 +424,7 @@ public class UI extends Application {
                     default -> 0;
                 };
 
-                int pacmanFrame = (int)(time / 75000000) % 4;
+                int pacmanFrame = (int) (time / 75000000) % 4;
                 sy = switch (pacmanFrame) {
                     case 0 -> sy;
                     case 2 -> sy + 50 * 2;
@@ -396,30 +440,30 @@ public class UI extends Application {
         // Modified function from:
         // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
         public Image colorPlayer(Color color) {
-        // public Image colorPlayer(int nr, int ng, int nb) {
-            int W = (int)spriteSheet.getWidth();
-            int H = (int)spriteSheet.getHeight();
+            // public Image colorPlayer(int nr, int ng, int nb) {
+            int W = (int) spriteSheet.getWidth();
+            int H = (int) spriteSheet.getHeight();
             WritableImage outputImage = new WritableImage(W, H);
             PixelReader reader = spriteSheet.getPixelReader();
             PixelWriter writer = outputImage.getPixelWriter();
-            int nr = (int)(color.getRed()*255);
-            int ng = (int)(color.getGreen()*255);
-            int nb = (int)(color.getBlue()*255);
+            int nr = (int) (color.getRed() * 255);
+            int ng = (int) (color.getGreen() * 255);
+            int nb = (int) (color.getBlue() * 255);
             // Yellow (the player)
-            int or= 255;
-            int og= 241;
-            int ob= 0;
+            int or = 255;
+            int og = 241;
+            int ob = 0;
             for (int y = 0; y < H; y++) {
                 for (int x = 850; x < 900; x++) {
                     int argb = reader.getArgb(x, y);
                     int a = (argb >> 24) & 0xFF;
                     int r = (argb >> 16) & 0xFF;
-                    int g = (argb >>  8) & 0xFF;
-                    int b =  argb        & 0xFF;
-                    if (g==og && r==or && b==ob) {
-                        r=nr;
-                        g=ng;
-                        b=nb;
+                    int g = (argb >> 8) & 0xFF;
+                    int b = argb & 0xFF;
+                    if (g == og && r == or && b == ob) {
+                        r = nr;
+                        g = ng;
+                        b = nb;
                     }
                     argb = (a << 24) | (r << 16) | (g << 8) | b;
                     writer.setArgb(x, y, argb);
@@ -461,7 +505,8 @@ public class UI extends Application {
                 int ghostFrame = (int) (time / 300000000) % 2;
                 if (ghostFrame == 1) {
                     sy += 50;
-                    if (fTimer > 0 && fTimer < 2.0) sx += 50;
+                    if (fTimer > 0 && fTimer < 2.0)
+                        sx += 50;
                 }
 
                 Position ghostTilePos = ghost.getPosition();
@@ -487,34 +532,43 @@ public class UI extends Application {
             if (wWall) {
                 if (sWall) {
                     if (eWall) {
-                        gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                TILE_SIZE);
                     } else {
                         if (nWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                    TILE_SIZE, TILE_SIZE);
                         } else {
                             if (neWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                        TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                        TILE_SIZE, TILE_SIZE);
                             }
                         }
                     }
                 } else {
                     if (eWall) {
                         if (nWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                    TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 6, 32, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32 * 6, 32, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                    TILE_SIZE);
                         }
                     } else {
                         if (nWall) {
                             if (seWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                        TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                        TILE_SIZE, TILE_SIZE);
                             }
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 0, 32, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32 * 0, 32, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                    TILE_SIZE);
                         }
                     }
                 }
@@ -522,51 +576,71 @@ public class UI extends Application {
                 if (eWall) {
                     if (nWall) {
                         if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 9, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32 * 9, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                    TILE_SIZE, TILE_SIZE);
                         } else {
                             if (swWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                        TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                        TILE_SIZE, TILE_SIZE);
                             }
                         }
                     } else {
                         if (sWall) {
                             if (nwWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                        TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                        TILE_SIZE, TILE_SIZE);
                             }
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 2, 32, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32 * 2, 32, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                    TILE_SIZE);
                         }
                     }
                 } else {
                     if (nWall) {
                         if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 8, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32 * 8, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                    TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 4, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32 * 4, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                    TILE_SIZE, TILE_SIZE);
                         }
                     } else {
                         if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                            gc.drawImage(wallSpriteSheet, 32, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                                    TILE_SIZE);
                         } else {
                             if (neWall) {
                                 if (seWall) {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                    gc.drawImage(wallSpriteSheet, 32 * 3 + 16, 32 * 1, 32 / 2.0, 32, i * TILE_SIZE + TILE_SIZE / 2.0, j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0, TILE_SIZE);
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                            TILE_SIZE, TILE_SIZE);
+                                    gc.drawImage(wallSpriteSheet, 32 * 3 + 16, 32 * 1, 32 / 2.0, 32,
+                                            i * TILE_SIZE + TILE_SIZE / 2.0, j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
+                                            TILE_SIZE);
                                 } else {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                    gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 1 + 16, 32 / 2.0, 32 / 2.0, i * TILE_SIZE + TILE_SIZE / 2.0, j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0, TILE_SIZE - TILE_SIZE / 2.0);
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                            TILE_SIZE, TILE_SIZE);
+                                    gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 1 + 16, 32 / 2.0, 32 / 2.0,
+                                            i * TILE_SIZE + TILE_SIZE / 2.0, j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
+                                            TILE_SIZE - TILE_SIZE / 2.0);
                                 }
                             } else if (nwWall) {
                                 if (swWall) {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                    gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 1, 32 / 2.0, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0, TILE_SIZE);
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                            TILE_SIZE, TILE_SIZE);
+                                    gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 1, 32 / 2.0, 32, i * TILE_SIZE,
+                                            j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0, TILE_SIZE);
                                 } else {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                                    gc.drawImage(wallSpriteSheet, 32 * 7 + 16, 32 * 1 + 16, 32 / 2.0, 32 / 2.0, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0, TILE_SIZE - TILE_SIZE / 2.0);
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                            TILE_SIZE, TILE_SIZE);
+                                    gc.drawImage(wallSpriteSheet, 32 * 7 + 16, 32 * 1 + 16, 32 / 2.0, 32 / 2.0,
+                                            i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
+                                            TILE_SIZE - TILE_SIZE / 2.0);
                                 }
                             }
                         }
@@ -577,24 +651,22 @@ public class UI extends Application {
     }
 
     private void drawTileFromTileset(
-        GraphicsContext gc,
-        Image tileset,
-        int tileX,
-        int tileY,
-        double destX,
-        double destY
-    ) {
+            GraphicsContext gc,
+            Image tileset,
+            int tileX,
+            int tileY,
+            double destX,
+            double destY) {
         gc.drawImage(
-            tileset,
-            tileX * 32,
-            tileY * 32,
-            32,
-            32,
-            destX,
-            destY,
-            Constants.TILE_SIZE,
-            Constants.TILE_SIZE
-        );
+                tileset,
+                tileX * 32,
+                tileY * 32,
+                32,
+                32,
+                destX,
+                destY,
+                Constants.TILE_SIZE,
+                Constants.TILE_SIZE);
     }
 
     private void drawRectangle(GraphicsContext gc, int x, int y, int width, int height) {

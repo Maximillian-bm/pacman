@@ -25,12 +25,18 @@ package "GameLogic" {
       - findNearestPlayer(gameState: GameState, ghost: Ghost): Player
       - computeGhostTargetTile(gameState: GameState, ghost: Ghost, pac: Player, blinky: Ghost): Pair
       - GhostMovement(gameState: GameState): void
-      - collision(pos1: Position, pos2: Position): boolean
       - handleGhostPlayerCollisions(gameState: GameState): void
       - updateRespawnTimers(gameState: GameState): void
+      - updatePlayerPowerTimers(gameState: GameState): void
+      - isPowered(p: Player): boolean
+      - handlePvPcollitions(gameState: GameState): void
+      - isPlayerCollidable(p: Player): boolean
+      - eatPlayer(gameState: GameState, eater: Player, victim: Player): void
+      - resolvePlayerOverlap(a: Player, b: Player): void
+      - updateInvulnerabilityTimers(gameState: GameState): void
+      - isInvulnerable(p: Player): boolean
   }
     class ClientMain {
-      + clock: int
       + main(args: String): void
   }
     abstract GameController {
@@ -57,19 +63,16 @@ package "GameLogic" {
         - sync: Space
         + createLobby(nrOfPlayers: int): void
         + joinLobby(lobbyID: String): void
+        + joinLobby(lobbyID: String, timeoutMs: long): void
+        + leaveLobby(): void
+        + getGameState(): Object
+        + isPlayerInGame(playerID: int): boolean
         + startGame(): void
         + getLobbyID(): int
         + getNrOfPlayers(): int
         + getPlayerID(): int
     }
         class KeyHandler {
-        + move(key: KeyCode): void
-        + moveUp(): void
-        + moveDown(): void
-        + moveLeft(): void
-        + moveRight(): void
-    }
-        class KeyHandlerOnline extends KeyHandler {
         - rawActions: Space
         - playerID: int
         + move(key: KeyCode): void
@@ -80,6 +83,7 @@ package "GameLogic" {
     }
         class Reader implements Runnable {
         - lobbyID: int
+        + isConnected(): boolean
         + run(): void
     }
   }
@@ -87,7 +91,14 @@ package "GameLogic" {
   }
 }
 package "GUI" {
+    class SoundEngine {
+      - players: Map
+      + play(sound: Sound): void
+      + stop(sound: Sound): void
+      + setVolume(volume: double): void
+  }
     class UI extends Application {
+      - soundEngine: SoundEngine
       - lobbyHandler: ConnectToLobby
       - gameController: ClientGameController
       - gameState: GameState
@@ -98,9 +109,11 @@ package "GUI" {
       - wallSpriteSheet: Image
       - keyHandler: KeyHandler
       - createLobby: Runnable
+      - notificationText: Text
       + TilePos(x: int, y: int): record
       + start(stage: Stage): void
       - initializeLobby(stage: Stage): void
+      + notifyDisconnection(message: String): void
       - startLobby(stage: Stage): void
       - startGame(stage: Stage): void
       - drawTileFromTileset(gc: GraphicsContext, tileset: Image, tileX: int, tileY: int, destX: double, destY: double): void
@@ -122,15 +135,18 @@ package "model" {
       + setClock(clock: int): void
   }
     class ActionList {
-      - actions: Map
+      - actionsMap: Map
+      - actionsList: List
       - nrOfActionsCalled: int
       - missedAction: boolean
+      - playerID: int
       + addAction(action: Action): void
       + getActions(clock: int): List
       + missedAction(): boolean
       + fixedMissedAction(): void
   }
     class Constants {
+      + LOBBY_TTL: long
       + NR_OF_LOBBYS_CAP: int
       + cleanActions: ActionList
       + REMOTE_PUBLIC_URI: String
@@ -143,10 +159,17 @@ package "model" {
       + PLAYER_RESPAWN_DELAY_SEC: double
       + TARGET_FPS: long
       + CENTER_EPS_PX: double
+      + COUNTDOWN_DURATION_TICKS: int
+      + COLLISION_DISTANCE_PVG: double
+      + COLLISION_DISTANCE_PVP: double
       + PLAYER_LIVES: int
       + PLAYER_SPEED: double
+      + PLAYER_SPAWN_PROTECT_SEC: double
       + GHOST_RESPAWN_DELAY_SEC: double
       + FRIGHTENED_DURATION_SEC: double
+      + clock: int
+      + actionOffset: int
+      + timeOffset: long
   }
     enum Direction {
       NORTH
@@ -155,16 +178,15 @@ package "model" {
       WEST
   }
     abstract Entity {
-      - position: int
-      - direction: int
+      + position: Position
+      + direction: Direction
       + update(): void
+      + distanceTo(e: Entity): double
   }
     class Unknown {
   }
     class Ghost extends Entity {
       - type: GhostType
-      - position: Position
-      - direction: Direction
       - GHOSTSPEED: double
       - ghostScatterMode: boolean
       - ghostChaseTimer: double
@@ -186,28 +208,48 @@ package "model" {
   }
     class Player extends Entity {
       - id: int
+      - ghostsEatenThisEnergizer: int
       - points: int
       - lives: int
-      - position: Position
-      - direction: Direction
       - intendedDirection: Direction
       - respawnTimer: double
       - alive: boolean
       - spawnPosition: Position
-      - isEnergized: boolean
-      - ghostsEatenThisEnergizer: int
+      - powerUpTimer: double
+      - invulnerableTimer: double
       + isAlive(): boolean
       + setAlive(alive: boolean): void
       + addPoints(points: int): void
       + eatGhost(): void
       + loseLife(): void
       + isDead(): boolean
+      + getColor(): Color
   }
     class Position {
       + x: double
       + y: double
       + ToGridPosition(): Pair
       + ToScreenPosition(): Pair
+  }
+    enum Sound {
+      CREDIT
+      START_MUSIC
+      EAT_DOT
+      TURNING_CORNER
+      EXTEND
+      GHOST_NORMAL
+      GHOST_SPURT_1
+      GHOST_SPURT_2
+      GHOST_SPURT_3
+      GHOST_SPURT_4
+      EAT_FRUIT
+      GHOST_BLUE
+      EAT_GHOST
+      GHOST_HOME
+      FAIL
+      COFFEE_BREAK
+      - path: String
+      + getPath(): String
   }
     enum TileType {
       EMPTY
@@ -252,7 +294,11 @@ package "ServerLogic" {
       - space1: Space
       - running: boolean
       - toBeAdded: List
+      - showActiveLobbys: boolean
+      - closeAllLobbys: boolean
       + run(): void
+      + closeAllLobbys(): void
+      + showActiveLobbys(): void
       + stop(): void
       + addLobby(lobby: Lobby): void
   }
@@ -262,15 +308,24 @@ package "ServerLogic" {
       - space1: Space
       + main(arg: String): void
   }
+    class ServerIO implements Runnable {
+      + lobbyCleaner: LobbyCleaner
+      + run(): void
+      - help(): void
+      - invalidIndput(): void
+  }
 }
+  UI o-- SoundEngine: contains
   UI o-- ConnectToLobby: contains
   UI o-- ClientGameController: contains
   UI o-- KeyHandler: contains
   Constants o-- ActionList: contains
+  Entity o-- Position: contains
+  Entity o-- Direction: contains
   Ghost o-- GhostType: contains
-  Ghost "1" o-- "many" Position: contains
-  Ghost o-- Direction: contains
-  Player "1" o-- "many" Position: contains
-  Player "1" o-- "many" Direction: contains
+  Ghost o-- Position: contains
+  Player o-- Direction: contains
+  Player o-- Position: contains
   Lobby o-- LobbyActionHandler: contains
+  ServerIO o-- LobbyCleaner: contains
 @enduml
