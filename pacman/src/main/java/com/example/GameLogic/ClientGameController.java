@@ -107,49 +107,48 @@ public class ClientGameController extends GameController {
         Ghost ghost1 = new Ghost(GhostType.RED);
         ghost1.setPosition(
             new Position(
-                3 * TILE_SIZE,
-                TILE_SIZE
+                8 * TILE_SIZE,
+                8 * TILE_SIZE
             ));
         ghosts.add(ghost1);
 
         Ghost ghost2 = new Ghost(GhostType.PINK);
         ghost2.setPosition(
             new Position(
-                2 * TILE_SIZE,
-                TILE_SIZE
+                8 * TILE_SIZE,
+                8 * TILE_SIZE
             ));
         ghosts.add(ghost2);
 
         Ghost ghost3 = new Ghost(GhostType.CYAN);
         ghost3.setPosition(
             new Position(
-                2 * TILE_SIZE,
-                TILE_SIZE
+                8 * TILE_SIZE,
+                8 * TILE_SIZE
             ));
         ghosts.add(ghost3);
 
         Ghost ghost4 = new Ghost(GhostType.ORANGE);
         ghost4.setPosition(
             new Position(
-                2 * TILE_SIZE,
-                TILE_SIZE
+                8 * TILE_SIZE,
+                8 * TILE_SIZE
             ));
         ghosts.add(ghost4);
 
         Ghost ghost5 = new Ghost(GhostType.PURPLE);
         ghost5.setPosition(
             new Position(
-                2 * TILE_SIZE,
-                TILE_SIZE
+                8 * TILE_SIZE,
+                8 * TILE_SIZE
             ));
         ghosts.add(ghost5);
 
-        ghost1.setSpawnPosition(new Position(3 * TILE_SIZE, TILE_SIZE));
-        ghost2.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
-        ghost3.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
-        ghost4.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
-        ghost5.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
-
+        ghost1.setSpawnPosition(new Position(8 * TILE_SIZE, 8 * TILE_SIZE));
+        ghost2.setSpawnPosition(new Position(7 * TILE_SIZE, 8 * TILE_SIZE));
+        ghost3.setSpawnPosition(new Position(7 * TILE_SIZE, 8 * TILE_SIZE));
+        ghost4.setSpawnPosition(new Position(8 * TILE_SIZE, 7 * TILE_SIZE));
+        ghost5.setSpawnPosition(new Position(8 * TILE_SIZE, 7 * TILE_SIZE));
         ghost1.setRespawnTimer(0.0);
         ghost2.setRespawnTimer(0.0);
         ghost3.setRespawnTimer(0.0);
