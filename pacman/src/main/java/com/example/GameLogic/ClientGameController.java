@@ -40,7 +40,7 @@ public class ClientGameController extends GameController {
         return gameState;
     }
 
-    private GameState deepCopyGameState(GameState state) {
+    public GameState deepCopyGameState(GameState state) {
         List<Player> copiedPlayers = new ArrayList<>();
         for (Player p : state.players()) {
             copiedPlayers.add(p.copy());
@@ -122,7 +122,7 @@ public class ClientGameController extends GameController {
                 if (sp != null) {
                     g.setPosition(new Position(sp.x, sp.y));
                 }
-                g.setDirection(Direction.WEST);
+                g.setDirection(Direction.NORTH);
                 g.setRespawnTimer(0.0);
             }
 
@@ -196,13 +196,13 @@ public class ClientGameController extends GameController {
                     spawnPosition = new Position(1 * TILE_SIZE, 1 * TILE_SIZE);
                     break;
                 case 1:
-                    spawnPosition = new Position(15 * TILE_SIZE, 1 * TILE_SIZE);
+                    spawnPosition = new Position(17 * TILE_SIZE, 1 * TILE_SIZE);
                     break;
                 case 2:
-                    spawnPosition = new Position(1 * TILE_SIZE, 15 * TILE_SIZE);
+                    spawnPosition = new Position(1 * TILE_SIZE, 24 * TILE_SIZE);
                     break;
                 case 3:
-                    spawnPosition = new Position(15 * TILE_SIZE, 15 * TILE_SIZE);
+                    spawnPosition = new Position(24 * TILE_SIZE, 24 * TILE_SIZE);
                     break;
                 default:
                     spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
@@ -223,60 +223,59 @@ public class ClientGameController extends GameController {
         Ghost ghost1 = new Ghost(GhostType.RED);
         ghost1.setPosition(
             new Position(
-                3 * TILE_SIZE,
-                TILE_SIZE
+                9 * TILE_SIZE,
+                12 * TILE_SIZE
             ));
         ghosts.add(ghost1);
 
         Ghost ghost2 = new Ghost(GhostType.PINK);
         ghost2.setPosition(
             new Position(
-                2 * TILE_SIZE,
-                TILE_SIZE
+                8 * TILE_SIZE,
+                12 * TILE_SIZE
             ));
         ghosts.add(ghost2);
 
         Ghost ghost3 = new Ghost(GhostType.CYAN);
         ghost3.setPosition(
             new Position(
-                2 * TILE_SIZE,
-                TILE_SIZE
+                10 * TILE_SIZE,
+                12 * TILE_SIZE
             ));
         ghosts.add(ghost3);
 
         Ghost ghost4 = new Ghost(GhostType.ORANGE);
         ghost4.setPosition(
             new Position(
-                2 * TILE_SIZE,
-                TILE_SIZE
+                9 * TILE_SIZE,
+                12 * TILE_SIZE
             ));
         ghosts.add(ghost4);
 
         Ghost ghost5 = new Ghost(GhostType.PURPLE);
         ghost5.setPosition(
             new Position(
-                2 * TILE_SIZE,
-                TILE_SIZE
+                9 * TILE_SIZE,
+                12 * TILE_SIZE
             ));
         ghosts.add(ghost5);
 
-        ghost1.setSpawnPosition(new Position(3 * TILE_SIZE, TILE_SIZE));
-        ghost2.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
-        ghost3.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
-        ghost4.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
-        ghost5.setSpawnPosition(new Position(2 * TILE_SIZE, TILE_SIZE));
-
+        ghost1.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
+        ghost2.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
+        ghost3.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
+        ghost4.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
+        ghost5.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
         ghost1.setRespawnTimer(0.0);
         ghost2.setRespawnTimer(0.0);
         ghost3.setRespawnTimer(0.0);
         ghost4.setRespawnTimer(0.0);
         ghost5.setRespawnTimer(0.0);
 
-        ghost1.setDirection(Direction.WEST);
-        ghost2.setDirection(Direction.WEST);
-        ghost3.setDirection(Direction.WEST);
-        ghost4.setDirection(Direction.WEST);
-        ghost5.setDirection(Direction.WEST);
+        ghost1.setDirection(Direction.NORTH);
+        ghost2.setDirection(Direction.NORTH);
+        ghost3.setDirection(Direction.NORTH);
+        ghost4.setDirection(Direction.NORTH);
+        ghost5.setDirection(Direction.NORTH);
 
         return new GameState(
             Constants.clock,
@@ -463,6 +462,7 @@ public class ClientGameController extends GameController {
             int tileY = gp.getValue();
 
             TileType tileType = tiles[tileY][tileX];
+        if(tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON) player.setAteFruit(true);
 
             if (Player.isAnyPowerActive() && !Player.isPowerOwner(player)) {
                 return;
@@ -479,6 +479,7 @@ public class ClientGameController extends GameController {
                     }
                 }
 
+                player.setAtePowerUp(true);
                 player.setPowerUpTimer(FRIGHTENED_DURATION_SEC);
                 Ghost.setFrightenedTimerSec(FRIGHTENED_DURATION_SEC);
 
@@ -978,8 +979,7 @@ public class ClientGameController extends GameController {
                     continue;
                 }
 
-                int livesLeft = Math.max(0, player.getLives() - 1);
-                player.setLives(livesLeft);
+                int livesLeft = player.loseLife();
 
                 if (livesLeft <= 0) {
                     player.setAlive(false);
