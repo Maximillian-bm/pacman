@@ -37,7 +37,7 @@ public class Constants {
     public static final double COLLISION_DISTANCE_PVP = TILE_SIZE;
 
     // Player
-    public final static int PLAYER_LIVES = 1;
+    public final static int PLAYER_LIVES = 3;
     public final static double PLAYER_SPEED = 175;
     public final static double PLAYER_SPAWN_PROTECT_SEC = 2.0;
 
