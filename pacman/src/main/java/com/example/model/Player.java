@@ -38,6 +38,7 @@ public class Player extends Entity {
     private boolean atePowerUp = false;
 
 
+
     public Player(int id) {
         this.id = id;
         this.alive = true;
@@ -74,9 +75,13 @@ public class Player extends Entity {
         ghostsEatenThisEnergizer++;
     }
 
-    public void loseLife() {
-        lostHeart = true;
-        if (!isDead()) lives--;
+    public int loseLife() {
+        if (!isDead()){
+            lives--;
+            lostHeart = true;
+        }
+
+        return lives;
     }
 
     // Instead of calling a function/event like 'die()' in loseHealth, we can just check if a player is dead like this:

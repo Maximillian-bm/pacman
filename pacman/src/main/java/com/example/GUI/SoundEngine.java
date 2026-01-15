@@ -32,9 +32,9 @@ public class SoundEngine {
     }
 
     public void loop(Sound sound) {
-        AudioClip player = soundPlayers.get(sound);
-        player.stop();   // IMPORTANT: restart sound if already playing
-        player.play();
+        AudioClip looper = soundLoopers.get(sound);
+        looper.stop();   // IMPORTANT: restart sound if already playing
+        looper.play();
     }
 
     public void stop(Sound sound) {

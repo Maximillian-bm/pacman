@@ -821,8 +821,7 @@ public class ClientGameController extends GameController {
                 continue;
             }
 
-            int livesLeft = Math.max(0, player.getLives() - 1);
-            player.setLives(livesLeft);
+            int livesLeft = player.loseLife();
 
             if (livesLeft <= 0) {
                 player.setAlive(false);

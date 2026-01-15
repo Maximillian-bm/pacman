@@ -11,6 +11,7 @@ import com.example.GameLogic.ClientGameController;
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.GameState;
+import com.example.model.Ghost;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
@@ -307,6 +308,8 @@ public class UI extends Application {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
+            playSounds();
+
             drawMap();
 
             drawPlayers(time);
@@ -314,6 +317,29 @@ public class UI extends Application {
             drawGhosts(time);
 
             drawPoints();
+        }
+
+        private void playSounds(){
+            Player localPlayer = gameState.players().get(lobbyHandler.getPlayerID());
+            if(localPlayer.isLostHeart()){
+                soundEngine.play(Sound.FAIL);
+                localPlayer.setLostHeart(false);
+            }
+            if(localPlayer.isAteFruit()){
+                soundEngine.play(Sound.EAT_FRUIT);
+                localPlayer.setAteFruit(false);
+            }
+            if(localPlayer.isAteGhost()){
+                soundEngine.play(Sound.EAT_GHOST);
+                soundEngine.play(Sound.GHOST_HOME);
+                localPlayer.setAteGhost(false);
+            }
+            for (Player p : gameState.players()) {
+                if(p.isAtePowerUp()){
+                    soundEngine.play(Sound.GHOST_BLUE);
+                    p.setAtePowerUp(false);
+                }
+            }
         }
 
         private void drawCountdown() {
