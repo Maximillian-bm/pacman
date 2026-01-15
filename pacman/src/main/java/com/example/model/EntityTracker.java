@@ -9,7 +9,7 @@ import lombok.Setter;
 
 public class EntityTracker {
     @Getter @Setter
-    private double GHOSTSPEED = PLAYER_SPEED * 0.8;
+    private double ghostSpeed = PLAYER_SPEED * 0.8;
     @Getter @Setter
     private boolean ghostScatterMode = true;
     @Getter @Setter
@@ -64,6 +64,12 @@ public class EntityTracker {
         return false;
     }
     public EntityTracker copy(){
-        return this;
+        EntityTracker r = new EntityTracker();
+        r.setGhostSpeed(ghostSpeed);
+        r.setGhostScatterMode(ghostScatterMode);
+        r.setGhostChaseTimer(ghostChaseTimer);
+        r.setFrightenedTimerSec(frightenedTimerSec);
+        r.setPowerOwnerId(powerOwnerId);
+        return r;
     }
 }
