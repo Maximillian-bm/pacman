@@ -55,9 +55,10 @@ public class ClientGameController extends GameController {
         handleGhostPlayerCollisions(gameState);
         handlePlayerGridPosition(gameState);
 
-        System.out.println(gameState.winner());
+        Player winner = gameState.winner();
         if (allPlayersDead(gameState) || allPointsGathered(gameState)) {
-
+            winner = getWinner(gameState);
+            System.out.println("winner found");
         }
 
         GameState newGameState = new GameState(
@@ -65,7 +66,7 @@ public class ClientGameController extends GameController {
             gameState.players(),
             gameState.ghosts(),
             gameState.tiles(),
-            gameState.winner()
+            winner
         );
 
         return newGameState;
@@ -999,7 +1000,7 @@ private boolean isInvulnerable(Player p) {
     return p != null && p.getInvulnerableTimer() > 0.0;
 }
 
-    public boolean allPlayersDead(GameState gameState) {
+    private boolean allPlayersDead(GameState gameState) {
         for (Player player : gameState.players()) {
             if (0 < player.getLives()) {
                 return false;
@@ -1008,7 +1009,7 @@ private boolean isInvulnerable(Player p) {
         return true;
     }
 
-    public boolean allPointsGathered(GameState gameState) {
+    private boolean allPointsGathered(GameState gameState) {
         TileType tiles[][] = gameState.tiles();
         for (int y = 0; y < tiles.length; y++) {
             for (int x = 0; x < tiles[0].length; x++) {
@@ -1037,5 +1038,16 @@ private boolean isInvulnerable(Player p) {
             }
         }
         return true;
+    }
+
+    private Player getWinner(GameState gameState) {
+        List<Player> players = gameState.players();
+        Player winner = players.get(0);
+        for (Player player : players) {
+            if (winner.getPoints() < player.getPoints()) {
+                winner = player;
+            }
+        }
+        return winner;
     }
 }

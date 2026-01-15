@@ -44,7 +44,7 @@ import java.text.DecimalFormat;
 
 public class UI extends Application {
 
-    private final SoundEngine soundEngine = new SoundEngine();
+    // private final SoundEngine soundEngine = new SoundEngine();
 
     private final ConnectToLobby lobbyHandler = new ConnectToLobby();
 
@@ -158,7 +158,7 @@ public class UI extends Application {
                 Constants.INIT_SCREEN_HEIGHT);
 
         joinLobbyButton.setOnAction(e -> {
-            soundEngine.play(Sound.EAT_FRUIT);
+            // soundEngine.play(Sound.EAT_FRUIT);
             String input = lobbyIDInput.getText();
             System.out.println("Connecting to: " + input);
             errorText.setText("");
@@ -205,12 +205,12 @@ public class UI extends Application {
 
         createLobbyButton.setOnAction(e -> {
             createLobby.run();
-            soundEngine.play(Sound.EAT_FRUIT);
+            // soundEngine.play(Sound.EAT_FRUIT);
         });
 
         startButton.setOnAction(e -> {
             startLobby(stage);
-            soundEngine.play(Sound.START_MUSIC);
+            // soundEngine.play(Sound.START_MUSIC);
         });
 
         stage.setScene(startScene);
@@ -313,7 +313,22 @@ public class UI extends Application {
 
             drawGhosts(time);
 
-            drawPoints();
+            if (gameState.winner() == null) {
+                drawPoints();
+            } else {
+                drawEndscreen();
+            }
+        }
+
+        private void drawEndscreen() {
+            gc.setFill(Color.GRAY);
+            int padding = 100;
+            gc.fillRect(
+                Constants.INIT_SCREEN_WIDTH/2-padding,
+                Constants.INIT_SCREEN_HEIGHT/2-padding,
+                Constants.INIT_SCREEN_WIDTH/2+padding,
+                Constants.INIT_SCREEN_HEIGHT/2+padding
+            );
         }
 
         private void drawCountdown() {
