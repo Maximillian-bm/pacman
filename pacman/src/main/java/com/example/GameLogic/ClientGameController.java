@@ -26,6 +26,9 @@ import javafx.util.Pair;
 public class ClientGameController extends GameController {
 
     public GameState updateGameStateFor(GameState gameState, int targetClock) {
+        // Create a deep copy to avoid mutating the original state
+        gameState = deepCopyGameState(gameState);
+
         int clock = gameState.clock();
         while (clock < targetClock) {
             int currentClock = ++clock;
@@ -35,7 +38,29 @@ public class ClientGameController extends GameController {
         return gameState;
     }
 
+    private GameState deepCopyGameState(GameState state) {
+        List<Player> copiedPlayers = new ArrayList<>();
+        for (Player p : state.players()) {
+            copiedPlayers.add(p.copy());
+        }
+
+        List<Ghost> copiedGhosts = new ArrayList<>();
+        for (Ghost g : state.ghosts()) {
+            copiedGhosts.add(g.copy());
+        }
+
+        // Deep copy tiles
+        TileType[][] originalTiles = state.tiles();
+        TileType[][] copiedTiles = new TileType[originalTiles.length][originalTiles[0].length];
+        for (int i = 0; i < originalTiles.length; i++) {
+            System.arraycopy(originalTiles[i], 0, copiedTiles[i], 0, originalTiles[i].length);
+        }
+
+        return new GameState(state.clock(), copiedPlayers, copiedGhosts, copiedTiles, state.winner());
+    }
+
     public GameState updateGameState(GameState gameState, List<Action> actions) {
+        int newClock = gameState.clock() + 1;
 
         updateRespawnTimers(gameState);
         updatePlayerPowerTimers(gameState);
@@ -55,20 +80,102 @@ public class ClientGameController extends GameController {
         handleGhostPlayerCollisions(gameState);
         handlePlayerGridPosition(gameState);
 
-        System.out.println(gameState.winner());
-        if (allPlayersDead(gameState) || allPointsGathered(gameState)) {
+        Player winner = gameState.winner();
+        TileType[][] tiles = gameState.tiles();
 
+        if (allPointsGathered(gameState)) {
+            // Find player with highest points as winner
+            Player highestScorer = null;
+            int highestPoints = -1;
+            for (Player p : gameState.players()) {
+                if (p.getPoints() > highestPoints) {
+                    highestPoints = p.getPoints();
+                    highestScorer = p;
+                }
+            }
+            winner = highestScorer;
+
+            // Reset map for next level
+            TileType[][] newTiles = Maps.getMap1();
+            tiles = newTiles;
+
+            // Increase ghost speed for next level
+            Ghost.setGHOSTSPEED(Ghost.getGHOSTSPEED() * 1.1);
+
+            // Reset player positions
+            for (Player p : gameState.players()) {
+                Position sp = p.getSpawnPosition();
+                if (sp != null) {
+                    p.setPosition(new Position(sp.x, sp.y));
+                }
+                p.setDirection(Direction.EAST);
+                p.setIntendedDirection(null);
+            }
+
+            // Reset ghost positions
+            for (Ghost g : gameState.ghosts()) {
+                Position sp = g.getSpawnPosition();
+                if (sp != null) {
+                    g.setPosition(new Position(sp.x, sp.y));
+                }
+                g.setDirection(Direction.WEST);
+                g.setRespawnTimer(0.0);
+            }
+
+            newClock = 1;
         }
 
+        // Handle fruit spawning based on pellets eaten
+        handleFruitSpawning(gameState);
+
         GameState newGameState = new GameState(
-            Constants.clock,
+            newClock,
             gameState.players(),
             gameState.ghosts(),
-            gameState.tiles(),
-            gameState.winner()
+            tiles,
+            winner
         );
 
         return newGameState;
+    }
+
+    private void handleFruitSpawning(GameState gameState) {
+        // Count total points earned (approximation for pellets eaten)
+        int totalPoints = 0;
+        for (Player p : gameState.players()) {
+            totalPoints += p.getPoints();
+        }
+
+        // Spawn cherry after ~70 pellets (700 points)
+        if (totalPoints >= 700) {
+            TileType[][] tiles = gameState.tiles();
+            boolean hasFruit = false;
+            for (TileType[] row : tiles) {
+                for (TileType t : row) {
+                    if (t == TileType.CHERRY || t == TileType.STRAWBERRY) {
+                        hasFruit = true;
+                        break;
+                    }
+                }
+                if (hasFruit) break;
+            }
+
+            if (!hasFruit) {
+                // Find an empty tile near center to spawn fruit
+                int centerX = tiles.length / 2;
+                int centerY = tiles[0].length / 2;
+                for (int dx = 0; dx < tiles.length; dx++) {
+                    for (int dy = 0; dy < tiles[0].length; dy++) {
+                        int x = (centerX + dx) % tiles.length;
+                        int y = (centerY + dy) % tiles[0].length;
+                        if (tiles[x][y] == TileType.EMPTY) {
+                            tiles[x][y] = TileType.CHERRY;
+                            return;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public GameState initializeGameState(int nrOfPlayers) {
@@ -289,41 +396,61 @@ public class ClientGameController extends GameController {
             double mapWidth = tiles.length * TILE_SIZE;
             double mapHeight = tiles[0].length * TILE_SIZE;
 
-            if (pos.x + TILE_SIZE / 2.0 <= 0) {
-                pos.x = mapWidth - TILE_SIZE / 2.0;
-            } else if (pos.x + TILE_SIZE / 2.0 >= mapWidth) {
-                pos.x = -TILE_SIZE / 2.0;
+            // Wrap around with preserved overflow - wrap at position boundaries
+            double rightBoundary = mapWidth - TILE_SIZE / 2.0;
+            double bottomBoundary = mapHeight - TILE_SIZE / 2.0;
+
+            if (pos.x <= -TILE_SIZE / 2.0) {
+                double overflow = -TILE_SIZE / 2.0 - pos.x;
+                pos.x = rightBoundary - overflow;
+            } else if (pos.x >= rightBoundary) {
+                double overflow = pos.x - rightBoundary;
+                pos.x = -TILE_SIZE / 2.0 + overflow;
             }
 
-            if (pos.y + TILE_SIZE / 2.0 <= 0) {
-                pos.y = mapHeight - TILE_SIZE / 2.0;
-            } else if (pos.y + TILE_SIZE / 2.0 >= mapHeight) {
-                pos.y = -TILE_SIZE / 2.0;
+            if (pos.y <= -TILE_SIZE / 2.0) {
+                double overflow = -TILE_SIZE / 2.0 - pos.y;
+                pos.y = bottomBoundary - overflow;
+            } else if (pos.y >= bottomBoundary) {
+                double overflow = pos.y - bottomBoundary;
+                pos.y = -TILE_SIZE / 2.0 + overflow;
             }
 
-            double margin = 0.1;
+            // Skip wall collision check if player is in wrap-around zone (negative or beyond bounds)
+            boolean inWrapZone = pos.x < 0 || pos.y < 0 ||
+                                 pos.x >= rightBoundary ||
+                                 pos.y >= bottomBoundary;
 
-            if (isWall(tiles, pos.x + margin, pos.y + margin) ||
-                isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + margin) ||
-                isWall(tiles, pos.x + margin, pos.y + TILE_SIZE - margin) ||
-                isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + TILE_SIZE - margin)) {
+            if (!inWrapZone) {
+                double margin = 0.1;
 
-                Pair<Integer, Integer> currentGridPos = pos.ToGridPosition();
-                int targetGridX = currentGridPos.getKey();
-                int targetGridY = currentGridPos.getValue();
+                if (isWall(tiles, pos.x + margin, pos.y + margin) ||
+                    isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + margin) ||
+                    isWall(tiles, pos.x + margin, pos.y + TILE_SIZE - margin) ||
+                    isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + TILE_SIZE - margin)) {
 
-                while (true) {
-                    if (targetGridX >= 0 && targetGridX < tiles.length &&
-                        targetGridY >= 0 && targetGridY < tiles[0].length &&
-                        tiles[targetGridX][targetGridY] != TileType.WALL) {
-                        break;
+                    Pair<Integer, Integer> currentGridPos = pos.ToGridPosition();
+                    int targetGridX = currentGridPos.getKey();
+                    int targetGridY = currentGridPos.getValue();
+
+                    int maxIterations = tiles.length + tiles[0].length;
+                    int iterations = 0;
+                    while (iterations < maxIterations) {
+                        if (targetGridX >= 0 && targetGridX < tiles.length &&
+                            targetGridY >= 0 && targetGridY < tiles[0].length &&
+                            tiles[targetGridX][targetGridY] != TileType.WALL) {
+                            break;
+                        }
+                        targetGridX -= dx;
+                        targetGridY -= dy;
+                        iterations++;
                     }
-                    targetGridX -= dx;
-                    targetGridY -= dy;
-                }
 
-                pos.x = targetGridX * TILE_SIZE;
-                pos.y = targetGridY * TILE_SIZE;
+                    if (iterations < maxIterations) {
+                        pos.x = targetGridX * TILE_SIZE;
+                        pos.y = targetGridY * TILE_SIZE;
+                    }
+                }
             }
 
             player.setPosition(pos);
@@ -770,28 +897,40 @@ public class ClientGameController extends GameController {
                 pos.y = -TILE_SIZE / 2.0;
             }
 
-            double margin = 0.1;
-            if (isWall(tiles, pos.x + margin, pos.y + margin) ||
-                isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + margin) ||
-                isWall(tiles, pos.x + margin, pos.y + TILE_SIZE - margin) ||
-                isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + TILE_SIZE - margin)) {
+            // Skip wall collision check if ghost is in wrap-around zone
+            boolean inWrapZone = pos.x < 0 || pos.y < 0 ||
+                                 pos.x >= mapWidth - TILE_SIZE / 2.0 ||
+                                 pos.y >= mapHeight - TILE_SIZE / 2.0;
 
-                Pair<Integer, Integer> currentGridPos = pos.ToGridPosition();
-                int targetGridX = currentGridPos.getKey();
-                int targetGridY = currentGridPos.getValue();
+            if (!inWrapZone) {
+                double margin = 0.1;
+                if (isWall(tiles, pos.x + margin, pos.y + margin) ||
+                    isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + margin) ||
+                    isWall(tiles, pos.x + margin, pos.y + TILE_SIZE - margin) ||
+                    isWall(tiles, pos.x + TILE_SIZE - margin, pos.y + TILE_SIZE - margin)) {
 
-                while (true) {
-                    if (targetGridX >= 0 && targetGridX < tiles.length &&
-                        targetGridY >= 0 && targetGridY < tiles[0].length &&
-                        tiles[targetGridX][targetGridY] != TileType.WALL) {
-                        break;
+                    Pair<Integer, Integer> currentGridPos = pos.ToGridPosition();
+                    int targetGridX = currentGridPos.getKey();
+                    int targetGridY = currentGridPos.getValue();
+
+                    int maxIterations = tiles.length + tiles[0].length;
+                    int iterations = 0;
+                    while (iterations < maxIterations) {
+                        if (targetGridX >= 0 && targetGridX < tiles.length &&
+                            targetGridY >= 0 && targetGridY < tiles[0].length &&
+                            tiles[targetGridX][targetGridY] != TileType.WALL) {
+                            break;
+                        }
+                        targetGridX -= dx;
+                        targetGridY -= dy;
+                        iterations++;
                     }
-                    targetGridX -= dx;
-                    targetGridY -= dy;
-                }
 
-                pos.x = targetGridX * TILE_SIZE;
-                pos.y = targetGridY * TILE_SIZE;
+                    if (iterations < maxIterations) {
+                        pos.x = targetGridX * TILE_SIZE;
+                        pos.y = targetGridY * TILE_SIZE;
+                    }
+                }
             }
 
             ghost.setPosition(pos);
@@ -863,7 +1002,33 @@ public class ClientGameController extends GameController {
                     p.setAlive(true);
                     p.setDirection(Direction.WEST);
                     p.setIntendedDirection(null);
-                    p.setInvulnerableTimer(Constants.PLAYER_SPAWN_PROTECT_SEC);
+
+                    // Check if spawning directly on a ghost (unsafe respawn)
+                    boolean unsafeRespawn = false;
+                    if (sp != null && Ghost.getFrightenedTimerSec() <= 0.0) {
+                        for (Ghost g : gameState.ghosts()) {
+                            if (g == null || g.getRespawnTimer() > 0.0) continue;
+                            Position gp = g.getPosition();
+                            if (gp == null) continue;
+                            double dist = Math.sqrt(Math.pow(sp.x - gp.x, 2) + Math.pow(sp.y - gp.y, 2));
+                            if (dist <= Constants.COLLISION_DISTANCE_PVG) {
+                                unsafeRespawn = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (unsafeRespawn) {
+                        // Die immediately on unsafe respawn
+                        int livesLeft = Math.max(0, p.getLives() - 1);
+                        p.setLives(livesLeft);
+                        p.setAlive(false);
+                        p.setRespawnTimer(livesLeft > 0 ? PLAYER_RESPAWN_DELAY_SEC : 0.0);
+                        p.setPosition(new Position(-1000, -1000));
+                        p.setIntendedDirection(null);
+                    } else {
+                        p.setInvulnerableTimer(Constants.PLAYER_SPAWN_PROTECT_SEC);
+                    }
                 }
             }
         }

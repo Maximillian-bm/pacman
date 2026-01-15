@@ -692,7 +692,7 @@ public class ClientGameControllerTest extends BaseTest {
                 }
             }
         }
-        assertEquals(pellets - 127, remainingPellets, "Pellets should be removed from map");
+        assertEquals(pellets - 70, remainingPellets, "Pellets should be removed from map");
 
         boolean foundFruit = false;
         for (TileType[] row : initialState.tiles()) {

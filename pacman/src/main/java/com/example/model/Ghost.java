@@ -27,4 +27,13 @@ public class Ghost extends Entity {
         this.type = type;
         super.direction = Direction.WEST;
     }
+
+    public Ghost copy() {
+        Ghost copy = new Ghost(this.type);
+        copy.position = this.position != null ? new Position(this.position.x, this.position.y) : null;
+        copy.direction = this.direction;
+        copy.spawnPosition = this.spawnPosition != null ? new Position(this.spawnPosition.x, this.spawnPosition.y) : null;
+        copy.respawnTimer = this.respawnTimer;
+        return copy;
+    }
 }
