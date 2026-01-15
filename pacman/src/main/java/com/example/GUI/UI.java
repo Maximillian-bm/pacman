@@ -34,9 +34,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -424,12 +422,19 @@ public class UI extends Application {
                     default -> 0;
                 };
 
-                int pacmanFrame = (int) (time / 75000000) % 4;
+                int pacmanFrame = (int) (time / 75000000.0) % 4;
                 sy = switch (pacmanFrame) {
                     case 0 -> sy;
                     case 2 -> sy + 50 * 2;
                     default -> sy + 50;
                 };
+
+                double remainingRatio = player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC;
+                remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
+                double blinkPeriodSec = 0.75 + remainingRatio;
+                double timeSec = (time - startTime) / 500_000_000.0;
+                int blinkFrame = (int) (timeSec / blinkPeriodSec) % 2;
+                if (player.getInvulnerableTimer() > 0.0 && blinkFrame == 1) sy = 50 * 12;
 
                 Image coloredPlayer = colorPlayer(player.getColor());
                 Position playerTilePos = player.getPosition();
@@ -502,7 +507,7 @@ public class UI extends Application {
                     sx = 0;
                 }
 
-                int ghostFrame = (int) (time / 300000000) % 2;
+                int ghostFrame = (int) (time / 300000000.0) % 2;
                 if (ghostFrame == 1) {
                     sy += 50;
                     if (fTimer > 0 && fTimer < 2.0)
