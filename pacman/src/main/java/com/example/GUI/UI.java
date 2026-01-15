@@ -361,10 +361,10 @@ public class UI extends Application {
                 default:
                     break;
             }
-            if(!eatingDot && gameState.tiles()[Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)][Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)] == TileType.PAC_DOT){
+            if(!eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] == TileType.PAC_DOT){
                 eatingDot = true;
                 soundEngine.play(Sound.EAT_DOT);
-            }else if(eatingDot && gameState.tiles()[Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)][Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)] != TileType.PAC_DOT){
+            }else if(eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] != TileType.PAC_DOT){
                 eatingDot = false;
                 soundEngine.stop(Sound.EAT_DOT);
             }
