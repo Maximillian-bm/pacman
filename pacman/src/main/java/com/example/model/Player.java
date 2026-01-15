@@ -1,24 +1,30 @@
 package com.example.model;
 
-import javafx.scene.paint.Color;
+import java.util.List;
 
+import javafx.scene.paint.Color;
 import lombok.Getter;
 import lombok.Setter;
 
 public class Player extends Entity {
+
     @Getter
     private final int id;
 
     private int ghostsEatenThisEnergizer;
 
     @Getter @Setter
-    private int
-        points = 0,
-        lives = Constants.PLAYER_LIVES;
+    private int points = 0;
+
+    @Getter @Setter
+    private int lives = Constants.PLAYER_LIVES;
+
     @Getter @Setter
     private Direction intendedDirection;
+
     @Getter @Setter
     private double respawnTimer = 0.0;
+
     private boolean alive;
 
     @Getter @Setter
@@ -26,6 +32,7 @@ public class Player extends Entity {
 
     @Getter @Setter
     private double powerUpTimer = 0.0;
+
     @Getter @Setter
     private double invulnerableTimer = 0.0;
     @Getter @Setter
@@ -39,6 +46,61 @@ public class Player extends Entity {
 
 
 
+    private static int powerOwnerId = -1;
+
+    public static int getPowerOwnerId() {
+        return powerOwnerId;
+    }
+
+    public static void setPowerOwnerId(int playerId) {
+        powerOwnerId = playerId;
+    }
+
+    public static void clearPowerOwner() {
+        powerOwnerId = -1;
+    }
+
+    public static boolean isAnyPowerActive() {
+        return powerOwnerId != -1;
+    }
+
+    public static boolean isPowerOwner(Player p) {
+        return p != null
+            && p.getId() == powerOwnerId
+            && p.getPowerUpTimer() > 0.0
+            && p.isAlive()
+            && p.getRespawnTimer() <= 0.0;
+    }
+
+    public static void assignPowerTo(Player owner) {
+        if (owner == null) return;
+        powerOwnerId = owner.getId();
+        owner.ghostsEatenThisEnergizer = 0;
+    }
+    public static boolean clearPowerIfOwnerInvalid(List<Player> players) {
+    if (powerOwnerId == -1) return false;
+
+    Player owner = null;
+    if (players != null) {
+        for (Player p : players) {
+            if (p != null && p.getId() == powerOwnerId) {
+                owner = p;
+                break;
+            }
+        }
+    }
+    if (owner == null
+        || owner.getPowerUpTimer() <= 0.0
+        || !owner.isAlive()
+        || owner.getRespawnTimer() > 0.0) {
+
+        powerOwnerId = -1;
+        return true;
+    }
+
+    return false;
+}
+
     public Player(int id) {
         this.id = id;
         this.alive = true;
@@ -46,17 +108,14 @@ public class Player extends Entity {
         this.direction = Direction.EAST;
         this.respawnTimer = 0.0;
     }
+
     public boolean isAlive() {
         return alive;
     }
 
     public void setAlive(boolean alive) {
         this.alive = alive;
-    }   
-    /*
-     * From: "https://pacman.fandom.com/wiki/Power_Pellet"
-     * If consecutive ghosts are eaten during the same Energizer effect, they will give out 400, 800 and 1,600 point bonuses for each of the consecutive ghosts in order.
-     */
+    }
 
     public void addPoints(int points) {
         this.points += points;
@@ -71,7 +130,6 @@ public class Player extends Entity {
             case 3 -> 1600;
             default -> 3200;
         };
-
         ghostsEatenThisEnergizer++;
     }
 
@@ -84,7 +142,6 @@ public class Player extends Entity {
         return lives;
     }
 
-    // Instead of calling a function/event like 'die()' in loseHealth, we can just check if a player is dead like this:
     public boolean isDead() {
         return lives <= 0;
     }
