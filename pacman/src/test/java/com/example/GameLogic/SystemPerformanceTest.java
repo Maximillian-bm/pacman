@@ -53,7 +53,7 @@ public class SystemPerformanceTest extends BaseTest {
 
         assertTrue(averageTimeMs < 1.0, "Game logic update took too long: " + averageTimeMs + "ms");
         assertTrue(currentState.clock() > initialState.clock(), "Clock should have advanced");
-        assertNotEquals(initialState.players().getFirst().getPosition().x,
+        assertNotEquals(initialState.players().getFirst().getPosition().x, 
             currentState.players().getFirst().getPosition().x, 0.001, "Player position should have changed");
     }
 
@@ -61,15 +61,15 @@ public class SystemPerformanceTest extends BaseTest {
     @DisplayName("Catch-up mechanism should resimulate lag frames within latency limits")
     public void testCatchUpLag() {
         int lagFrames = 60;
-        int targetClock = initialState.clock() + lagFrames;
+        int tarclock = initialState.clock() + lagFrames;
 
         long startTime = System.nanoTime();
-        GameState nextState = controller.updateGameStateFor(initialState, targetClock);
+        GameState nextState = controller.updateGameStateFor(initialState, tarclock);
         long endTime = System.nanoTime();
         long durationMs = (endTime - startTime) / 1_000_000;
 
         assertTrue(durationMs < 20, "Catch-up mechanism is too slow, UI will freeze. Took: " + durationMs + "ms");
-        assertEquals(targetClock, nextState.clock(), "State clock should match target after catch-up");
+        assertEquals(tarclock, nextState.clock(), "State clock should match target after catch-up");
     }
 
     @Test

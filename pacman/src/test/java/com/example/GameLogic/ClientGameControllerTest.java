@@ -329,7 +329,7 @@ public class ClientGameControllerTest extends BaseTest {
         GameState nextState = controller.updateGameState(initialState, new ArrayList<>());
 
         assertNotNull(nextState.winner(), "Winner should be set");
-
+        
         boolean foundPellet = false;
         for (TileType[] row : nextState.tiles()) {
             for (TileType tile : row) {
@@ -402,7 +402,7 @@ public class ClientGameControllerTest extends BaseTest {
         player.setRespawnTimer(0.0);
         player.setLives(3);
         player.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
-
+        
         // Properly power up the player
         player.setPowerUpTimer(10.0);
         initialState.entityTracker().assignPowerTo(player);
@@ -655,7 +655,7 @@ public class ClientGameControllerTest extends BaseTest {
             initialState.ghosts(),
             initialState.tiles(),
             null,
-            initialState.entityTracker()
+            initialState.entityTracker().copy()
         );
 
         GameState nextState = controller.updateGameState(highClockState, new ArrayList<>());
@@ -783,12 +783,12 @@ public class ClientGameControllerTest extends BaseTest {
         Player player = initialState.players().getFirst();
         player.setPosition(new Position(TILE_SIZE, TILE_SIZE));
         player.setDirection(Direction.EAST);
-
+        
         // At clock 1, move EAST
         Constants.cleanActions.addAction(new Action(0, 1, 2, 0)); // 2 = EAST
-
+        
         GameState finalState = controller.updateGameStateFor(initialState, 5);
-
+        
         assertEquals(5, finalState.clock());
         assertTrue(finalState.players().getFirst().getPosition().x > TILE_SIZE, "Player should have moved EAST from resimulation");
         double expectedX = TILE_SIZE + 5 * (Constants.PLAYER_SPEED / Constants.TARGET_FPS);
@@ -806,7 +806,7 @@ public class ClientGameControllerTest extends BaseTest {
 
         // Clock 1: EAST (already moving East)
         Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
-        // Clock 3: SOUTH (at TILE_SIZE, TILE_SIZE it should be able to turn if it's an intersection,
+        // Clock 3: SOUTH (at TILE_SIZE, TILE_SIZE it should be able to turn if it's an intersection, 
         // but let's assume it's moving and we want to see it change direction)
         // We'll place it at an intersection for easier testing
         player.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
@@ -833,7 +833,7 @@ public class ClientGameControllerTest extends BaseTest {
         ghost.setRespawnTimer(0.0);
         ghost.setPosition(new Position(3.2 * TILE_SIZE, 3 * TILE_SIZE));
         ghost.setDirection(Direction.WEST);
-
+        
         // Player moves EAST towards ghost
         player.setDirection(Direction.EAST);
         Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
@@ -856,7 +856,7 @@ public class ClientGameControllerTest extends BaseTest {
 
         TileType[][] tiles = initialState.tiles();
         tiles[3][3] = TileType.ENERGIZER;
-
+        
         Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
 
         // Resimulate over eating the energizer
@@ -877,7 +877,7 @@ public class ClientGameControllerTest extends BaseTest {
         Position initialPos = new Position(initialState.players().getFirst().getPosition().x, initialState.players().getFirst().getPosition().y);
 
         Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
-
+        
         GameState finalState = controller.updateGameStateFor(initialState, 10);
 
         assertNotEquals(initialClock, finalState.clock(), "Final state should be different from initial state");
@@ -891,15 +891,15 @@ public class ClientGameControllerTest extends BaseTest {
         Constants.cleanActions = new ActionList();
         GameState state1 = controller.initializeGameState(1);
         GameState state2 = controller.initializeGameState(1);
-
+        
         // Manually update state1 5 times with no actions
         for(int i = 1; i <= 5; i++) {
             state1 = controller.updateGameState(state1, new ArrayList<>());
         }
-
+        
         // Resimulate state2 for 5 ticks
         state2 = controller.updateGameStateFor(state2, 5);
-
+        
         assertEquals(state1.clock(), state2.clock(), "States should have same clock");
         assertEquals(state1.players().getFirst().getPosition().x, state2.players().getFirst().getPosition().x, 0.001, "Player X should be same");
         assertEquals(state1.players().getFirst().getPosition().y, state2.players().getFirst().getPosition().y, 0.001, "Player Y should be same");
@@ -910,10 +910,10 @@ public class ClientGameControllerTest extends BaseTest {
     public void testUpdateGameStateForLargeClockJump() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
-
+        
         // Resimulate 100 ticks
         GameState finalState = controller.updateGameStateFor(initialState, 100);
-
+        
         assertEquals(100, finalState.clock());
     }
 
@@ -922,11 +922,11 @@ public class ClientGameControllerTest extends BaseTest {
     public void testUpdateGameStateForClockRegression() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
-        GameState futureState = new GameState(10, initialState.players(), initialState.ghosts(), initialState.tiles(), null, initialState.entityTracker());
-
-        // targetClock (5) < futureState.clock() (10)
+        GameState futureState = new GameState(10, initialState.players(), initialState.ghosts(), initialState.tiles(), null, initialState.entityTracker().copy());
+        
+        // tarclock (5) < futureState.clock() (10)
         GameState resultState = controller.updateGameStateFor(futureState, 5);
-
+        
         assertEquals(10, resultState.clock(), "Clock should not regress and state should remain unchanged");
     }
 
@@ -941,9 +941,9 @@ public class ClientGameControllerTest extends BaseTest {
 
         // Action at clock 10 (beyond target clock 5)
         Constants.cleanActions.addAction(new Action(0, 10, 4, 0)); // 4 = SOUTH
-
+        
         GameState finalState = controller.updateGameStateFor(initialState, 5);
-
+        
         assertEquals(5, finalState.clock());
         assertEquals(Direction.EAST, finalState.players().getFirst().getDirection(), "Direction should still be EAST");
     }
@@ -955,16 +955,16 @@ public class ClientGameControllerTest extends BaseTest {
         initialState = controller.initializeGameState(2);
         Player p0 = initialState.players().getFirst();
         Player p1 = initialState.players().get(1);
-
+        
         p0.setPosition(new Position(3 * TILE_SIZE, 3 * TILE_SIZE));
         p1.setPosition(new Position(10 * TILE_SIZE, 3 * TILE_SIZE));
-
+        
         // Both move at clock 1
         Constants.cleanActions.addAction(new Action(0, 1, 1, 0)); // P0 WEST
         Constants.cleanActions.addAction(new Action(1, 1, 2, 1)); // P1 EAST
-
+        
         GameState finalState = controller.updateGameStateFor(initialState, 5);
-
+        
         assertTrue(finalState.players().getFirst().getPosition().x < 3 * TILE_SIZE, "P0 should have moved WEST");
         assertTrue(finalState.players().get(1).getPosition().x > 10 * TILE_SIZE, "P1 should have moved EAST");
     }
@@ -984,9 +984,7 @@ public class ClientGameControllerTest extends BaseTest {
         // Check missedAction with current clock (10)
         assertTrue(Constants.cleanActions.missedAction(10), "Missed action should be detected");
 
-        // Fix is implied by re-running or manual getActions?
-        // The test just checks detection.
-        // We can manually consume it to clear the state for the assertion
+        // Fix by processing it
         Constants.cleanActions.getActions(5);
         assertFalse(Constants.cleanActions.missedAction(10));
     }
@@ -1029,14 +1027,14 @@ public class ClientGameControllerTest extends BaseTest {
         Constants.cleanActions = new ActionList();
         sharedActionsList.forEach(Constants.cleanActions::addAction);
         GameState stateClient2 = controller.initializeGameState(2);
-
+        
         stateClient2 = controller.updateGameStateFor(stateClient2, 5);
         stateClient2 = controller.updateGameStateFor(stateClient2, 15);
         stateClient2 = controller.updateGameStateFor(stateClient2, 20);
 
         // --- Assertions: Both clients should have identical positions for all entities ---
         assertEquals(stateClient1.clock(), stateClient2.clock(), "Clocks should match");
-
+        
         for (int i = 0; i < 2; i++) {
             Player p1 = stateClient1.players().get(i);
             Player p2 = stateClient2.players().get(i);
@@ -1058,32 +1056,32 @@ public class ClientGameControllerTest extends BaseTest {
     public void testResyncAfterRollback() {
         // Scenario: Client is at clock 15, then discovers an action from another player happened at clock 10.
         // It must resimulate from the last known good state (clock 9) up to 15.
-
+        
         Constants.cleanActions = new ActionList();
         // Initial actions (only P0 moves)
         for (int i = 1; i <= 15; i++) {
             Constants.cleanActions.addAction(new Action(0, i, 2, i)); // P0 moves EAST
         }
-
+        
         GameState stateAtClock9 = controller.initializeGameState(2);
         stateAtClock9 = controller.updateGameStateFor(stateAtClock9, 9);
-
+        
         // Client mistakenly proceeds to 15 without knowing about P1's action at 10
         GameState stateWrong = controller.updateGameStateFor(stateAtClock9, 15);
-
+        
         // Now "discover" the late action for P1 at clock 10
         Constants.cleanActions.addAction(new Action(1, 10, 4, 100)); // P1 moves SOUTH at clock 10
-
+        
         // Resync from the last good state (9) to 15
         GameState stateCorrected = controller.updateGameStateFor(stateAtClock9, 15);
-
+        
         // Assertions
-        assertNotEquals(stateWrong.players().get(1).getPosition().y,
+        assertNotEquals(stateWrong.players().get(1).getPosition().y, 
             stateCorrected.players().get(1).getPosition().y, 0.001, "P1 position should be different after corrected resimulation");
-
+        
         assertTrue(stateCorrected.players().get(1).getPosition().y > stateWrong.players().get(1).getPosition().y, "P1 should have moved SOUTH in the corrected state");
-
-        assertEquals(stateWrong.players().getFirst().getPosition().x,
+            
+        assertEquals(stateWrong.players().getFirst().getPosition().x, 
             stateCorrected.players().getFirst().getPosition().x, 0.001, "P0 position should still be consistent (independent movement)");
     }
 }

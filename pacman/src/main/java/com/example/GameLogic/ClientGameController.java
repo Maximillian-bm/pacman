@@ -28,12 +28,12 @@ import javafx.util.Pair;
 
 public class ClientGameController extends GameController {
 
-    public GameState updateGameStateFor(GameState gameState, int targetClock) {
+    public GameState updateGameStateFor(GameState gameState, int tarclock) {
         // Create a deep copy to avoid mutating the original state
         gameState = deepCopyGameState(gameState);
 
-        while(gameState.clock() < targetClock){
-            gameState = updateGameState(gameState, Constants.cleanActions.getActions(gameState.clock()+1));
+        while (gameState.clock() < tarclock) {
+            gameState = updateGameState(gameState, Constants.cleanActions.getActions(gameState.clock() + 1));
         }
         return gameState;
     }
@@ -462,8 +462,11 @@ public class ClientGameController extends GameController {
             int tileX = gp.getKey();
             int tileY = gp.getValue();
 
+            if (tileY < 0 || tileY >= tiles.length || tileX < 0 || tileX >= tiles[0].length) return;
+
             TileType tileType = tiles[tileY][tileX];
-        if(tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON) player.setAteFruit(true);
+            if (tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON)
+                player.setAteFruit(true);
 
             if (entityTracker.isAnyPowerActive() && !entityTracker.isPowerOwner(player)) {
                 return;
