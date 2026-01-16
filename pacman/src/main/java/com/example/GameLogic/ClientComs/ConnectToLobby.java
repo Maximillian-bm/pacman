@@ -76,6 +76,7 @@ public class ConnectToLobby {
         } catch (Exception e) {
             return;
         }
+        startGame();
     }
 
     public void startGame() {
