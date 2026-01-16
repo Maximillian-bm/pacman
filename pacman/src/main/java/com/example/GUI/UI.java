@@ -11,7 +11,9 @@ import com.example.GameLogic.ClientGameController;
 import com.example.model.*;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
@@ -72,6 +74,7 @@ public class UI extends Application {
             Objects.requireNonNull(getClass().getResource("/tilesets/pacman-sprite-sheet.png")).toExternalForm());
     private final Image wallSpriteSheet = new Image(
             Objects.requireNonNull(getClass().getResource("/tilesets/chompermazetiles.png")).toExternalForm());
+    private final Map<Color, Image> coloredPlayerCache = new HashMap<>();
 
     private KeyHandler keyHandler;
 
@@ -93,7 +96,55 @@ public class UI extends Application {
     public void start(Stage stage) {
         stage.setTitle("Pacman");
         System.out.println("REMOTE_PUBLIC_URI: " + Constants.REMOTE_PUBLIC_URI + ", LOCAL_GATE: " + Constants.LOCAL_GATE);
+        precomputePlayerColors();
         initializeMainMenu(stage);
+    }
+
+    private void precomputePlayerColors() {
+        // Pre-compute colored player images for all 4 player colors
+        Color[] playerColors = {
+            Color.rgb(255, 241, 0),  // Player 0 - Yellow
+            Color.rgb(255, 0, 0),    // Player 1 - Red
+            Color.rgb(0, 255, 0),    // Player 2 - Green
+            Color.rgb(0, 0, 255)     // Player 3 - Blue
+        };
+        for (Color color : playerColors) {
+            coloredPlayerCache.put(color, createColoredPlayerImage(color));
+        }
+    }
+
+    // Modified function from:
+    // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
+    private Image createColoredPlayerImage(Color color) {
+        int W = (int) spriteSheet.getWidth();
+        int H = (int) spriteSheet.getHeight();
+        WritableImage outputImage = new WritableImage(W, H);
+        PixelReader reader = spriteSheet.getPixelReader();
+        PixelWriter writer = outputImage.getPixelWriter();
+        int nr = (int) (color.getRed() * 255);
+        int ng = (int) (color.getGreen() * 255);
+        int nb = (int) (color.getBlue() * 255);
+        // Yellow (the player)
+        int or = 255;
+        int og = 241;
+        int ob = 0;
+        for (int y = 0; y < H; y++) {
+            for (int x = 850; x < 900; x++) {
+                int argb = reader.getArgb(x, y);
+                int a = (argb >> 24) & 0xFF;
+                int r = (argb >> 16) & 0xFF;
+                int g = (argb >> 8) & 0xFF;
+                int b = argb & 0xFF;
+                if (g == og && r == or && b == ob) {
+                    r = nr;
+                    g = ng;
+                    b = nb;
+                }
+                argb = (a << 24) | (r << 16) | (g << 8) | b;
+                writer.setArgb(x, y, argb);
+            }
+        }
+        return outputImage;
     }
 
     private void initializeMainMenu(Stage stage) {
@@ -630,39 +681,8 @@ public class UI extends Application {
             return cycleTime < blinkPeriodUnits ? 0 : 1;
         }
 
-        // Modified function from:
-        // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
-        public Image colorPlayer(Color color) {
-            // public Image colorPlayer(int nr, int ng, int nb) {
-            int W = (int) spriteSheet.getWidth();
-            int H = (int) spriteSheet.getHeight();
-            WritableImage outputImage = new WritableImage(W, H);
-            PixelReader reader = spriteSheet.getPixelReader();
-            PixelWriter writer = outputImage.getPixelWriter();
-            int nr = (int) (color.getRed() * 255);
-            int ng = (int) (color.getGreen() * 255);
-            int nb = (int) (color.getBlue() * 255);
-            // Yellow (the player)
-            int or = 255;
-            int og = 241;
-            int ob = 0;
-            for (int y = 0; y < H; y++) {
-                for (int x = 850; x < 900; x++) {
-                    int argb = reader.getArgb(x, y);
-                    int a = (argb >> 24) & 0xFF;
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
-                    if (g == og && r == or && b == ob) {
-                        r = nr;
-                        g = ng;
-                        b = nb;
-                    }
-                    argb = (a << 24) | (r << 16) | (g << 8) | b;
-                    writer.setArgb(x, y, argb);
-                }
-            }
-            return outputImage;
+        private Image colorPlayer(Color color) {
+            return coloredPlayerCache.get(color);
         }
 
         private void drawGhosts() {
