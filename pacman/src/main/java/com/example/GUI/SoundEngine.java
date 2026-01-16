@@ -10,8 +10,7 @@ import java.util.Map;
 import com.example.model.Sound;
 
 public class SoundEngine {
-
-    public static boolean disabled = true;
+    public static boolean disabled = false;
 
     private final Map<Sound, AudioClip> soundPlayers = new EnumMap<>(Sound.class);
     private final Map<Sound, AudioClip> soundLoopers = new EnumMap<>(Sound.class);
