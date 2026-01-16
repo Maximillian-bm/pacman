@@ -29,6 +29,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.text.Font;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -160,6 +161,10 @@ public class UI extends Application {
                 root,
                 Constants.INIT_SCREEN_WIDTH,
                 Constants.INIT_SCREEN_HEIGHT);
+        // startScene.getStylesheets().add("style.css");
+        Font font = Font.loadFont(getClass().getResource("/fonts/PixelatedEleganceRegular-ovyAA.ttf").toExternalForm(), 45);
+        
+        header.setFont(font);
 
         joinLobbyButton.setOnAction(e -> {
             soundEngine.play(Sound.EAT_FRUIT);
