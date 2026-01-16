@@ -324,7 +324,7 @@ public class UI extends Application {
                 if (!ActionOfClock.isEmpty()){
                     savedState = gameController.deepCopyGameState(gameState);
                     for (Action a : ActionOfClock) {
-                        System.out.println(a.getMove() +" "+ a.clock());
+                        System.out.println(a.getIndex() +" "+ a.clock());
                     }
                 }
                 gameState = gameController.updateGameState(gameState, ActionOfClock);

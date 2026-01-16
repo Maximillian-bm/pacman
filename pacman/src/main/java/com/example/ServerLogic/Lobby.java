@@ -67,13 +67,6 @@ public class Lobby implements Runnable{
     }
 
     public void replay(){
-        actionHandler.stop();
-        try {
-			rep.get(lobbyID+"rawAction").getAll(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class));
-            rep.get(lobbyID+"cleanAction").getAll(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class));
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
         actionHandler = new LobbyActionHandler(rep, lobbyID);
         Thread actionThread = new Thread(actionHandler);
         actionThread.setDaemon(true);
@@ -88,6 +81,13 @@ public class Lobby implements Runnable{
         try {
 			Object[] t = sync.getp(new ActualField("START"));
             if(t == null){
+                actionHandler.stop();
+                try {
+	                rep.get(lobbyID+"rawAction").getAll(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class));
+                    rep.get(lobbyID+"cleanAction").getAll(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class));
+		        } catch (InterruptedException e) {
+		            e.printStackTrace();
+		        }
                 for(int i = 0; i < nrOfPlayers; i++){
                     Object[] t2 = sync.getp(new ActualField(i), new ActualField("REPLAY"));
                     if(t2 != null){
