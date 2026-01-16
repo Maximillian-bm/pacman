@@ -659,51 +659,53 @@ public class UI extends Application {
             long invulnBlinkNanosPerUnit = 500_000_000L;
 
             gameState.players().forEach(player -> {
-                int sy = switch (player.getDirection()) {
-                    case WEST -> 50 * 6;
-                    case NORTH -> 50 * 9;
-                    case SOUTH -> 50 * 3;
-                    default -> 0;
-                };
+                if(!player.isDeadWithNoHearts()){
+                    int sy = switch (player.getDirection()) {
+                        case WEST -> 50 * 6;
+                        case NORTH -> 50 * 9;
+                        case SOUTH -> 50 * 3;
+                        default -> 0;
+                    };
 
-                int pacmanFrame = (int) ((animationTimeNanos / pacmanNanosPerFrame) % pacmanFrameCount);
-                sy = switch (pacmanFrame) {
-                    case 0 -> sy;
-                    case 2 -> sy + 50 * 2;
-                    default -> sy + 50;
-                };
+                    int pacmanFrame = (int) ((animationTimeNanos / pacmanNanosPerFrame) % pacmanFrameCount);
+                    sy = switch (pacmanFrame) {
+                        case 0 -> sy;
+                        case 2 -> sy + 50 * 2;
+                        default -> sy + 50;
+                    };
 
-                boolean hasPowerUp = entityTracker.isPowerOwner(player);
+                    boolean hasPowerUp = entityTracker.isPowerOwner(player);
 
-                if (player.isInvulnerable() || hasPowerUp) {
-                    int blinkFrame;
-                    if (hasPowerUp) {
-                        blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.65, Constants.FRIGHTENED_DURATION_SEC);
-                    } else {
-                        blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.5, Constants.PLAYER_SPAWN_PROTECT_SEC);
-                    }
-
-                    if (blinkFrame == 1) sy = 50 * 12;
-                }
-
-                Image coloredPlayer = colorPlayer(player.getColor());
-                Position playerTilePos = player.getPosition();
-
-                double rsTimer = player.getRespawnTimer();
-                if (rsTimer <= 0) {
-                    gc.drawImage(coloredPlayer, 850, sy, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
-                } else {
-                    double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC/11;
-                    float y = 0;
-                    for (int i = 1; i < 11; i++) {
-                        if (rsTimer < rsFrameInterval*i) {
-                            y = 50*(11-i);
-                            break;
+                    if (player.isInvulnerable() || hasPowerUp) {
+                        int blinkFrame;
+                        if (hasPowerUp) {
+                            blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.65, Constants.FRIGHTENED_DURATION_SEC);
+                        } else {
+                            blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.5, Constants.PLAYER_SPAWN_PROTECT_SEC);
                         }
+
+                        if (blinkFrame == 1) sy = 50 * 12;
                     }
 
-                    gc.drawImage(coloredPlayer, 350, y, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
-                    // gc.drawImage(coloredPlayer, 0, 0, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                    Image coloredPlayer = colorPlayer(player.getColor());
+                    Position playerTilePos = player.getPosition();
+
+                    double rsTimer = player.getRespawnTimer();
+                    if (rsTimer <= 0) {
+                        gc.drawImage(coloredPlayer, 850, sy, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                    } else {
+                        double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC/11;
+                        float y = 0;
+                        for (int i = 1; i < 11; i++) {
+                            if (rsTimer < rsFrameInterval*i) {
+                                y = 50*(11-i);
+                                break;
+                            }
+                        }
+
+                        gc.drawImage(coloredPlayer, 350, y, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                        // gc.drawImage(coloredPlayer, 0, 0, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                    }
                 }
             });
         }
