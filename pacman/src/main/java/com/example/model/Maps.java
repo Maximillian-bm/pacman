@@ -2,6 +2,7 @@ package com.example.model;
 
 import javafx.util.Pair;
 
+import java.util.List;
 import java.util.Map;
 
 public class Maps {
@@ -35,14 +36,22 @@ public class Maps {
             GhostType.CYAN, new Pair<>(9, 10),
             GhostType.ORANGE, new Pair<>(10, 10),
             GhostType.PURPLE, new Pair<>(10, 10)
+        ), List.of(
+            new Pair<>(1, 1),
+            new Pair<>(17, 1),
+            new Pair<>(1, 20),
+            new Pair<>(17, 20)
         ));
 
         public final int[][] tileValues;
-        public final Map<GhostType, Pair<Integer, Integer>> ghostPositions;
+        public final Map<GhostType, Pair<Integer, Integer>> ghostSpawnTiles;
+        public final List<Pair<Integer, Integer>> playerSpawnTiles;
 
-        Levels(int[][] tileValues, Map<GhostType, Pair<Integer, Integer>> ghostPositions) {
+        Levels(int[][] tileValues, Map<GhostType, Pair<Integer, Integer>> ghostSpawnTiles,
+               List<Pair<Integer, Integer>> playerSpawnTiles) {
             this.tileValues = tileValues;
-            this.ghostPositions = ghostPositions;
+            this.ghostSpawnTiles = ghostSpawnTiles;
+            this.playerSpawnTiles = playerSpawnTiles;
         }
     }
 
@@ -61,8 +70,12 @@ public class Maps {
         return tm;
     }
 
-    public static Pair<Integer, Integer> getGhostPosition(GhostType ghostType) {
-        return currentLevel.ghostPositions.get(ghostType);
+    public static Pair<Integer, Integer> getGhostSpawnTile(GhostType ghostType) {
+        return currentLevel.ghostSpawnTiles.get(ghostType);
+    }
+
+    public static Pair<Integer, Integer> getPlayerSpawnTile(int playerId) {
+        return currentLevel.playerSpawnTiles.get(playerId);
     }
 
     public static void incrementLevel() {

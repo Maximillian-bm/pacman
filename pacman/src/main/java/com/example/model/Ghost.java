@@ -15,7 +15,7 @@ public class Ghost extends Entity {
 
     public Ghost(GhostType type) {
         this.type = type;
-        this.spawnPosition = new Position().fromGridPosition(Maps.getGhostPosition(type));
+        this.spawnPosition = new Position().fromGridPosition(Maps.getGhostSpawnTile(type));
         this.position = new Position(this.spawnPosition.x, this.spawnPosition.y);
         super.direction = Direction.WEST;
     }
