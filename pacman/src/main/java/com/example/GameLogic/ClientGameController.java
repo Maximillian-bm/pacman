@@ -949,6 +949,9 @@ public class ClientGameController extends GameController {
                     }
                 }
             }
+            if(p.getRespawnTimer() <= 0 && p.getLives() <= 0){
+                p.setDeadWithNoHearts(true);
+            }
         }
 
         for (Ghost g : gameState.ghosts()) {
