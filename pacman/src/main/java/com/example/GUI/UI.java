@@ -625,7 +625,19 @@ public class UI extends Application {
                             break;
                         case MELON:
                             gc.drawImage(spriteSheet, 600, 200, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
+                                TILE_SIZE);
+                            break;
+                        case GALAXIAN:
+                            gc.drawImage(spriteSheet, 600, 350, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
+                                TILE_SIZE);
+                            break;
+                        case BELL:
+                            gc.drawImage(spriteSheet, 600, 400, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
+                                TILE_SIZE);
+                            break;
+                        case KEY:
+                            gc.drawImage(spriteSheet, 600, 450, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
+                                TILE_SIZE);
                             break;
                         case ENERGIZER:
                             gc.drawImage(spriteSheet, 415, 415, 25, 25, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
