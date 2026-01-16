@@ -18,6 +18,10 @@ public class EntityTracker {
     private double frightenedTimerSec = 0.0;
     @Getter @Setter
     private int powerOwnerId = -1;
+    @Getter @Setter
+    private double fruitCooldownTimer = 0.0;
+    @Getter @Setter
+    private boolean fruitOnMap = false;
 
     public void clearPowerOwner() {
         this.powerOwnerId = -1;
@@ -78,6 +82,8 @@ public class EntityTracker {
         r.setGhostChaseTimer(ghostChaseTimer);
         r.setFrightenedTimerSec(frightenedTimerSec);
         r.setPowerOwnerId(powerOwnerId);
+        r.setFruitCooldownTimer(fruitCooldownTimer);
+        r.setFruitOnMap(fruitOnMap);
         return r;
     }
 }
