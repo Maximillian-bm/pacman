@@ -11,7 +11,7 @@ import com.example.model.Sound;
 
 public class SoundEngine {
 
-    public static boolean disabled = false;
+    public static boolean disabled = true;
 
     private final Map<Sound, AudioClip> soundPlayers = new EnumMap<>(Sound.class);
     private final Map<Sound, AudioClip> soundLoopers = new EnumMap<>(Sound.class);

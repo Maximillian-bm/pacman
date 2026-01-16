@@ -127,9 +127,9 @@ public class PlayerLogicTest extends BaseTest {
         Ghost g = new Ghost(GhostType.RED);
         initialState.ghosts().add(g);
 
-        Position deathSpot = new Position(5 * TILE_SIZE, 5 * TILE_SIZE);
-        p.setSpawnPosition(deathSpot);
-        g.setPosition(deathSpot);
+        // Place ghost at player's spawn position (from Maps)
+        Position spawnPos = p.getSpawnPosition();
+        g.setPosition(new Position(spawnPos.x, spawnPos.y));
 
         p.setAlive(false);
         p.setRespawnTimer(0.01);

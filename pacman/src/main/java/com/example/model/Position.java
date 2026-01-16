@@ -3,7 +3,6 @@ package com.example.model;
 import javafx.util.Pair;
 
 import static com.example.model.Constants.TILE_SIZE;
-import static com.example.model.Maps.getMap1;
 
 public class Position {
     public double x;
@@ -18,6 +17,10 @@ public class Position {
 
     public Pair<Integer, Integer> ToGridPosition() {
         return new Pair<>(Math.max(0, (int) ((x + TILE_SIZE / 2.0) / TILE_SIZE)), Math.max(0, (int) ((y + TILE_SIZE / 2.0) / TILE_SIZE)));
+    }
+
+    public Position fromGridPosition(Pair<Integer, Integer> gridPos) {
+        return new Position(gridPos.getKey() * TILE_SIZE, gridPos.getValue() * TILE_SIZE);
     }
 
     public Pair<Integer, Integer> ToScreenPosition() {

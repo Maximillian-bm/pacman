@@ -453,9 +453,8 @@ public class ClientGameControllerTest extends BaseTest {
         player.setAlive(false);
         player.setRespawnTimer(0.01);
 
-        Position spawnPos = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
-        player.setSpawnPosition(spawnPos);
-
+        // Place ghost at player's spawn position (from Maps)
+        Position spawnPos = player.getSpawnPosition();
         ghost.setPosition(new Position(spawnPos.x, spawnPos.y));
 
         initialState = controller.updateGameState(initialState, new ArrayList<>());
@@ -528,9 +527,10 @@ public class ClientGameControllerTest extends BaseTest {
     public void testGhostRespawnAtSpawnPosition() {
         initialState.ghosts().clear();
         Ghost ghost = new Ghost(GhostType.RED);
-        Position spawnPos = new Position(5 * TILE_SIZE, 5 * TILE_SIZE);
-        ghost.setSpawnPosition(spawnPos);
         initialState.ghosts().add(ghost);
+
+        // Get spawn position from constructor (set via Maps)
+        Position spawnPos = ghost.getSpawnPosition();
 
         Player player = initialState.players().getFirst();
         player.setPosition(new Position(TILE_SIZE, TILE_SIZE));

@@ -1,6 +1,6 @@
 package com.example.model;
 
-import static com.example.model.Maps.getMap1;
+import static com.example.model.Maps.getCurrentLevelTiles;
 
 public class Constants {
     //Constants
@@ -10,7 +10,7 @@ public class Constants {
 
     public static String REMOTE_PUBLIC_URI;
     public static String LOCAL_GATE;
-    static {
+    static { // Run with: 'mvn javafx:run -Djvm.options="-Doffline=true"' for offline mode
         if (System.getProperty("offline") != null) {
             REMOTE_PUBLIC_URI = "tcp://127.0.0.1:50000/?keep";
             LOCAL_GATE = "tcp://127.0.0.1:50000/?keep";
@@ -21,8 +21,8 @@ public class Constants {
     }
 
 
-    public final static int TILES_WIDE = getMap1()[0].length;
-    public final static int TILES_TALL = getMap1().length;
+    public final static int TILES_WIDE = getCurrentLevelTiles()[0].length;
+    public final static int TILES_TALL = getCurrentLevelTiles().length;
     public final static int TILE_SIZE = 800 / TILES_TALL;
     public final static int INIT_SCREEN_WIDTH = TILES_WIDE * TILE_SIZE;
     public final static int INIT_SCREEN_HEIGHT = TILES_TALL * TILE_SIZE;
@@ -40,6 +40,7 @@ public class Constants {
     // Player
     public final static int PLAYER_LIVES = 3;
     public final static double PLAYER_SPEED = 175;
+    public final static double PLAYER_FRIGHTENED_SPEED = 150;
     public final static double PLAYER_SPAWN_PROTECT_SEC = 2.0;
 
     // Ghost

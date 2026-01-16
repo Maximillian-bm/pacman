@@ -21,13 +21,9 @@ public class Player extends Entity {
     @Getter @Setter
     private Direction intendedDirection;
 
-    @Getter @Setter
-    private double respawnTimer;
-
+    @Getter
+    @Setter
     private boolean alive;
-
-    @Getter @Setter
-    private Position spawnPosition;
 
     @Getter @Setter
     private double powerUpTimer = 0.0;
@@ -44,19 +40,11 @@ public class Player extends Entity {
     private boolean atePowerUp = false;
 
     public Player(int id) {
+        super(Maps.getPlayerSpawnTile(id));
         this.id = id;
         this.alive = true;
         this.lives = Constants.PLAYER_LIVES;
         this.direction = Direction.EAST;
-        this.respawnTimer = 0.0;
-    }
-
-    public boolean isAlive() {
-        return alive;
-    }
-
-    public void setAlive(boolean alive) {
-        this.alive = alive;
     }
 
     public void addPoints(int points) {
@@ -93,12 +81,16 @@ public class Player extends Entity {
     }
 
     public Color getColor() {
-        switch (id) {
-            case 1: return Color.rgb(255, 0, 0);
-            case 2: return Color.rgb(0, 255, 0);
-            case 3: return Color.rgb(0, 0, 255);
-            default: return Color.rgb(255, 241, 0);
-        }
+        return switch (id) {
+            case 1 -> Color.rgb(255, 0, 0);
+            case 2 -> Color.rgb(0, 255, 0);
+            case 3 -> Color.rgb(0, 0, 255);
+            default -> Color.rgb(255, 241, 0);
+        };
+    }
+
+    public boolean isInvulnerable() {
+        return invulnerableTimer > 0.0;
     }
 
     public Player copy() {

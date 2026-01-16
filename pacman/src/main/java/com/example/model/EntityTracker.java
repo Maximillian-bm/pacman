@@ -66,6 +66,11 @@ public class EntityTracker {
 
         return false;
     }
+
+    public boolean isPlayerFrightened(Player player) {
+        return isAnyPowerActive() && !isPowerOwner(player) && !player.isInvulnerable();
+    }
+
     public EntityTracker copy(){
         EntityTracker r = new EntityTracker();
         r.setGhostSpeed(ghostSpeed);
