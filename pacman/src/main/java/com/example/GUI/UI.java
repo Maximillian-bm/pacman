@@ -664,9 +664,9 @@ public class UI extends Application {
                 if (player.isInvulnerable() || hasPowerUp) {
                     int blinkFrame;
                     if (hasPowerUp) {
-                        blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.8, Constants.FRIGHTENED_DURATION_SEC);
+                        blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.65, Constants.FRIGHTENED_DURATION_SEC);
                     } else {
-                        blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.9, Constants.PLAYER_SPAWN_PROTECT_SEC);
+                        blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.5, Constants.PLAYER_SPAWN_PROTECT_SEC);
                     }
 
                     if (blinkFrame == 1) sy = 50 * 12;
@@ -699,9 +699,8 @@ public class UI extends Application {
             long effectElapsedNanos = (long) ((1.0 - remainingRatio) * effectDurationSec * 1_000_000_000L);
             double t = 1.0 - remainingRatio;
             double adjustedRemainingRatio = 1.0 - t * t * t;
-            double halfPeriodUnits = endDelayRatio + adjustedRemainingRatio;
+            double halfPeriodUnits = endDelayRatio + (1.0 - endDelayRatio) * adjustedRemainingRatio;
             long halfPeriodNanos = Math.max(1_000_000L, (long) (halfPeriodUnits * nanosPerUnit));
-            System.out.println("Blink period: " + (halfPeriodNanos / 1_000_000L) + "ms");
             return ((effectElapsedNanos / halfPeriodNanos) % 2 == 0) ? 0 : 1;
         }
 
