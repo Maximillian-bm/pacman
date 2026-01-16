@@ -89,6 +89,10 @@ public class Player extends Entity {
         };
     }
 
+    public boolean isInvulnerable() {
+        return invulnerableTimer > 0.0;
+    }
+
     public Player copy() {
         Player copy = new Player(this.id);
         copy.position = this.position != null ? new Position(this.position.x, this.position.y) : null;

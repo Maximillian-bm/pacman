@@ -200,9 +200,7 @@ public class ClientGameController extends GameController {
             }
             Position pos = player.getPosition();
 
-            boolean isFrightened = entityTracker.isAnyPowerActive() && !entityTracker.isPowerOwner(player);
-
-            double movementPerFrame = (isFrightened ? PLAYER_FRIGHTENED_SPEED : PLAYER_SPEED) / TARGET_FPS;
+            double movementPerFrame = (entityTracker.isPlayerFrightened(player) ? PLAYER_FRIGHTENED_SPEED : PLAYER_SPEED) / TARGET_FPS;
 
             Direction intendedDir = player.getIntendedDirection();
 
@@ -1085,14 +1083,14 @@ public class ClientGameController extends GameController {
         for (Player p : gameState.players()) {
             if (p == null) continue;
 
-            if (p.getInvulnerableTimer() > 0.0) {
+            if (p.isInvulnerable()) {
                 p.setInvulnerableTimer(Math.max(0.0, p.getInvulnerableTimer() - dt));
             }
         }
     }
 
     private boolean isInvulnerable(Player p) {
-        return p != null && p.getInvulnerableTimer() > 0.0;
+        return p != null && p.isInvulnerable();
     }
 
     public boolean allPlayersDead(GameState gameState) {

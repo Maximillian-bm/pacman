@@ -8,15 +8,8 @@ import static com.example.model.Constants.TILE_SIZE;
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
 import com.example.GameLogic.ClientGameController;
-import com.example.model.Action;
-import com.example.model.ActionList;
-import com.example.model.Constants;
-import com.example.model.Direction;
-import com.example.model.GameState;
-import com.example.model.Player;
-import com.example.model.Position;
-import com.example.model.TileType;
-import com.example.model.Sound;
+import com.example.model.*;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -545,12 +538,13 @@ public class UI extends Application {
                     default -> sy + 50;
                 };
 
+
                 double remainingRatio = player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC;
                 remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
                 double blinkPeriodSec = 0.75 + remainingRatio;
                 double timeSec = (time - startTime) / 500_000_000.0;
                 int blinkFrame = (int) (timeSec / blinkPeriodSec) % 2;
-                if (player.getInvulnerableTimer() > 0.0 && blinkFrame == 1) sy = 50 * 12;
+                if (player.isInvulnerable() && blinkFrame == 1) sy = 50 * 12;
 
                 Image coloredPlayer = colorPlayer(player.getColor());
                 Position playerTilePos = player.getPosition();
