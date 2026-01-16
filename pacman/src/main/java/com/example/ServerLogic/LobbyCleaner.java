@@ -37,6 +37,7 @@ public class LobbyCleaner implements Runnable{
                     int lobbyID = lobby.getLobbyID();
                     lobby.stop();
                     toBeRemoved.add(lobby);
+                    System.out.println("Closing lobby "+lobby.getLobbyID()+" due to exeeded TTL");
                     try {
                         space1.put(lobbyID);
                     } catch (InterruptedException e) {
@@ -51,6 +52,7 @@ public class LobbyCleaner implements Runnable{
                         int lobbyID = lobby.getLobbyID();
                         lobby.stop();
                         toBeRemoved.add(lobby);
+                        System.out.println("Closing lobby "+lobby.getLobbyID()+" due to player quiting");
                         try {
                             space1.put(lobbyID);
                         } catch (InterruptedException e1) {
@@ -58,14 +60,7 @@ public class LobbyCleaner implements Runnable{
                         }
                     }
                 } catch (Exception e) {
-                    int lobbyID = lobby.getLobbyID();
-                    lobby.stop();
-                    toBeRemoved.add(lobby);
-                    try {
-						space1.put(lobbyID);
-					} catch (InterruptedException e1) {
-						e1.printStackTrace();
-					}
+                    e.printStackTrace();
                 }
                 //Check for replay
                 lobby.checkForReplay();
@@ -87,6 +82,7 @@ public class LobbyCleaner implements Runnable{
                 System.out.println("Closing lobby "+lobby.getLobbyID());
                 lobby.stop();
                 toBeRemoved.add(lobby);
+                System.out.println("Closing lobby "+lobby.getLobbyID());
                 try {
                     space1.put(lobby.getLobbyID());
                 } catch (InterruptedException e) {
