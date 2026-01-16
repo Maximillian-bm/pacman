@@ -3,6 +3,7 @@ package com.example.ServerLogic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspace.ActualField;
 import org.jspace.Space;
 
 import com.example.model.Constants;
@@ -35,11 +36,29 @@ public class LobbyCleaner implements Runnable{
                     int lobbyID = lobby.getLobbyID();
                     lobby.stop();
                     toBeRemoved.add(lobby);
+                    System.out.println("Closing lobby "+lobby.getLobbyID()+" due to exeeded TTL");
                     try {
                         space1.put(lobbyID);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                }
+                try {
+                    Space sync = lobby.getRep().get(lobby.getLobbyID()+"sync");
+                    Object[] t = sync.getp(new ActualField("QUIT"));
+                    if(t != null){
+                        int lobbyID = lobby.getLobbyID();
+                        lobby.stop();
+                        toBeRemoved.add(lobby);
+                        System.out.println("Closing lobby "+lobby.getLobbyID()+" due to player quiting");
+                        try {
+                            space1.put(lobbyID);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
             if(showActiveLobbys){
