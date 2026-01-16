@@ -1,36 +1,47 @@
 package com.example.ServerLogic;
 
-import org.jspace.PileSpace;
-import org.jspace.QueueSpace;
+import org.jspace.FormalField;
 import org.jspace.Space;
 import org.jspace.SpaceRepository;
 
 import com.example.GameLogic.ActionUtil;
 import com.example.model.Action;
-import com.example.model.Constants;
 
 public class LobbyActionHandler implements Runnable{
 
+    SpaceRepository repository;
+    int lobbyID;
+    boolean running = true;
+
+    public LobbyActionHandler(SpaceRepository repository, int lobbyID){
+        this.repository = repository;
+        this.lobbyID = lobbyID;
+    }
+
     @Override
     public void run() {
-        SpaceRepository repository = new SpaceRepository();
-        repository.addGate(Constants.GATE_URI);
-        Space cleanActions = new PileSpace();
-        Space rawActions = new QueueSpace();
-        repository.add("cleanAction", cleanActions);
-        repository.add("rawAction", rawActions);
+        Space rawActions = repository.get(lobbyID+"rawAction");
+        Space cleanActions = repository.get(lobbyID+"cleanAction");
         int actionCount = 0;
         int clock = 0;
-        while(true) {
+        while(running) {
             try {
-                Action rawAction = ActionUtil.convertObjToAction(rawActions.get());
-                int tempClock = rawAction.getClock();
-                actionCount = ActionUtil.handleRawAction(clock, actionCount, rawAction, cleanActions);
-                clock = ((tempClock < clock) ? clock : tempClock);
+                Action rawAction = ActionUtil.convertObjToAction(rawActions.get(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class)));
+                int tempClock = rawAction.clock();
+                ActionUtil.handleRawAction(clock, actionCount, rawAction, cleanActions);
+                actionCount++;
+                clock = (Math.max(tempClock, clock));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public void stop() {
+        running = false;
+        repository.remove(lobbyID+"rawAction");
+        repository.remove(lobbyID+"cleanAction");
+        repository.remove(lobbyID+"sync");
     }
     
 }

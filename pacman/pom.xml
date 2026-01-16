@@ -18,11 +18,14 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- MUST be 17+ -->
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
+    <maven.compiler.source>23</maven.compiler.source>
+    <maven.compiler.target>23</maven.compiler.target>
 
     <!-- JavaFX version -->
     <javafx.version>25.0.1</javafx.version>
+
+    <!-- JVM options for javafx:run (empty by default) -->
+    <jvm.options></jvm.options>
   </properties>
 
   <dependencies>
@@ -40,11 +43,23 @@
       <version>${javafx.version}</version>
     </dependency>
 
-    <!-- Existing dependencies -->
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-media</artifactId>
+      <version>${javafx.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.12.2</version>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.13.1</version>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
 
@@ -62,7 +77,26 @@
       <scope>provided</scope>
     </dependency>
 
-  
+    <!-- TestFX for UI Testing -->
+    <dependency>
+      <groupId>org.testfx</groupId>
+      <artifactId>testfx-core</artifactId>
+      <version>4.0.18</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testfx</groupId>
+      <artifactId>testfx-junit5</artifactId>
+      <version>4.0.18</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testfx</groupId>
+      <artifactId>openjfx-monocle</artifactId>
+      <version>21.0.2</version>
+      <scope>test</scope>
+    </dependency>
+
 
   </dependencies>
 
@@ -96,7 +130,10 @@
 
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.1</version>
+          <version>3.2.5</version>
+          <configuration>
+            <argLine>-Dtestfx.robot=glass -Dtestfx.headless=true -Dglass.platform=Monocle -Dmonocle.platform=Headless -Dprism.order=sw -Dmonocle.screen.geometry=1920x1080-32 -Dheadless.geometry=1920x1080-32 -Dprism.allowhidpi=false -Dglass.uiScale=1.0 -Doffline=true</argLine>
+          </configuration>
         </plugin>
 
         <plugin>
@@ -124,6 +161,16 @@
           <version>3.0.0</version>
         </plugin>
 
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <configuration>
+                <mainClass>com.example.ServerLogic.ServerController</mainClass>
+                <classpathScope>compile</classpathScope>
+            </configuration>
+        </plugin>
+
       </plugins>
     </pluginManagement>
 
@@ -135,6 +182,9 @@
     <version>0.0.8</version>
     <configuration>
       <mainClass>com.example.GameLogic.ClientMain</mainClass>
+      <options>
+        <option>${jvm.options}</option>
+      </options>
     </configuration>
   </plugin>
 
