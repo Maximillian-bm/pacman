@@ -348,7 +348,15 @@ public class ClientGameController extends GameController {
             if (tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON)
                 player.setAteFruit(true);
 
-            if (isPowerup(tileType) && !entityTracker.isAnyPowerActive()) {
+
+            boolean isPowerup = tiles[tileY][tileX] == TileType.ENERGIZER;
+            boolean powerupActive = entityTracker.isAnyPowerActive();
+
+            boolean pickObjectUp = !powerupActive || !isPowerup;
+
+            if (!pickObjectUp) return;
+
+            if (isPowerup) {
                 entityTracker.assignPowerTo(player);
 
                 for (Player other : gameState.players()) {
@@ -369,14 +377,11 @@ public class ClientGameController extends GameController {
             player.addPoints(tileType.points);
 
             switch (tileType) {
-                case EMPTY, WALL -> { }
+                case EMPTY, WALL -> {
+                }
                 default -> tiles[tileY][tileX] = TileType.EMPTY;
             }
         });
-    }
-
-    private boolean isPowerup(TileType t) {
-        return t == TileType.ENERGIZER;
     }
 
     private Direction directionFromMove(int move) {
