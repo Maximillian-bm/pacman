@@ -307,7 +307,7 @@ public class UI extends Application {
 
         stage.setScene(scene);
 
-        Button quitButton = new Button("QUIT");
+        Button quitButton = createTiledButton("QUIT", 6, 2);
         quitButton.setPrefSize(200, 100);
         quitButton.setTranslateX(Constants.INIT_SCREEN_WIDTH/100);
         quitButton.setTranslateY(Constants.INIT_SCREEN_HEIGHT/50);
@@ -411,25 +411,39 @@ public class UI extends Application {
         }
 
         private void drawEndscreen() {
-            gc.setFill(Color.GRAY);
-            int padding = 150;
+            gc.setFill(Color.color(0.2, 0.2, 0.2, 0.9));
+            int padding = 200;
             gc.fillRect(
                 Constants.INIT_SCREEN_WIDTH/2-padding,
                 Constants.INIT_SCREEN_HEIGHT/2-padding,
                 padding*2,
                 padding*2
             );
-            gc.setFont(new javafx.scene.text.Font(24));
+            gc.setStroke(Color.YELLOW);
+            gc.setLineWidth(4);
+            gc.strokeRect(
+                Constants.INIT_SCREEN_WIDTH/2-padding,
+                Constants.INIT_SCREEN_HEIGHT/2-padding,
+                padding*2,
+                padding*2
+            );
+            gc.setFont(new Font(FONT_FAMILY, 32));
+            gc.setFill(Color.YELLOW);
+            gc.fillText("GAME OVER", 
+                Constants.INIT_SCREEN_WIDTH/2-padding+50, 
+                Constants.INIT_SCREEN_HEIGHT/2-padding+50
+            );
             List<Player> players = gameState.players()
                     .stream()
                     .sorted(Comparator.comparing((Player p) -> p.getPoints()))
                         .collect(Collectors.toList());
             Collections.reverse(players);
+            gc.setFont(new Font(FONT_FAMILY, 20));
             for (int i = 0; i < players.size(); i++) {
                 gc.setFill(players.get(i).getColor());
                 gc.fillText("Score: " + players.get(i).getPoints(), 
-                    Constants.INIT_SCREEN_WIDTH/2-padding+100, 
-                    Constants.INIT_SCREEN_HEIGHT/2-padding+(i+2)*40
+                    Constants.INIT_SCREEN_WIDTH/2-padding+40, 
+                    Constants.INIT_SCREEN_HEIGHT/2-padding+100+i*50
                 );
             }
         }
