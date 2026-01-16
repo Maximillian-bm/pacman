@@ -38,6 +38,9 @@ public class Player extends Entity {
     private boolean ateGhost = false;
     @Getter @Setter
     private boolean atePowerUp = false;
+    @Getter @Setter
+    private boolean deadWithNoHearts = false;
+    
 
     public Player(int id) {
         super(Maps.getPlayerSpawnTile(id));
