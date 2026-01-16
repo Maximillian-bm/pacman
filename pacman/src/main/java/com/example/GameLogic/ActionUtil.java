@@ -20,7 +20,7 @@ public class ActionUtil {
     //Meant to be used by the key handler
     public static void registerRawAction(Action action, Space remoteRawActions) {
         try {
-            remoteRawActions.put(action.getPlayerId(), action.getClock(), action.getMove());
+            remoteRawActions.put(action.getPlayerId(), action.clock(), action.getMove());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -29,9 +29,9 @@ public class ActionUtil {
     //Given the clock and index of the last clean action, registeres a raw action to the given clean action space
     //Meant to be used exclusivly by the server
     public static void handleRawAction(int lastActionsClock, int index, Action action, Space cleanActions) {
-        action.setClock((Math.max(action.getClock(), lastActionsClock)));
+        action.setClock((Math.max(action.clock(), lastActionsClock)));
         try {
-            cleanActions.put(action.getPlayerId(), action.getClock(), action.getMove(), index);
+            cleanActions.put(action.getPlayerId(), action.clock(), action.getMove(), index);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
