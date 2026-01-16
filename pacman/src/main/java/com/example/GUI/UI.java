@@ -68,7 +68,6 @@ public class UI extends Application {
 
     private boolean eatingDot = false;
 
-    // Wall-clock time for animations (nanoseconds since animation start)
     private long animationTimeNanos = 0;
 
     record TilePos(int x, int y) { }
@@ -89,7 +88,6 @@ public class UI extends Application {
     }
 
     private void precomputePlayerColors() {
-        // Pre-compute colored player images for all 4 player colors
         Color[] playerColors = {
             Color.rgb(255, 241, 0),  // Player 0 - Yellow
             Color.rgb(255, 0, 0),    // Player 1 - Red
@@ -343,7 +341,6 @@ public class UI extends Application {
         gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
         savedState = gameController.deepCopyGameState(gameState);
 
-        // final Group root = new Group();
         final StackPane root = new StackPane();
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
@@ -402,16 +399,10 @@ public class UI extends Application {
                 startTime = time;
             }
 
-            // Update animation time (wall-clock based, independent of game ticks)
             animationTimeNanos = time - startTime;
 
-            // === Rendering (runs at full AnimationTimer rate, typically 60 FPS) ===
             draw();
-            if (Constants.clock < 0) {
-                drawCountdown();
-            }
 
-            // === Game logic tick check (runs at TARGET_FPS = 20 FPS) ===
             long tickDurationNanos = 1_000_000_000 / TARGET_FPS;
             long elapsedSinceStart = time - (startTime + Constants.timeOffset);
             long expectedTicksElapsed = Constants.clock + Constants.COUNTDOWN_DURATION_TICKS;
@@ -419,9 +410,7 @@ public class UI extends Application {
                 return; // Not time for next game tick yet
             }
 
-            // === Game logic update (20 FPS) ===
             if (Constants.clock < 0) {
-                // Countdown tick - just increment
                 Constants.clock++;
                 return;
             }
@@ -454,6 +443,7 @@ public class UI extends Application {
             drawGhosts();
 
             if (gameState.winner() == null) {
+                if (Constants.clock < 0) drawCountdown();
                 drawPoints();
                 restartButton.setVisible(false);
             } else {
@@ -648,7 +638,6 @@ public class UI extends Application {
                     default -> 0;
                 };
 
-                // Wall-clock pacman animation: cycles through 4 frames
                 int pacmanFrame = (int) ((animationTimeNanos / pacmanNanosPerFrame) % pacmanFrameCount);
                 sy = switch (pacmanFrame) {
                     case 0 -> sy;
@@ -661,9 +650,9 @@ public class UI extends Application {
                 if (player.isInvulnerable() || hasPowerUp) {
                     int blinkFrame;
                     if (hasPowerUp) {
-                        blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.8);
+                        blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.8, Constants.FRIGHTENED_DURATION_SEC);
                     } else {
-                        blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.9);
+                        blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.9, Constants.PLAYER_SPAWN_PROTECT_SEC);
                     }
 
                     if (blinkFrame == 1) sy = 50 * 12;
@@ -691,25 +680,14 @@ public class UI extends Application {
             });
         }
 
-        /**
-         * Wall-clock blink frame calculation.
-         * @param nanosPerUnit Base nanoseconds per blink "unit"
-         * @param remainingRatio Fraction of effect time remaining (0.0 to 1.0)
-         * @param endDelayRatio Minimum blink period multiplier when time is almost out
-         * @return 0 for normal sprite, 1 for blink sprite
-         */
-        private int getBlinkFrame(long nanosPerUnit, double remainingRatio, double endDelayRatio) {
+        private int getBlinkFrame(long nanosPerUnit, double remainingRatio, double endDelayRatio, double effectDurationSec) {
             remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
-            // accelerate blinking as time runs out
+            long effectElapsedNanos = (long) ((1.0 - remainingRatio) * effectDurationSec * 1_000_000_000L);
             double t = 1.0 - remainingRatio;
-            remainingRatio = 1.0 - t * t;
-            // half-period in "units"
-            double halfPeriodUnits = endDelayRatio + remainingRatio;
-            // Convert half-period to nanoseconds and clamp to >= 1ms
+            double adjustedRemainingRatio = 1.0 - t * t;
+            double halfPeriodUnits = endDelayRatio + adjustedRemainingRatio;
             long halfPeriodNanos = Math.max(1_000_000L, (long) (halfPeriodUnits * nanosPerUnit));
-            System.out.println("Blink period: " + (halfPeriodNanos / 1_000_000) + "ms");
-            // Toggle every halfPeriodNanos nanoseconds
-            return ((animationTimeNanos / halfPeriodNanos) % 2 == 0) ? 0 : 1;
+            return ((effectElapsedNanos / halfPeriodNanos) % 2 == 0) ? 0 : 1;
         }
 
         private Image colorPlayer(Color color) {
@@ -749,7 +727,6 @@ public class UI extends Application {
                     sx = 0;
                 }
 
-                // Wall-clock ghost animation: cycles through 2 frames
                 int ghostFrame = (int) ((animationTimeNanos / ghostNanosPerFrame) % ghostFrameCount);
                 if (ghostFrame == 1) {
                     sy += 50;
@@ -770,13 +747,11 @@ public class UI extends Application {
         private void drawWall(int y, int x) {
             TileType[][] tiles = gameState.tiles();
 
-            // Check adjacent walls (cardinal directions)
             boolean n = isWall(tiles, y - 1, x);
             boolean s = isWall(tiles, y + 1, x);
             boolean e = isWall(tiles, y, x + 1);
             boolean w = isWall(tiles, y, x - 1);
 
-            // Check diagonal walls
             boolean ne = isWall(tiles, y - 1, x + 1);
             boolean nw = isWall(tiles, y - 1, x - 1);
             boolean se = isWall(tiles, y + 1, x + 1);
