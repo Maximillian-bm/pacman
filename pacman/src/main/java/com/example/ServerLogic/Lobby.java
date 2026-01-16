@@ -103,7 +103,7 @@ public class Lobby implements Runnable{
     }
 
     public void stop(){
-        actionHandler.stop();
+        actionHandler.stopAndDeleteSpaces();
     }
 
     public SpaceRepository getRep(){

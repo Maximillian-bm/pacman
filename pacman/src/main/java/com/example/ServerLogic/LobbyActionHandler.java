@@ -37,11 +37,15 @@ public class LobbyActionHandler implements Runnable{
         }
     }
 
-    public void stop() {
+    public void stopAndDeleteSpaces() {
         running = false;
         repository.remove(lobbyID+"rawAction");
         repository.remove(lobbyID+"cleanAction");
         repository.remove(lobbyID+"sync");
+    }
+
+    public void stop() {
+        running = false;
     }
     
 }
