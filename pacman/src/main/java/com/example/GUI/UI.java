@@ -523,6 +523,8 @@ public class UI extends Application {
         }
 
         private void drawPlayers(long time) {
+            EntityTracker entityTracker = gameState.entityTracker();
+
             gameState.players().forEach(player -> {
                 int sy = switch (player.getDirection()) {
                     case WEST -> 50 * 6;
@@ -538,13 +540,14 @@ public class UI extends Application {
                     default -> sy + 50;
                 };
 
-
-                double remainingRatio = player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC;
-                remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
-                double blinkPeriodSec = 0.75 + remainingRatio;
-                double timeSec = (time - startTime) / 500_000_000.0;
-                int blinkFrame = (int) (timeSec / blinkPeriodSec) % 2;
-                if (player.isInvulnerable() && blinkFrame == 1) sy = 50 * 12;
+                if (player.isInvulnerable() || entityTracker.isPowerOwner(player)) {
+                    double remainingRatio = player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC;
+                    remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
+                    double blinkPeriodSec = 0.75 + remainingRatio;
+                    double timeSec = (time - startTime) / 500_000_000.0;
+                    int blinkFrame = (int) (timeSec / blinkPeriodSec) % 2;
+                    if (blinkFrame == 1) sy = 50 * 12;
+                }
 
                 Image coloredPlayer = colorPlayer(player.getColor());
                 Position playerTilePos = player.getPosition();
