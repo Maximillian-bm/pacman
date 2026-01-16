@@ -244,6 +244,9 @@ public class UI extends Application {
     }
 
     private void startGame(Stage stage) {
+        stage.setOnCloseRequest(event -> {
+            lobbyHandler.quit();
+        });
         gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
         savedState = gameController.deepCopyGameState(gameState);
 

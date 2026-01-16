@@ -76,6 +76,7 @@ public class Lobby implements Runnable{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+        actionHandler.reStart();
         Thread actionThread = new Thread(actionHandler);
         actionThread.setDaemon(true);
         actionThread.start();

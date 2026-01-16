@@ -47,5 +47,9 @@ public class LobbyActionHandler implements Runnable{
     public void stop() {
         running = false;
     }
+
+    public void reStart() {
+        running = true;
+    }
     
 }

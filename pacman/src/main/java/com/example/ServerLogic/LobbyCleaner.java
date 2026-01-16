@@ -32,6 +32,11 @@ public class LobbyCleaner implements Runnable{
             }
             List<Lobby> toBeRemoved = new ArrayList<>();
             for (Lobby lobby : lobbys) {
+                
+                //Check for replay
+                lobby.checkForReplay();
+                if(lobby.allReadyForReplay()) lobby.replay();
+
                 //Check TTL
                 if(System.currentTimeMillis() - lobby.getTimeOfCreation() > Constants.LOBBY_TTL){
                     int lobbyID = lobby.getLobbyID();
@@ -44,6 +49,7 @@ public class LobbyCleaner implements Runnable{
                         e.printStackTrace();
                     }
                 }
+
                 //Ckeck if player quit
                 try {
                     Space sync = lobby.getRep().get(lobby.getLobbyID()+"sync");
@@ -62,9 +68,6 @@ public class LobbyCleaner implements Runnable{
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                //Check for replay
-                lobby.checkForReplay();
-                if(lobby.allReadyForReplay()) lobby.replay();
             }
             if(showActiveLobbys){
                 if(lobbys.isEmpty()){
@@ -79,7 +82,6 @@ public class LobbyCleaner implements Runnable{
             }
             if(closeAllLobbys){
                 for(Lobby lobby : lobbys) {
-                System.out.println("Closing lobby "+lobby.getLobbyID());
                 lobby.stop();
                 toBeRemoved.add(lobby);
                 System.out.println("Closing lobby "+lobby.getLobbyID());
