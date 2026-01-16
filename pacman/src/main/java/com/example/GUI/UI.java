@@ -273,6 +273,7 @@ public class UI extends Application {
         stage.setOnCloseRequest(event -> {
             lobbyHandler.quit();
             gameAnimator.stop();
+            System.exit(0);
         });
 
         quitButton.setOnAction(e -> {
