@@ -29,7 +29,7 @@ public class ActionUtil {
     //Given the clock and index of the last clean action, registeres a raw action to the given clean action space
     //Meant to be used exclusivly by the server
     public static void handleRawAction(int lastActionsClock, int index, Action action, Space cleanActions) {
-        action.setClock(((action.getClock() < lastActionsClock) ? lastActionsClock : action.getClock()));
+        action.setClock((Math.max(action.getClock(), lastActionsClock)));
         try {
             cleanActions.put(action.getPlayerId(), action.getClock(), action.getMove(), index);
         } catch (InterruptedException e) {

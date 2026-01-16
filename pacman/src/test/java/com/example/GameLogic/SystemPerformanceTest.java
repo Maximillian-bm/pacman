@@ -53,7 +53,7 @@ public class SystemPerformanceTest extends BaseTest {
 
         assertTrue(averageTimeMs < 1.0, "Game logic update took too long: " + averageTimeMs + "ms");
         assertTrue(currentState.clock() > initialState.clock(), "Clock should have advanced");
-        assertNotEquals(initialState.players().getFirst().getPosition().x, 
+        assertNotEquals(initialState.players().getFirst().getPosition().x,
             currentState.players().getFirst().getPosition().x, 0.001, "Player position should have changed");
     }
 
@@ -87,7 +87,7 @@ public class SystemPerformanceTest extends BaseTest {
         }
 
         long startTime = System.nanoTime();
-        controller.updateGameState(stressState, new ArrayList<>());
+        stressState = controller.updateGameState(stressState, new ArrayList<>());
         long endTime = System.nanoTime();
 
         double durationMs = (endTime - startTime) / 1_000_000.0;
