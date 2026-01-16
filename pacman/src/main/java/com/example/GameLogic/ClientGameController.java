@@ -103,35 +103,35 @@ public class ClientGameController extends GameController {
         //         }
         //     }
         //     winner = highestScorer;
-
-            // Reset map for next level
-            TileType[][] newTiles = Maps.getMap1();
-            tiles = newTiles;
-
-            // Increase ghost speed for next level
-            entityTracker.setGhostSpeed(entityTracker.getGhostSpeed() * 1.1);
-
-            // Reset player positions
-            for (Player p : gameState.players()) {
-                Position sp = p.getSpawnPosition();
-                if (sp != null) {
-                    p.setPosition(new Position(sp.x, sp.y));
-                }
-                p.setDirection(Direction.EAST);
-                p.setIntendedDirection(null);
-            }
-
-            // Reset ghost positions
-            for (Ghost g : gameState.ghosts()) {
-                Position sp = g.getSpawnPosition();
-                if (sp != null) {
-                    g.setPosition(new Position(sp.x, sp.y));
-                }
-                g.setDirection(Direction.NORTH);
-                g.setRespawnTimer(0.0);
-            }
-
-            newClock = 1;
+            //
+            // // Reset map for next level
+            // TileType[][] newTiles = Maps.getMap1();
+            // tiles = newTiles;
+            //
+            // // Increase ghost speed for next level
+            // entityTracker.setGhostSpeed(entityTracker.getGhostSpeed() * 1.1);
+            //
+            // // Reset player positions
+            // for (Player p : gameState.players()) {
+            //     Position sp = p.getSpawnPosition();
+            //     if (sp != null) {
+            //         p.setPosition(new Position(sp.x, sp.y));
+            //     }
+            //     p.setDirection(Direction.EAST);
+            //     p.setIntendedDirection(null);
+            // }
+            //
+            // // Reset ghost positions
+            // for (Ghost g : gameState.ghosts()) {
+            //     Position sp = g.getSpawnPosition();
+            //     if (sp != null) {
+            //         g.setPosition(new Position(sp.x, sp.y));
+            //     }
+            //     g.setDirection(Direction.NORTH);
+            //     g.setRespawnTimer(0.0);
+            // }
+            //
+            // newClock = 1;
 
         // Handle fruit spawning based on pellets eaten
         handleFruitSpawning(gameState);
