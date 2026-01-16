@@ -1,14 +1,5 @@
 package com.example.GameLogic;
 
-import static com.example.model.Constants.CENTER_EPS_PX;
-import static com.example.model.Constants.FRIGHTENED_DURATION_SEC;
-import static com.example.model.Constants.GHOST_RESPAWN_DELAY_SEC;
-import static com.example.model.Constants.PLAYER_LIVES;
-import static com.example.model.Constants.PLAYER_RESPAWN_DELAY_SEC;
-import static com.example.model.Constants.PLAYER_SPEED;
-import static com.example.model.Constants.TARGET_FPS;
-import static com.example.model.Constants.TILE_SIZE;
-
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.Direction;
@@ -25,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.util.Pair;
+
+import static com.example.model.Constants.*;
 
 public class ClientGameController extends GameController {
 
@@ -199,13 +192,17 @@ public class ClientGameController extends GameController {
     }
 
     private void stepMovement(GameState gameState) {
+        EntityTracker entityTracker = gameState.entityTracker();
+
         gameState.players().forEach(player -> {
             if (!player.isAlive()) {
                 return;
             }
             Position pos = player.getPosition();
 
-            double movementPerFrame = PLAYER_SPEED / TARGET_FPS;
+            boolean isFrightened = entityTracker.isAnyPowerActive() && !entityTracker.isPowerOwner(player);
+
+            double movementPerFrame = (isFrightened ? PLAYER_FRIGHTENED_SPEED : PLAYER_SPEED) / TARGET_FPS;
 
             Direction intendedDir = player.getIntendedDirection();
 
@@ -353,13 +350,7 @@ public class ClientGameController extends GameController {
             if (tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON)
                 player.setAteFruit(true);
 
-            if (entityTracker.isAnyPowerActive() && !entityTracker.isPowerOwner(player)) {
-                return;
-            }
-
-            player.addPoints(tileType.points);
-
-            if (isPowerup(tileType)) {
+            if (isPowerup(tileType) && !entityTracker.isAnyPowerActive()) {
                 entityTracker.assignPowerTo(player);
 
                 for (Player other : gameState.players()) {
@@ -375,14 +366,12 @@ public class ClientGameController extends GameController {
                 for (Ghost g : gameState.ghosts()) {
                     g.setDirection(oppositeDir(getGhostDir(g)));
                 }
-
-                tiles[tileY][tileX] = TileType.EMPTY;
-                return;
             }
 
+            player.addPoints(tileType.points);
+
             switch (tileType) {
-                case EMPTY, WALL -> {
-                }
+                case EMPTY, WALL -> { }
                 default -> tiles[tileY][tileX] = TileType.EMPTY;
             }
         });
