@@ -9,6 +9,7 @@ public class Player extends Entity {
     @Getter
     private final int id;
 
+    @Setter
     private int ghostsEatenThisEnergizer;
 
     @Getter @Setter
