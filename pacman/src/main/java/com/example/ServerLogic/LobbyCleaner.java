@@ -58,7 +58,8 @@ public class LobbyCleaner implements Runnable{
                         }
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.out.println("tried to check lobby "+lobby.getLobbyID()+" but it was already deleted");
+                    //e.printStackTrace();
                 }
             }
             if(showActiveLobbys){
