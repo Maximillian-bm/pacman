@@ -262,7 +262,7 @@ public class UI extends Application {
 
         stage.setScene(scene);
 
-        Button restartButton = new Button("Restart Game");
+        Button restartButton = new Button("QUIT");
         restartButton.setPrefSize(200, 100);
         restartButton.setTranslateX(Constants.INIT_SCREEN_WIDTH/100);
         restartButton.setTranslateY(Constants.INIT_SCREEN_HEIGHT/50);
@@ -272,13 +272,8 @@ public class UI extends Application {
         gameAnimator.start();
 
         restartButton.setOnAction(e -> {
-            lobbyHandler.startGame();
-            Constants.cleanActions = new ActionList();
-            gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
-            Constants.clock = -Constants.COUNTDOWN_DURATION_TICKS;
-            Constants.actionOffset = 6;
-            Constants.timeOffset = 0;
-            gameAnimator.resetTime();
+            lobbyHandler.quit();
+            stage.close();
         });
 
         canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
