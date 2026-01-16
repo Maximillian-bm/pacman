@@ -154,42 +154,11 @@ public class ClientGameController extends GameController {
         TileType[][] tiles = Maps.getCurrentLevelTiles();
 
         for (int i = 0; i < nrOfPlayers; i++) {
-            Player player = new Player(i);
-
-            Position spawnPosition;
-            switch (i) {
-                case 0:
-                    spawnPosition = new Position(1 * TILE_SIZE, 1 * TILE_SIZE);
-                    break;
-                case 1:
-                    spawnPosition = new Position(17 * TILE_SIZE, 1 * TILE_SIZE);
-                    break;
-                case 2:
-                    spawnPosition = new Position(1 * TILE_SIZE, 24 * TILE_SIZE);
-                    break;
-                case 3:
-                    spawnPosition = new Position(24 * TILE_SIZE, 24 * TILE_SIZE);
-                    break;
-                default:
-                    spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
-                    break;
-            }
-            player.setSpawnPosition(spawnPosition);
-            player.setPosition(new Position(spawnPosition.x, spawnPosition.y));
-            player.setLives(PLAYER_LIVES);
-            player.setAlive(true);
-            player.setDirection(Direction.EAST);
-            player.setIntendedDirection(null);
-            player.setRespawnTimer(0.0);
-            players.add(player);
+            players.add(new Player(i));
         }
 
         for (GhostType type : GhostType.values()) {
-            Ghost ghost = new Ghost(type);
-            ghost.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-            ghost.setRespawnTimer(0.0);
-            ghost.setDirection(Direction.NORTH);
-            ghosts.add(ghost);
+            ghosts.add(new Ghost(type));
         }
 
         return new GameState(
