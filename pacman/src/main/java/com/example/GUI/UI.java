@@ -9,6 +9,7 @@ import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
 import com.example.GameLogic.ClientGameController;
 import com.example.model.Action;
+import com.example.model.ActionList;
 import com.example.model.Constants;
 import com.example.model.Direction;
 import com.example.model.GameState;
@@ -17,6 +18,7 @@ import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
 import com.example.model.Sound;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javafx.animation.AnimationTimer;
@@ -43,6 +45,9 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.text.DecimalFormat;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import javafx.geometry.Insets;
 
 public class UI extends Application {
 
@@ -245,7 +250,8 @@ public class UI extends Application {
         gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
         savedState = gameController.deepCopyGameState(gameState);
 
-        final Group root = new Group();
+        // final Group root = new Group();
+        final StackPane root = new StackPane();
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
@@ -256,11 +262,29 @@ public class UI extends Application {
 
         stage.setScene(scene);
 
-        canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
-        root.getChildren().add(canvas);
+        Button restartButton = new Button("Restart Game");
+        restartButton.setPrefSize(200, 100);
+        restartButton.setTranslateX(Constants.INIT_SCREEN_WIDTH/100);
+        restartButton.setTranslateY(Constants.INIT_SCREEN_HEIGHT/50);
+        restartButton.setVisible(false);
 
-        final AnimationTimer tm = new GameAnimator();
-        tm.start();
+        final GameAnimator gameAnimator = new GameAnimator(restartButton);
+        gameAnimator.start();
+
+        restartButton.setOnAction(e -> {
+            lobbyHandler.startGame();
+            Constants.cleanActions = new ActionList();
+            gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
+            Constants.clock = -Constants.COUNTDOWN_DURATION_TICKS;
+            Constants.actionOffset = 6;
+            Constants.timeOffset = 0;
+            gameAnimator.resetTime();
+        });
+
+        canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
+
+        root.getChildren().add(canvas);
+        root.getChildren().add(restartButton);
 
         gc = canvas.getGraphicsContext2D();
 
@@ -268,7 +292,13 @@ public class UI extends Application {
     }
 
     private class GameAnimator extends AnimationTimer {
-        long startTime = 0;
+        private Button restartButton;
+        private long startTime;
+
+        public GameAnimator(Button button) {
+            restartButton = button;
+            startTime = 0;
+        }
 
         @Override
         public void handle(long time) {
@@ -309,6 +339,10 @@ public class UI extends Application {
             Constants.clock++;
         }
 
+        public void resetTime() {
+            startTime = 0;
+        }
+
         private void draw(long time) {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -319,7 +353,37 @@ public class UI extends Application {
 
             drawGhosts(time);
 
-            drawPoints();
+            if (gameState.winner() == null) {
+                drawPoints();
+                restartButton.setVisible(false);
+            } else {
+                drawEndscreen();
+                restartButton.setVisible(true);
+            }
+        }
+
+        private void drawEndscreen() {
+            gc.setFill(Color.GRAY);
+            int padding = 150;
+            gc.fillRect(
+                Constants.INIT_SCREEN_WIDTH/2-padding,
+                Constants.INIT_SCREEN_HEIGHT/2-padding,
+                padding*2,
+                padding*2
+            );
+            gc.setFont(new javafx.scene.text.Font(24));
+            List<Player> players = gameState.players()
+                    .stream()
+                    .sorted(Comparator.comparing((Player p) -> p.getPoints()))
+                        .collect(Collectors.toList());
+            Collections.reverse(players);
+            for (int i = 0; i < players.size(); i++) {
+                gc.setFill(players.get(i).getColor());
+                gc.fillText("Score: " + players.get(i).getPoints(), 
+                    Constants.INIT_SCREEN_WIDTH/2-padding+100, 
+                    Constants.INIT_SCREEN_HEIGHT/2-padding+(i+2)*40
+                );
+            }
         }
 
         private void playSounds(){
