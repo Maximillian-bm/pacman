@@ -664,21 +664,17 @@ public class UI extends Application {
          * @return 0 for normal sprite, 1 for blink sprite
          */
         private int getBlinkFrame(int ticksPerUnit, double remainingRatio, double endDelayRatio) {
-            // Clamp remaining ratio to [0, 1]
             remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
-            // Apply quadratic curve to make blinking accelerate as time runs out
+            // accelerate blinking as time runs out (your existing curve)
             double t = 1.0 - remainingRatio;
             remainingRatio = 1.0 - t * t;
-            // Blink period in "units" - ranges from endDelayRatio (fast) to endDelayRatio+1 (slow)
-            double blinkPeriodUnits = endDelayRatio + remainingRatio;
-
-            // Use tick count offset by countdown duration to get ticks since game start
+            // half-period in "units"
+            double halfPeriodUnits = endDelayRatio + remainingRatio;
             int ticksSinceStart = Constants.clock + Constants.COUNTDOWN_DURATION_TICKS;
-            // Convert ticks to "units" for the blink calculation
-            double tickUnits = (double) ticksSinceStart / ticksPerUnit;
-            // Calculate position within blink cycle (full cycle = 2 * blinkPeriodUnits)
-            double cycleTime = tickUnits % (blinkPeriodUnits * 2.0);
-            return cycleTime < blinkPeriodUnits ? 0 : 1;
+            // Convert half-period to ticks and clamp to >= 1 tick
+            int halfPeriodTicks = Math.max(1, (int) Math.round(halfPeriodUnits * ticksPerUnit));
+            // Toggle every halfPeriodTicks ticks
+            return ((ticksSinceStart / halfPeriodTicks) % 2 == 0) ? 0 : 1;
         }
 
         private Image colorPlayer(Color color) {
