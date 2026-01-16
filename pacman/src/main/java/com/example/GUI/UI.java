@@ -640,8 +640,12 @@ public class UI extends Application {
                                 TILE_SIZE);
                             break;
                         case ENERGIZER:
-                            gc.drawImage(spriteSheet, 415, 415, 25, 25, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
+                            if (gameState.entityTracker().isAnyPowerActive()) {
+                                gc.setGlobalAlpha(0.33);
+                            }
+                            gc.drawImage(spriteSheet, 400, 450, 50, 50, x * TILE_SIZE - TILE_SIZE / 3.0, y * TILE_SIZE - TILE_SIZE / 3.0, TILE_SIZE + (TILE_SIZE / 3.0) * 2,
+                                    TILE_SIZE + (TILE_SIZE / 3.0) * 2);
+                            gc.setGlobalAlpha(1.0);
                             break;
 
                     }
