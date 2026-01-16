@@ -204,14 +204,31 @@ public class UI extends Application {
 
             System.out.println("Creating lobby with " + playerCount + " number of player");
 
-            lobbyHandler.createLobby(Integer.parseInt(playerCount));
+            createLobbyButton.setDisable(true);
 
-            startRoot.getChildren().remove(joinLobbyV);
-            startRoot.getChildren().remove(createLobbyV);
+            Thread createThread = new Thread(() -> {
+                try {
+                    lobbyHandler.createLobby(Integer.parseInt(playerCount));
 
-            joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
-            startRoot.getChildren().add(startButton);
-            startRoot.getChildren().add(joinedLobbyText);
+                    javafx.application.Platform.runLater(() -> {
+                        startRoot.getChildren().remove(joinLobbyV);
+                        startRoot.getChildren().remove(createLobbyV);
+
+                        joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
+                        startRoot.getChildren().add(startButton);
+                        startRoot.getChildren().add(joinedLobbyText);
+                    });
+                } catch (Exception ex) {
+                    javafx.application.Platform.runLater(() -> {
+                        errorText.setText(ex.getMessage());
+                        createLobbyButton.setDisable(false);
+                        System.err.println("--- Create Failed ---");
+                        System.err.println(ex.getMessage());
+                    });
+                }
+            });
+            createThread.setDaemon(true);
+            createThread.start();
         };
 
         createLobbyButton.setOnAction(e -> {
