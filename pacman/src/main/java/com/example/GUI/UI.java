@@ -256,6 +256,11 @@ public class UI extends Application {
 
             createLobbyButton.setDisable(true);
 
+            Text creatingText = new Text("Creating lobby...");
+            creatingText.setFill(Color.YELLOW);
+            creatingText.setStyle("-fx-font-size: 14px;");
+            startRoot.getChildren().add(creatingText);
+
             Thread createThread = new Thread(() -> {
                 try {
                     lobbyHandler.createLobby(Integer.parseInt(playerCount));
@@ -263,6 +268,7 @@ public class UI extends Application {
                     javafx.application.Platform.runLater(() -> {
                         startRoot.getChildren().remove(joinLobbyV);
                         startRoot.getChildren().remove(createLobbyV);
+                        startRoot.getChildren().remove(creatingText);
 
                         joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
                         startRoot.getChildren().add(startButton);
@@ -272,6 +278,7 @@ public class UI extends Application {
                     javafx.application.Platform.runLater(() -> {
                         errorText.setText(ex.getMessage());
                         createLobbyButton.setDisable(false);
+                        startRoot.getChildren().remove(creatingText);
                         System.err.println("--- Create Failed ---");
                         System.err.println(ex.getMessage());
                     });
