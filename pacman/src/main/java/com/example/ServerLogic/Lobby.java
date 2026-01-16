@@ -18,6 +18,7 @@ public class Lobby implements Runnable{
     private final int lobbyID;
     @Getter
     private final long timeOfCreation;
+    private final boolean[] readyForReplay;
 
     public Lobby(SpaceRepository rep, int nrOfPlayers, int lobbyID, long timeOfCreation){
         this.lobbyID = lobbyID;
@@ -25,6 +26,7 @@ public class Lobby implements Runnable{
         this.nrOfPlayers = nrOfPlayers;
         this.actionHandler = new LobbyActionHandler(rep, lobbyID);
         this.timeOfCreation = timeOfCreation;
+        this.readyForReplay = new boolean[nrOfPlayers];
     }
 
     @Override
@@ -71,5 +73,17 @@ public class Lobby implements Runnable{
 
     public SpaceRepository getRep(){
         return rep;
+    }
+
+    public boolean allReadyForReplay(){
+        boolean r = true;
+        for (boolean b : readyForReplay) {
+            if(!b) r = false;
+        }
+        return r;
+    }
+
+    public void setToReady(int playerID){
+        readyForReplay[playerID] = true;
     }
 }
