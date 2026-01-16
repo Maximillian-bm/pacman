@@ -752,6 +752,18 @@ public class ClientGameController extends GameController {
             double mapWidth = tiles[0].length * TILE_SIZE;
             double mapHeight = tiles.length * TILE_SIZE;
 
+            // Wrap position first to ensure valid grid calculation for direction decisions
+            if (pos.x < 0) {
+                pos.x += mapWidth;
+            } else if (pos.x >= mapWidth) {
+                pos.x -= mapWidth;
+            }
+            if (pos.y < 0) {
+                pos.y += mapHeight;
+            } else if (pos.y >= mapHeight) {
+                pos.y -= mapHeight;
+            }
+
             Pair<Integer, Integer> gridPos = pos.ToGridPosition();
             int gx = gridPos.getKey();
             int gy = gridPos.getValue();
