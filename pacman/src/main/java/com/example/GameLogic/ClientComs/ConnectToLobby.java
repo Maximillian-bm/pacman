@@ -66,7 +66,12 @@ public class ConnectToLobby {
     }
 
     public void replay() {
-
+        try {
+            sync.getp(new ActualField("START"));
+            sync.put(playerID, "REPLAY");
+        } catch (Exception e) {
+            return;
+        }
     }
 
     public void startGame() {

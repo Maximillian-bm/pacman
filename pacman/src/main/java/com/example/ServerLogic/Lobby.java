@@ -43,6 +43,13 @@ public class Lobby implements Runnable{
             }
         }
 
+        startGame();
+    }
+
+    public void startGame(){
+
+        Space sync = rep.get(lobbyID+"sync");
+
         for(int i = 0; i < nrOfPlayers; i++){
             try {
                 sync.get(new ActualField(i), new ActualField("OK"));
