@@ -16,7 +16,7 @@ public class ActionList {
     public void addAction(Action action) {
         actionsList.add(action);
         actionsMap
-            .computeIfAbsent(action.getClock(), _ -> new ArrayList<>())
+            .computeIfAbsent(action.clock(), _ -> new ArrayList<>())
             .add(action);
     }
 
@@ -31,7 +31,7 @@ public class ActionList {
     }
 
     public boolean missedAction(int clock){
-        if(actionsList.size() > nrOfActionsCalled && actionsList.get(nrOfActionsCalled).getClock() < clock){
+        if(actionsList.size() > nrOfActionsCalled && actionsList.get(nrOfActionsCalled).clock() < clock){
             if(actionsList.get(nrOfActionsCalled).getPlayerId() == playerID){
                 Constants.actionOffset++;
                 System.out.println("you missed your own action, action offset is now set to "+Constants.actionOffset+"game ticks");
