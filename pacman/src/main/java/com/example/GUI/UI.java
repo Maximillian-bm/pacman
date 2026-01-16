@@ -273,29 +273,30 @@ public class UI extends Application {
 
         stage.setScene(scene);
 
-        Button restartButton = new Button("Restart Game");
-        restartButton.setPrefSize(200, 100);
-        restartButton.setTranslateX(Constants.INIT_SCREEN_WIDTH/100);
-        restartButton.setTranslateY(Constants.INIT_SCREEN_HEIGHT/50);
-        restartButton.setVisible(false);
+        Button quitButton = new Button("QUIT");
+        quitButton.setPrefSize(200, 100);
+        quitButton.setTranslateX(Constants.INIT_SCREEN_WIDTH/100);
+        quitButton.setTranslateY(Constants.INIT_SCREEN_HEIGHT/50);
+        quitButton.setVisible(false);
 
-        final GameAnimator gameAnimator = new GameAnimator(restartButton);
+        final GameAnimator gameAnimator = new GameAnimator(quitButton);
         gameAnimator.start();
 
-        restartButton.setOnAction(e -> {
-            lobbyHandler.startGame();
-            Constants.cleanActions = new ActionList();
-            gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
-            Constants.clock = -Constants.COUNTDOWN_DURATION_TICKS;
-            Constants.actionOffset = 6;
-            Constants.timeOffset = 0;
-            gameAnimator.resetTime();
+        stage.setOnCloseRequest(event -> {
+            lobbyHandler.quit();
+            gameAnimator.stop();
+            System.exit(0);
+        });
+
+        quitButton.setOnAction(e -> {
+            lobbyHandler.quit();
+            stage.close();
         });
 
         canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
         root.getChildren().add(canvas);
-        root.getChildren().add(restartButton);
+        root.getChildren().add(quitButton);
 
         gc = canvas.getGraphicsContext2D();
 
