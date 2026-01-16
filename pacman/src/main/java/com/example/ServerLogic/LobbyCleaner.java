@@ -69,6 +69,7 @@ public class LobbyCleaner implements Runnable{
                 }
                 //Check for replay
                 lobby.checkForReplay();
+                if(lobby.allReadyForReplay()) lobby.replay();
             }
             if(showActiveLobbys){
                 if(lobbys.isEmpty()){

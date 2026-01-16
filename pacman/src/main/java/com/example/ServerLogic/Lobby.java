@@ -4,6 +4,7 @@ import com.example.model.*;
 
 import lombok.Getter;
 import org.jspace.ActualField;
+import org.jspace.FormalField;
 import org.jspace.Space;
 import org.jspace.SpaceRepository;
 
@@ -65,6 +66,23 @@ public class Lobby implements Runnable{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void replay(){
+        actionHandler.stop();
+        try {
+			rep.get(lobbyID+"rawAction").getAll(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class));
+            rep.get(lobbyID+"cleanAction").getAll(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+        Thread actionThread = new Thread(actionHandler);
+        actionThread.setDaemon(true);
+        actionThread.start();
+        for(int i = 0; i < nrOfPlayers; i++){
+            readyForReplay[i] = false;
+        }
+        startGame();
     }
 
     public void checkForReplay() {
