@@ -11,6 +11,8 @@ import com.example.model.Sound;
 
 public class SoundEngine {
 
+    public static boolean disabled = false;
+
     private final Map<Sound, AudioClip> soundPlayers = new EnumMap<>(Sound.class);
     private final Map<Sound, AudioClip> soundLoopers = new EnumMap<>(Sound.class);
 
@@ -30,6 +32,7 @@ public class SoundEngine {
     }
 
     public void play(Sound sound) {
+        if (disabled) return;
         try {
             AudioClip player = soundPlayers.get(sound);
             player.stop();   // IMPORTANT: restart sound if already playing
@@ -40,6 +43,7 @@ public class SoundEngine {
     }
 
     public void loop(Sound sound) {
+        if (disabled) return;
         try {
             AudioClip looper = soundLoopers.get(sound);
             looper.stop();   // IMPORTANT: restart sound if already playing
@@ -50,6 +54,7 @@ public class SoundEngine {
     }
 
     public void stop(Sound sound) {
+        if (disabled) return;
         try {
             soundPlayers.get(sound).stop();
             soundPlayers.get(sound).stop();
@@ -59,6 +64,7 @@ public class SoundEngine {
     }
 
     public void setVolume(double volume) {
+        if (disabled) return;
         try {
             soundPlayers.values().forEach(p -> p.setVolume(volume));
             soundLoopers.values().forEach(p -> p.setVolume(volume));    

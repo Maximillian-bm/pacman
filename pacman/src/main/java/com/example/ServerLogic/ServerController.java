@@ -13,11 +13,11 @@ import com.example.model.Constants;
 
 public class ServerController {
  
-    private static List<Lobby> lobbys = new ArrayList<>();
+    private static final List<Lobby> lobbys = new ArrayList<>();
 
-    private static SpaceRepository rep = new SpaceRepository();
+    private static final SpaceRepository rep = new SpaceRepository();
 
-    private static Space space1 = new RandomSpace();
+    private static final Space space1 = new RandomSpace();
 
     public static void main(String[] arg){
         rep.addGate(Constants.LOCAL_GATE);

@@ -283,11 +283,10 @@ public class UI extends Application {
                 return;
             }
 
-            List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
-            if (Constants.cleanActions.missedAction()) {
+            if (Constants.cleanActions.missedAction(Constants.clock)) {
                 gameState = gameController.updateGameStateFor(savedState, Constants.clock);
-                Constants.cleanActions.fixedMissedAction();
             } else {
+                List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
                 if (!ActionOfClock.isEmpty())
                     savedState = gameController.deepCopyGameState(gameState);
                 gameState = gameController.updateGameState(gameState, ActionOfClock);
@@ -321,7 +320,7 @@ public class UI extends Application {
         }
 
         private void playSounds(){
-            Player localPlayer = gameState.getPlayers().get(lobbyHandler.getPlayerID());
+            Player localPlayer = gameState.players().get(lobbyHandler.getPlayerID());
             if(localPlayer.isLostHeart()){
                 soundEngine.play(Sound.FAIL);
                 localPlayer.setLostHeart(false);
@@ -335,7 +334,7 @@ public class UI extends Application {
                 soundEngine.play(Sound.GHOST_HOME);
                 localPlayer.setAteGhost(false);
             }
-            for (Player p : gameState.getPlayers()) {
+            for (Player p : gameState.players()) {
                 if(p.isAtePowerUp()){
                     soundEngine.play(Sound.GHOST_BLUE);
                     p.setAtePowerUp(false);
@@ -361,17 +360,17 @@ public class UI extends Application {
                 default:
                     break;
             }
-            if(!eatingDot && gameState.getTiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] == TileType.PAC_DOT){
+            if(!eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] == TileType.PAC_DOT){
                 eatingDot = true;
                 soundEngine.play(Sound.EAT_DOT);
-            }else if(eatingDot && gameState.getTiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] != TileType.PAC_DOT){
+            }else if(eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] != TileType.PAC_DOT){
                 eatingDot = false;
                 soundEngine.stop(Sound.EAT_DOT);
             }
         }
 
         private void drawCountdown() {
-            Color playerColor = gameState.getPlayers().get(lobbyHandler.getPlayerID()).getColor();
+            Color playerColor = gameState.players().get(lobbyHandler.getPlayerID()).getColor();
             float seconds = -1 * (float) (Constants.clock) / Constants.TARGET_FPS;
 
             gc.setFill(playerColor);
@@ -387,7 +386,7 @@ public class UI extends Application {
         }
 
         private void drawPoints() {
-            List<Player> players = gameState.getPlayers();
+            List<Player> players = gameState.players();
             for (int i = 0; i < players.size(); i++) {
                 gc.setFill(players.get(i).getColor());
                 gc.setFont(new javafx.scene.text.Font(20));
@@ -405,7 +404,7 @@ public class UI extends Application {
         }
 
         private void drawMap() {
-            TileType[][] tiles = gameState.getTiles();
+            TileType[][] tiles = gameState.tiles();
             for (int y = 0; y < tiles.length; y++) {
                 for (int x = 0; x < tiles[0].length; x++) {
                     switch (tiles[y][x]) {
@@ -453,7 +452,7 @@ public class UI extends Application {
                     /*
                      * int finalI = x;
                      * int finalJ = y;
-                     * gameState.getPlayers().forEach(player -> {
+                     * gameState.players().forEach(player -> {
                      * Pair<Integer, Integer> playerGridPosition =
                      * player.getPosition().ToGridPosition();
                      * System.out.println(playerGridPosition.getKey() + " " +
@@ -470,7 +469,7 @@ public class UI extends Application {
         }
 
         private void drawPlayers(long time) {
-            gameState.getPlayers().forEach(player -> {
+            gameState.players().forEach(player -> {
                 int sy = switch (player.getDirection()) {
                     case WEST -> 50 * 6;
                     case NORTH -> 50 * 9;
@@ -534,7 +533,7 @@ public class UI extends Application {
         }
 
         private void drawGhosts(long time) {
-            gameState.getGhosts().forEach(ghost -> {
+            gameState.ghosts().forEach(ghost -> {
                 int sy = 0, sx = 0;
                 switch (ghost.getDirection()) {
                     case WEST:
@@ -556,7 +555,7 @@ public class UI extends Application {
                     case PURPLE -> 250; // ("Sue");
                 };
 
-                double fTimer = gameState.getFrightenedTimerSec();
+                double fTimer = gameState.entityTracker().getFrightenedTimerSec();
 
                 if (fTimer > 0) {
                     sy += 50 * 11;
@@ -575,138 +574,89 @@ public class UI extends Application {
             });
         }
 
+        private boolean isWall(TileType[][] tiles, int y, int x) {
+            return y >= 0 && y < tiles.length && x >= 0 && x < tiles[0].length
+                    && tiles[y][x] == TileType.WALL;
+        }
+
         private void drawWall(int y, int x) {
-            TileType[][] tiles = gameState.getTiles();
-            final int N = tiles.length;
-            final int M = tiles[0].length;
+            TileType[][] tiles = gameState.tiles();
 
-            boolean nWall = 0 > y - 1 || tiles[y - 1][x] != TileType.WALL;
-            boolean wWall = 0 > x - 1 || tiles[y][x - 1] != TileType.WALL;
-            boolean sWall = N <= y + 1 || tiles[y + 1][x] != TileType.WALL;
-            boolean eWall = M <= x + 1 || tiles[y][x + 1] != TileType.WALL;
+            // Check adjacent walls (cardinal directions)
+            boolean n = isWall(tiles, y - 1, x);
+            boolean s = isWall(tiles, y + 1, x);
+            boolean e = isWall(tiles, y, x + 1);
+            boolean w = isWall(tiles, y, x - 1);
 
-            boolean neWall = 0 > y - 1 || M <= x + 1 || tiles[y - 1][x + 1] != TileType.WALL;
-            boolean nwWall = 0 > y - 1 || 0 > x - 1 || tiles[y - 1][x - 1] != TileType.WALL;
-            boolean seWall = N <= y + 1 || M <= x + 1 || tiles[y + 1][x + 1] != TileType.WALL;
-            boolean swWall = N <= y + 1 || 0 > x - 1 || tiles[y + 1][x - 1] != TileType.WALL;
+            // Check diagonal walls
+            boolean ne = isWall(tiles, y - 1, x + 1);
+            boolean nw = isWall(tiles, y - 1, x - 1);
+            boolean se = isWall(tiles, y + 1, x + 1);
+            boolean sw = isWall(tiles, y + 1, x - 1);
 
-            if (wWall) {
-                if (sWall) {
-                    if (eWall) {
-                        gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                TILE_SIZE);
-                    } else {
-                        if (nWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                    TILE_SIZE, TILE_SIZE);
-                        } else {
-                            if (neWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                        TILE_SIZE, TILE_SIZE);
-                            } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                        TILE_SIZE, TILE_SIZE);
-                            }
-                        }
-                    }
-                } else {
-                    if (eWall) {
-                        if (nWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                    TILE_SIZE, TILE_SIZE);
-                        } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 6, 32, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
-                        }
-                    } else {
-                        if (nWall) {
-                            if (seWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                        TILE_SIZE, TILE_SIZE);
-                            } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                        TILE_SIZE, TILE_SIZE);
-                            }
-                        } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 0, 32, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
-                        }
-                    }
-                }
-            } else {
-                if (eWall) {
-                    if (nWall) {
-                        if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 9, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                    TILE_SIZE, TILE_SIZE);
-                        } else {
-                            if (swWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                        TILE_SIZE, TILE_SIZE);
-                            } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                        TILE_SIZE, TILE_SIZE);
-                            }
-                        }
-                    } else {
-                        if (sWall) {
-                            if (nwWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                        TILE_SIZE, TILE_SIZE);
-                            } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                        TILE_SIZE, TILE_SIZE);
-                            }
-                        } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 2, 32, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
-                        }
-                    }
-                } else {
-                    if (nWall) {
-                        if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 8, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                    TILE_SIZE, TILE_SIZE);
-                        } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 4, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                    TILE_SIZE, TILE_SIZE);
-                        }
-                    } else {
-                        if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
-                        } else {
-                            if (neWall) {
-                                if (seWall) {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                            TILE_SIZE, TILE_SIZE);
-                                    gc.drawImage(wallSpriteSheet, 32 * 3 + 16, 32 * 1, 32 / 2.0, 32,
-                                            x * TILE_SIZE + TILE_SIZE / 2.0, y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
-                                            TILE_SIZE);
-                                } else {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                            TILE_SIZE, TILE_SIZE);
-                                    gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 1 + 16, 32 / 2.0, 32 / 2.0,
-                                            x * TILE_SIZE + TILE_SIZE / 2.0, y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
-                                            TILE_SIZE - TILE_SIZE / 2.0);
-                                }
-                            } else if (nwWall) {
-                                if (swWall) {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                            TILE_SIZE, TILE_SIZE);
-                                    gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 1, 32 / 2.0, 32, x * TILE_SIZE,
-                                            y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0, TILE_SIZE);
-                                } else {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
-                                            TILE_SIZE, TILE_SIZE);
-                                    gc.drawImage(wallSpriteSheet, 32 * 7 + 16, 32 * 1 + 16, 32 / 2.0, 32 / 2.0,
-                                            x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
-                                            TILE_SIZE - TILE_SIZE / 2.0);
-                                }
-                            }
-                        }
-                    }
-                }
+            // Encode cardinal directions as bitmask: N=1, E=2, S=4, W=8
+            int mask = (n ? 1 : 0) | (e ? 2 : 0) | (s ? 4 : 0) | (w ? 8 : 0);
+
+            double destX = x * TILE_SIZE;
+            double destY = y * TILE_SIZE;
+
+            switch (mask) {
+                case 0 -> // isolated
+                    drawTileFromTileset(gc, wallSpriteSheet, 7, 1, destX, destY);
+                case 1 -> // N only
+                    drawTileFromTileset(gc, wallSpriteSheet, 6, 2, destX, destY);
+                case 2 -> // E only
+                    drawTileFromTileset(gc, wallSpriteSheet, 7, 0, destX, destY);
+                case 3 -> // N+E
+                    drawTileFromTileset(gc, wallSpriteSheet, ne ? 0 : 3, 2, destX, destY);
+                case 4 -> // S only
+                    drawTileFromTileset(gc, wallSpriteSheet, 6, 0, destX, destY);
+                case 5 -> // N+S
+                    drawTileFromTileset(gc, wallSpriteSheet, 6, 1, destX, destY);
+                case 6 -> // E+S
+                    drawTileFromTileset(gc, wallSpriteSheet, se ? 0 : 3, 0, destX, destY);
+                case 7 -> // N+E+S
+                    drawTileFromTileset(gc, wallSpriteSheet, 3, 1, destX, destY);
+                case 8 -> // W only
+                    drawTileFromTileset(gc, wallSpriteSheet, 9, 0, destX, destY);
+                case 9 -> // N+W
+                    drawTileFromTileset(gc, wallSpriteSheet, nw ? 2 : 5, 2, destX, destY);
+                case 10 -> // E+W
+                    drawTileFromTileset(gc, wallSpriteSheet, 8, 0, destX, destY);
+                case 11 -> // N+E+W
+                    drawTileFromTileset(gc, wallSpriteSheet, nw || ne ? 1 : 4, 2, destX, destY);
+                case 12 -> // S+W
+                    drawTileFromTileset(gc, wallSpriteSheet, sw ? 2 : 5, 0, destX, destY);
+                case 13 -> // N+S+W
+                    drawTileFromTileset(gc, wallSpriteSheet, 5, 1, destX, destY);
+                case 14 -> // E+S+W
+                    drawTileFromTileset(gc, wallSpriteSheet, sw || se ? 1 : 4, 0, destX, destY);
+                case 15 -> // N+E+S+W (all cardinal directions)
+                    drawCrossWall(destX, destY, ne, nw, se, sw);
+            }
+        }
+
+        private void drawCrossWall(double destX, double destY, boolean ne, boolean nw, boolean se, boolean sw) {
+            // Base: full cross
+            drawTileFromTileset(gc, wallSpriteSheet, 1, 1, destX, destY);
+
+            // Draw corner overlays for missing diagonal walls
+            double half = TILE_SIZE / 2.0;
+
+            if (!ne && !se) {
+                // Right edge missing both corners
+                drawTileFromTileset(gc, wallSpriteSheet, 3, 1, 16, 0, 16, 32, destX + half, destY);
+            } else if (!ne) {
+                // Top-right corner only
+                drawTileFromTileset(gc, wallSpriteSheet, 7, 1, 0, 16, 16, 16, destX + half, destY);
+            }
+
+            if (!nw && !sw) {
+                // Left edge missing both corners
+                drawTileFromTileset(gc, wallSpriteSheet, 5, 1, 0, 0, 16, 32, destX, destY);
+            } else if (!nw) {
+                // Top-left corner only
+                drawTileFromTileset(gc, wallSpriteSheet, 7, 1, 16, 16, 16, 16, destX, destY);
             }
         }
     }
@@ -717,17 +667,33 @@ public class UI extends Application {
             int tileX,
             int tileY,
             double destX,
+            double destY
+    ) {
+        drawTileFromTileset(gc, tileset, tileX, tileY, 0, 0, 32, 32, destX, destY);
+    }
+
+    private void drawTileFromTileset(
+            GraphicsContext gc,
+            Image tileset,
+            int tileX,
+            int tileY,
+            int srcOffsetX,
+            int srcOffsetY,
+            int srcWidth,
+            int srcHeight,
+            double destX,
             double destY) {
+        double scale = Constants.TILE_SIZE / 32.0;
         gc.drawImage(
                 tileset,
-                tileX * 32,
-                tileY * 32,
-                32,
-                32,
+                tileX * 32 + srcOffsetX,
+                tileY * 32 + srcOffsetY,
+                srcWidth,
+                srcHeight,
                 destX,
                 destY,
-                Constants.TILE_SIZE,
-                Constants.TILE_SIZE);
+                srcWidth * scale,
+                srcHeight * scale);
     }
 
     private void drawRectangle(GraphicsContext gc, int x, int y, int width, int height) {
