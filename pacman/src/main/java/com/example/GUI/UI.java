@@ -684,9 +684,10 @@ public class UI extends Application {
             remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
             long effectElapsedNanos = (long) ((1.0 - remainingRatio) * effectDurationSec * 1_000_000_000L);
             double t = 1.0 - remainingRatio;
-            double adjustedRemainingRatio = 1.0 - t * t;
+            double adjustedRemainingRatio = 1.0 - t * t * t;
             double halfPeriodUnits = endDelayRatio + adjustedRemainingRatio;
             long halfPeriodNanos = Math.max(1_000_000L, (long) (halfPeriodUnits * nanosPerUnit));
+            System.out.println("Blink period: " + (halfPeriodNanos / 1_000_000L) + "ms");
             return ((effectElapsedNanos / halfPeriodNanos) % 2 == 0) ? 0 : 1;
         }
 
