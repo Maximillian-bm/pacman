@@ -2,6 +2,7 @@ package com.example.GameLogic;
 
 import com.example.GUI.UI;
 import com.example.GameLogic.ClientComs.Reader;
+import com.example.ServerLogic.ServerController;
 import com.example.model.*;
 import javafx.application.Application;
 
@@ -19,6 +20,13 @@ public class ClientMain {
                 e.printStackTrace();
             }
         });
+
+        if (System.getProperty("offline") != null) {
+            Thread serverThread = new Thread(() -> ServerController.main(new String[]{}));
+            serverThread.setDaemon(true);
+            serverThread.start();
+        }
+
         Application.launch(UI.class, args);
     }
 }

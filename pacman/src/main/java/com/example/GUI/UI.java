@@ -77,7 +77,7 @@ public class UI extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("Pacman");
-        //System.out.println("REMOTE_PUBLIC_URI: " + Constants.REMOTE_PUBLIC_URI + ", LOCAL_GATE: " + Constants.LOCAL_GATE);
+        System.out.println("REMOTE_PUBLIC_URI: " + Constants.REMOTE_PUBLIC_URI + ", LOCAL_GATE: " + Constants.LOCAL_GATE);
         initializeMainMenu(stage);
     }
 
