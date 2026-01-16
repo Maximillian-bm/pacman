@@ -975,17 +975,20 @@ public class ClientGameControllerTest extends BaseTest {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
 
-        // Add action with index 0 at clock 1
-        Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
-        // Add action with index 5 at clock 2 (indices 1, 2, 3, 4 are missing)
-        Constants.cleanActions.addAction(new Action(0, 2, 2, 5));
+        // Run to clock 10
+        controller.updateGameStateFor(initialState, 10);
 
-        Constants.cleanActions.fixedMissedAction();
-        assertFalse(Constants.cleanActions.missedAction());
+        // "Late" action arrives for clock 5
+        Constants.cleanActions.addAction(new Action(0, 5, 2, 0));
 
-        controller.updateGameStateFor(initialState, 3);
+        // Check missedAction with current clock (10)
+        assertTrue(Constants.cleanActions.missedAction(10), "Missed action should be detected");
 
-        assertTrue(Constants.cleanActions.missedAction(), "Missed action should be detected during resimulation");
+        // Fix is implied by re-running or manual getActions?
+        // The test just checks detection.
+        // We can manually consume it to clear the state for the assertion
+        Constants.cleanActions.getActions(5);
+        assertFalse(Constants.cleanActions.missedAction(10));
     }
 
     @Test
