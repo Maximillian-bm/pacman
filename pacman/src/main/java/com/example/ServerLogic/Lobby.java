@@ -67,6 +67,23 @@ public class Lobby implements Runnable{
         }
     }
 
+    public void checkForReplay() {
+        Space sync = rep.get(lobbyID+"sync");
+        try {
+			Object[] t = sync.getp(new ActualField("START"));
+            if(t == null){
+                for(int i = 0; i < nrOfPlayers; i++){
+                    Object[] t2 = sync.getp(new ActualField(i), new ActualField("REPLAY"));
+                    if(t2 != null){
+                        readyForReplay[i] = true;
+                    }
+                }
+            }
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} 
+    }
+
     public void stop(){
         actionHandler.stop();
     }
