@@ -237,8 +237,33 @@ public class UI extends Application {
         });
 
         startButton.setOnAction(e -> {
-            startLobby(stage);
-            soundEngine.play(Sound.START_MUSIC);
+            startButton.setDisable(true);
+            
+            Text waitingText = new Text("Waiting for server to register all players");
+            waitingText.setFill(Color.YELLOW);
+            waitingText.setStyle("-fx-font-size: 14px;");
+            startRoot.getChildren().add(waitingText);
+
+            Thread startThread = new Thread(() -> {
+                try {
+                    lobbyHandler.startGame();
+                    javafx.application.Platform.runLater(() -> {
+                        startRoot.getChildren().remove(waitingText);
+                        startGame(stage);
+                    });
+                } catch (Exception ex) {
+                    javafx.application.Platform.runLater(() -> {
+                        errorText.setText("Failed to start game: " + ex.getMessage());
+                        startButton.setDisable(false);
+                        startRoot.getChildren().remove(waitingText);
+                        System.err.println("--- Start Game Failed ---");
+                        System.err.println(ex.getMessage());
+                    });
+                }
+                soundEngine.play(Sound.START_MUSIC);
+            });
+            startThread.setDaemon(true);
+            startThread.start();
         });
 
         stage.setScene(startScene);
