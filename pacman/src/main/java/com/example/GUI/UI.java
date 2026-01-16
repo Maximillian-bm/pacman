@@ -144,7 +144,7 @@ public class UI extends Application {
 
         Text header = new Text("Pacman");
         header.setFill(Color.WHITE);
-        header.setStyle("-fx-font: 48 arial;");
+        header.setStyle("-fx-font-size: 96px;");
 
         VBox startRoot = new VBox(
                 header,
@@ -161,10 +161,7 @@ public class UI extends Application {
                 root,
                 Constants.INIT_SCREEN_WIDTH,
                 Constants.INIT_SCREEN_HEIGHT);
-        // startScene.getStylesheets().add("style.css");
-        Font font = Font.loadFont(getClass().getResource("/fonts/PixelatedEleganceRegular-ovyAA.ttf").toExternalForm(), 45);
-        
-        header.setFont(font);
+        startScene.getStylesheets().add("style.css");
 
         joinLobbyButton.setOnAction(e -> {
             soundEngine.play(Sound.EAT_FRUIT);
@@ -379,10 +376,10 @@ public class UI extends Application {
             float seconds = -1 * (float) (Constants.clock) / Constants.TARGET_FPS;
 
             gc.setFill(playerColor);
-            gc.setFont(new javafx.scene.text.Font(80));
+            gc.setFont(new Font("Pixelated Elegance Regular", 80));
             gc.fillText((int)seconds + "", Constants.INIT_SCREEN_WIDTH / 2 - 20, Constants.INIT_SCREEN_HEIGHT / 2 - 40);
-            gc.setFont(new javafx.scene.text.Font(80));
-            gc.fillText((int)seconds + "", Constants.INIT_SCREEN_WIDTH / 2 - 20, Constants.INIT_SCREEN_HEIGHT / 2 - 40);
+            // gc.setFont(new Font("Pixelated Elegance Regular", 80));
+            // gc.fillText((int)seconds + "", Constants.INIT_SCREEN_WIDTH / 2 - 20, Constants.INIT_SCREEN_HEIGHT / 2 - 40);
 
             gc.fillRect(0, 0, Constants.INIT_SCREEN_WIDTH, 4);
             gc.fillRect(0, 0, 4, Constants.INIT_SCREEN_HEIGHT);
@@ -394,7 +391,7 @@ public class UI extends Application {
             List<Player> players = gameState.players();
             for (int i = 0; i < players.size(); i++) {
                 gc.setFill(players.get(i).getColor());
-                gc.setFont(new javafx.scene.text.Font(20));
+                gc.setFont(new Font("Pixelated Elegance Regular", 20));
 
                 StringBuilder hearts = new StringBuilder("");
                 for (int j = 0; j < players.get(i).getLives(); j++) {

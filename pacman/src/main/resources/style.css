@@ -2,13 +2,11 @@
     src: url('fonts/PixelatedEleganceRegular-ovyAA.ttf');
 }
 
-.text {
-	-fx-font-family: 'PixelatedEleganceRegular';
-    /* font-family: 'PixelatedEleganceRegular'; */
+* {
+	-fx-font-family: 'Pixelated Elegance Regular';
 }
 
 .text-field {
-	-fx-font-family: 'PixelatedElegance';
 	-fx-background-color: black;
 	-fx-border-color: blue;
 	-fx-mid-text-color: white;
