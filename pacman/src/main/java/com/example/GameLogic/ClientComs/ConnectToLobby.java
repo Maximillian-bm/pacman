@@ -57,20 +57,16 @@ public class ConnectToLobby {
         }
     }
 
-    public void joinLobby(String lobbyID, long timeoutMs) throws java.util.concurrent.TimeoutException {
-        throw new UnsupportedOperationException("TDD: Implement join with timeout.");
+    public void quit() {
+        try {
+            sync.put("QUIT");
+        } catch (Exception e) {
+            return;
+        }
     }
 
-    public void leaveLobby() {
-        throw new UnsupportedOperationException("TDD: Implement this method to handle player disconnection.");
-    }
+    public void replay() {
 
-    public Object getGameState() {
-        throw new UnsupportedOperationException("TDD: Implement this method to retrieve current game state for testing.");
-    }
-
-    public boolean isPlayerInGame(int playerID) {
-        throw new UnsupportedOperationException("TDD: Implement this method to check if a player is currently in the active game.");
     }
 
     public void startGame() {

@@ -3,6 +3,7 @@ package com.example.ServerLogic;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jspace.ActualField;
 import org.jspace.Space;
 
 import com.example.model.Constants;
@@ -40,6 +41,29 @@ public class LobbyCleaner implements Runnable{
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                }
+                try {
+                    Space sync = lobby.getRep().get(lobby.getLobbyID()+"sync");
+                    Object[] t = sync.getp(new ActualField("QUIT"));
+                    if(t != null){
+                        int lobbyID = lobby.getLobbyID();
+                        lobby.stop();
+                        toBeRemoved.add(lobby);
+                        try {
+                            space1.put(lobbyID);
+                        } catch (InterruptedException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                } catch (Exception e) {
+                    int lobbyID = lobby.getLobbyID();
+                    lobby.stop();
+                    toBeRemoved.add(lobby);
+                    try {
+						space1.put(lobbyID);
+					} catch (InterruptedException e1) {
+						e1.printStackTrace();
+					}
                 }
             }
             if(showActiveLobbys){

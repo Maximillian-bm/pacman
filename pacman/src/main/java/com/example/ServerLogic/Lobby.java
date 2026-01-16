@@ -62,4 +62,7 @@ public class Lobby implements Runnable{
         actionHandler.stop();
     }
 
+    public SpaceRepository getRep(){
+        return rep;
+    }
 }
