@@ -106,17 +106,15 @@ public class ClientGameController extends GameController {
             return;
         }
 
-        // Count total points earned (approximation for pellets eaten)
         int totalPoints = gameState.players().stream().mapToInt(Player::getPoints).sum();
-
-        // Spawn cherry after ~70 pellets (700 points)
-        if (totalPoints < 700) return;
 
         if (entityTracker.isFruitOnMap()) return;
 
+        TileType fruitToSpawn = Maps.getFruitToSpawn(totalPoints);
+        if (fruitToSpawn == null) return;
+
         TileType[][] tiles = gameState.tiles();
 
-        // Collect empty tiles near center
         int centerX = tiles[0].length / 2;
         int centerY = tiles.length / 2;
         int radius = 5;
@@ -137,7 +135,7 @@ public class ClientGameController extends GameController {
         if (!candidates.isEmpty()) {
             int index = Math.abs(gameState.clock() * 31) % candidates.size();
             int[] pos = candidates.get(index);
-            tiles[pos[1]][pos[0]] = TileType.CHERRY;
+            tiles[pos[1]][pos[0]] = fruitToSpawn;
             entityTracker.setFruitOnMap(true);
         }
     }
