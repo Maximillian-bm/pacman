@@ -6,13 +6,14 @@ package "GameLogic" {
       + handleRawAction(lastActionsClock: int, index: int, action: Action, cleanActions: Space): void
   }
     class ClientGameController extends GameController {
-      + updateGameStateFor(gameState: GameState, targetClock: int): GameState
+      + updateGameStateFor(gameState: GameState, tarclock: int): GameState
+      + deepCopyGameState(state: GameState): GameState
       + updateGameState(gameState: GameState, actions: List): GameState
+      - handleFruitSpawning(gameState: GameState): void
       + initializeGameState(nrOfPlayers: int): GameState
       - handleActions(gameState: GameState, actions: List): void
       - stepMovement(gameState: GameState): void
       - handlePlayerGridPosition(gameState: GameState): void
-      - isPowerup(t: TileType): boolean
       - directionFromMove(move: int): Direction
       - isWall(tiles: TileType, x: double, y: double): boolean
       - getGhostDir(ghost: Ghost): Direction
@@ -23,18 +24,22 @@ package "GameLogic" {
       - chooseBestDirTowardTarget(tiles: TileType, gx: int, gy: int, currentDir: Direction, targetX: int, targetY: int): Direction
       - chooseBestDirAwayFromPlayer(tiles: TileType, gx: int, gy: int, currentDir: Direction, playerX: int, playerY: int): Direction
       - findNearestPlayer(gameState: GameState, ghost: Ghost): Player
+      - getScatterCorner(gameState: GameState, ghost: Ghost): Pair
       - computeGhostTargetTile(gameState: GameState, ghost: Ghost, pac: Player, blinky: Ghost): Pair
       - GhostMovement(gameState: GameState): void
       - handleGhostPlayerCollisions(gameState: GameState): void
       - updateRespawnTimers(gameState: GameState): void
       - updatePlayerPowerTimers(gameState: GameState): void
-      - isPowered(p: Player): boolean
+      - isPowered(p: Player, entityTracker: EntityTracker): boolean
       - handlePvPcollitions(gameState: GameState): void
       - isPlayerCollidable(p: Player): boolean
       - eatPlayer(gameState: GameState, eater: Player, victim: Player): void
       - resolvePlayerOverlap(a: Player, b: Player): void
       - updateInvulnerabilityTimers(gameState: GameState): void
       - isInvulnerable(p: Player): boolean
+      + allPlayersDead(gameState: GameState): boolean
+      + allPointsGathered(gameState: GameState): boolean
+      - getWinner(gameState: GameState): Player
   }
     class ClientMain {
       + main(args: String): void
@@ -61,6 +66,7 @@ package "GameLogic" {
         - playerID: int
         - lobbyID: int
         - sync: Space
+        - reader: Reader
         + createLobby(nrOfPlayers: int): void
         + joinLobby(lobbyID: String): void
         + joinLobby(lobbyID: String, timeoutMs: long): void
@@ -68,6 +74,7 @@ package "GameLogic" {
         + getGameState(): Object
         + isPlayerInGame(playerID: int): boolean
         + startGame(): void
+        + quit(): void
         + getLobbyID(): int
         + getNrOfPlayers(): int
         + getPlayerID(): int
@@ -83,8 +90,10 @@ package "GameLogic" {
     }
         class Reader implements Runnable {
         - lobbyID: int
+        - running: boolean
         + isConnected(): boolean
         + run(): void
+        + stop(): void
     }
   }
   package "ClientThreads" {
@@ -92,8 +101,11 @@ package "GameLogic" {
 }
 package "GUI" {
     class SoundEngine {
-      - players: Map
+      + disabled: boolean
+      - soundPlayers: Map
+      - soundLoopers: Map
       + play(sound: Sound): void
+      + loop(sound: Sound): void
       + stop(sound: Sound): void
       + setVolume(volume: double): void
   }
@@ -107,16 +119,24 @@ package "GUI" {
       - canvas: Canvas
       - spriteSheet: Image
       - wallSpriteSheet: Image
+      - coloredPlayerCache: Map
       - keyHandler: KeyHandler
       - createLobby: Runnable
       - notificationText: Text
+      - eatingDot: boolean
+      - animationTimeNanos: long
+      + FONT_FAMILY: String
       + TilePos(x: int, y: int): record
+      + stop(): void
       + start(stage: Stage): void
-      - initializeLobby(stage: Stage): void
+      - precomputePlayerColors(): void
+      - createColoredPlayerImage(color: Color): Image
+      - initializeMainMenu(stage: Stage): void
       + notifyDisconnection(message: String): void
       - startLobby(stage: Stage): void
       - startGame(stage: Stage): void
       - drawTileFromTileset(gc: GraphicsContext, tileset: Image, tileX: int, tileY: int, destX: double, destY: double): void
+      - drawTileFromTileset(gc: GraphicsContext, tileset: Image, tileX: int, tileY: int, srcOffsetX: int, srcOffsetY: int, srcWidth: int, srcHeight: int, destX: double, destY: double): void
       - drawRectangle(gc: GraphicsContext, x: int, y: int, width: int, height: int): void
       - createTiledButton(text: String, tilesWide: int, tilesTall: int): Button
       - createTiledImageView(width: double, height: double): ImageView
@@ -129,7 +149,7 @@ package "model" {
       - move: int
       - index: int
       + getPlayerId(): int
-      + getClock(): int
+      + clock(): int
       + getMove(): int
       + getIndex(): int
       + setClock(clock: int): void
@@ -138,12 +158,10 @@ package "model" {
       - actionsMap: Map
       - actionsList: List
       - nrOfActionsCalled: int
-      - missedAction: boolean
       - playerID: int
       + addAction(action: Action): void
       + getActions(clock: int): List
-      + missedAction(): boolean
-      + fixedMissedAction(): void
+      + missedAction(clock: int): boolean
   }
     class Constants {
       + LOBBY_TTL: long
@@ -151,9 +169,9 @@ package "model" {
       + cleanActions: ActionList
       + REMOTE_PUBLIC_URI: String
       + LOCAL_GATE: String
-      + TILE_SIZE: int
       + TILES_WIDE: int
       + TILES_TALL: int
+      + TILE_SIZE: int
       + INIT_SCREEN_WIDTH: int
       + INIT_SCREEN_HEIGHT: int
       + PLAYER_RESPAWN_DELAY_SEC: double
@@ -164,6 +182,7 @@ package "model" {
       + COLLISION_DISTANCE_PVP: double
       + PLAYER_LIVES: int
       + PLAYER_SPEED: double
+      + PLAYER_FRIGHTENED_SPEED: double
       + PLAYER_SPAWN_PROTECT_SEC: double
       + GHOST_RESPAWN_DELAY_SEC: double
       + FRIGHTENED_DURATION_SEC: double
@@ -180,19 +199,30 @@ package "model" {
     abstract Entity {
       + position: Position
       + direction: Direction
+      + spawnPosition: Position
+      + respawnTimer: double
       + update(): void
       + distanceTo(e: Entity): double
+  }
+    class EntityTracker {
+      - ghostSpeed: double
+      - ghostScatterMode: boolean
+      - ghostChaseTimer: double
+      - frightenedTimerSec: double
+      - powerOwnerId: int
+      + clearPowerOwner(): void
+      + isAnyPowerActive(): boolean
+      + isPowerOwner(p: Player): boolean
+      + assignPowerTo(owner: Player): void
+      + clearPowerIfOwnerInvalid(players: List): boolean
+      + isPlayerFrightened(player: Player): boolean
+      + copy(): EntityTracker
   }
     class Unknown {
   }
     class Ghost extends Entity {
       - type: GhostType
-      - GHOSTSPEED: double
-      - ghostScatterMode: boolean
-      - ghostChaseTimer: double
-      - frightenedTimerSec: double
-      - spawnPosition: Position
-      - respawnTimer: double
+      + copy(): Ghost
   }
     enum GhostType {
       RED
@@ -203,8 +233,11 @@ package "model" {
       + name: String
   }
     class Maps {
-      + map1: int
-      + getMap1(): TileType
+      - currentLevel: Levels
+      + getCurrentLevelTiles(): TileType
+      + getGhostSpawnTile(ghostType: GhostType): Pair
+      + getPlayerSpawnTile(playerId: int): Pair
+      + incrementLevel(): void
   }
     class Player extends Entity {
       - id: int
@@ -212,23 +245,27 @@ package "model" {
       - points: int
       - lives: int
       - intendedDirection: Direction
-      - respawnTimer: double
       - alive: boolean
-      - spawnPosition: Position
       - powerUpTimer: double
       - invulnerableTimer: double
-      + isAlive(): boolean
-      + setAlive(alive: boolean): void
+      - lostHeart: boolean
+      - ateFruit: boolean
+      - ateGhost: boolean
+      - atePowerUp: boolean
       + addPoints(points: int): void
+      + resetGhostsEatenThisEnergizer(): void
       + eatGhost(): void
-      + loseLife(): void
+      + loseLife(): int
       + isDead(): boolean
       + getColor(): Color
+      + isInvulnerable(): boolean
+      + copy(): Player
   }
     class Position {
       + x: double
       + y: double
       + ToGridPosition(): Pair
+      + fromGridPosition(gridPos: Pair): Position
       + ToScreenPosition(): Pair
   }
     enum Sound {
@@ -278,9 +315,8 @@ package "ServerLogic" {
       - lobbyID: int
       - timeOfCreation: long
       + run(): void
-      + getTimeOfCreation(): long
-      + getLobbyID(): int
       + stop(): void
+      + getRep(): SpaceRepository
   }
     class LobbyActionHandler implements Runnable {
       + repository: SpaceRepository
@@ -315,17 +351,16 @@ package "ServerLogic" {
       - invalidIndput(): void
   }
 }
+  ConnectToLobby o-- Reader: contains
   UI o-- SoundEngine: contains
   UI o-- ConnectToLobby: contains
   UI o-- ClientGameController: contains
   UI o-- KeyHandler: contains
   Constants o-- ActionList: contains
-  Entity o-- Position: contains
+  Entity "1" o-- "many" Position: contains
   Entity o-- Direction: contains
   Ghost o-- GhostType: contains
-  Ghost o-- Position: contains
   Player o-- Direction: contains
-  Player o-- Position: contains
   Lobby o-- LobbyActionHandler: contains
   ServerIO o-- LobbyCleaner: contains
 @enduml
