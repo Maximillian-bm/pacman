@@ -1,14 +1,5 @@
 package com.example.GameLogic;
 
-import static com.example.model.Constants.CENTER_EPS_PX;
-import static com.example.model.Constants.FRIGHTENED_DURATION_SEC;
-import static com.example.model.Constants.GHOST_RESPAWN_DELAY_SEC;
-import static com.example.model.Constants.PLAYER_LIVES;
-import static com.example.model.Constants.PLAYER_RESPAWN_DELAY_SEC;
-import static com.example.model.Constants.PLAYER_SPEED;
-import static com.example.model.Constants.TARGET_FPS;
-import static com.example.model.Constants.TILE_SIZE;
-
 import com.example.model.Action;
 import com.example.model.Constants;
 import com.example.model.Direction;
@@ -25,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.util.Pair;
+
+import static com.example.model.Constants.*;
 
 public class ClientGameController extends GameController {
 
@@ -151,95 +144,15 @@ public class ClientGameController extends GameController {
     public GameState initializeGameState(int nrOfPlayers) {
         List<Player> players = new ArrayList<>();
         List<Ghost> ghosts = new ArrayList<>();
-        TileType[][] tiles = Maps.getMap1();
+        TileType[][] tiles = Maps.getCurrentLevelTiles();
 
         for (int i = 0; i < nrOfPlayers; i++) {
-            Player player = new Player(i);
-
-            Position spawnPosition;
-            switch (i) {
-                case 0:
-                    spawnPosition = new Position(1 * TILE_SIZE, 1 * TILE_SIZE);
-                    break;
-                case 1:
-                    spawnPosition = new Position(17 * TILE_SIZE, 1 * TILE_SIZE);
-                    break;
-                case 2:
-                    spawnPosition = new Position(1 * TILE_SIZE, 24 * TILE_SIZE);
-                    break;
-                case 3:
-                    spawnPosition = new Position(24 * TILE_SIZE, 24 * TILE_SIZE);
-                    break;
-                default:
-                    spawnPosition = new Position(3 * TILE_SIZE, 3 * TILE_SIZE);
-                    break;
-            }
-            player.setSpawnPosition(spawnPosition);
-            player.setPosition(new Position(spawnPosition.x, spawnPosition.y));
-            player.setLives(PLAYER_LIVES);
-            player.setAlive(true);
-            player.setDirection(Direction.EAST);
-            player.setIntendedDirection(null);
-            player.setRespawnTimer(0.0);
-            players.add(player);
+            players.add(new Player(i));
         }
 
-        Ghost ghost1 = new Ghost(GhostType.RED);
-        ghost1.setPosition(
-            new Position(
-                9 * TILE_SIZE,
-                12 * TILE_SIZE
-            ));
-        ghosts.add(ghost1);
-
-        Ghost ghost2 = new Ghost(GhostType.PINK);
-        ghost2.setPosition(
-            new Position(
-                8 * TILE_SIZE,
-                12 * TILE_SIZE
-            ));
-        ghosts.add(ghost2);
-
-        Ghost ghost3 = new Ghost(GhostType.CYAN);
-        ghost3.setPosition(
-            new Position(
-                10 * TILE_SIZE,
-                12 * TILE_SIZE
-            ));
-        ghosts.add(ghost3);
-
-        Ghost ghost4 = new Ghost(GhostType.ORANGE);
-        ghost4.setPosition(
-            new Position(
-                9 * TILE_SIZE,
-                12 * TILE_SIZE
-            ));
-        ghosts.add(ghost4);
-
-        Ghost ghost5 = new Ghost(GhostType.PURPLE);
-        ghost5.setPosition(
-            new Position(
-                9 * TILE_SIZE,
-                12 * TILE_SIZE
-            ));
-        ghosts.add(ghost5);
-
-        ghost1.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-        ghost2.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-        ghost3.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-        ghost4.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-        ghost5.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-        ghost1.setRespawnTimer(0.0);
-        ghost2.setRespawnTimer(0.0);
-        ghost3.setRespawnTimer(0.0);
-        ghost4.setRespawnTimer(0.0);
-        ghost5.setRespawnTimer(0.0);
-
-        ghost1.setDirection(Direction.NORTH);
-        ghost2.setDirection(Direction.NORTH);
-        ghost3.setDirection(Direction.NORTH);
-        ghost4.setDirection(Direction.NORTH);
-        ghost5.setDirection(Direction.NORTH);
+        for (GhostType type : GhostType.values()) {
+            ghosts.add(new Ghost(type));
+        }
 
         return new GameState(
             -1,
@@ -279,13 +192,15 @@ public class ClientGameController extends GameController {
     }
 
     private void stepMovement(GameState gameState) {
+        EntityTracker entityTracker = gameState.entityTracker();
+
         gameState.players().forEach(player -> {
             if (!player.isAlive()) {
                 return;
             }
             Position pos = player.getPosition();
 
-            double movementPerFrame = PLAYER_SPEED / TARGET_FPS;
+            double movementPerFrame = (entityTracker.isPlayerFrightened(player) ? PLAYER_FRIGHTENED_SPEED : PLAYER_SPEED) / TARGET_FPS;
 
             Direction intendedDir = player.getIntendedDirection();
 
@@ -433,13 +348,15 @@ public class ClientGameController extends GameController {
             if (tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON)
                 player.setAteFruit(true);
 
-            if (entityTracker.isAnyPowerActive() && !entityTracker.isPowerOwner(player)) {
-                return;
-            }
 
-            player.addPoints(tileType.points);
+            boolean isPowerup = tiles[tileY][tileX] == TileType.ENERGIZER;
+            boolean powerupActive = entityTracker.isAnyPowerActive();
 
-            if (isPowerup(tileType)) {
+            boolean pickObjectUp = !powerupActive || !isPowerup;
+
+            if (!pickObjectUp) return;
+
+            if (isPowerup) {
                 entityTracker.assignPowerTo(player);
 
                 for (Player other : gameState.players()) {
@@ -455,10 +372,9 @@ public class ClientGameController extends GameController {
                 for (Ghost g : gameState.ghosts()) {
                     g.setDirection(oppositeDir(getGhostDir(g)));
                 }
-
-                tiles[tileY][tileX] = TileType.EMPTY;
-                return;
             }
+
+            player.addPoints(tileType.points);
 
             switch (tileType) {
                 case EMPTY, WALL -> {
@@ -466,10 +382,6 @@ public class ClientGameController extends GameController {
                 default -> tiles[tileY][tileX] = TileType.EMPTY;
             }
         });
-    }
-
-    private boolean isPowerup(TileType t) {
-        return t == TileType.ENERGIZER;
     }
 
     private Direction directionFromMove(int move) {
@@ -664,6 +576,10 @@ public class ClientGameController extends GameController {
                 continue;
             }
 
+            if (!p.isAlive() || p.getRespawnTimer() > 0.0) {
+                continue;
+            }
+
             Pair<Integer, Integer> pt = p.getPosition().ToGridPosition();
             int px = pt.getKey();
             int py = pt.getValue();
@@ -683,6 +599,20 @@ public class ClientGameController extends GameController {
         }
 
         return best;
+    }
+
+    private Pair<Integer, Integer> getScatterCorner(GameState gameState, Ghost ghost) {
+        int maxX = gameState.tiles()[0].length - 1;
+        int maxY = gameState.tiles().length - 1;
+
+        return switch (ghost.getType()) {
+            case RED -> new Pair<>(maxX, 0);
+            case PINK -> new Pair<>(0, 0);
+            case CYAN -> new Pair<>(maxX, maxY);
+            case ORANGE -> new Pair<>(0, maxY);
+            case PURPLE -> new Pair<>(maxX / 2, maxY / 2);
+            default -> new Pair<>(maxX, 0);
+        };
     }
 
     private Pair<Integer, Integer> computeGhostTargetTile(GameState gameState, Ghost ghost, Player pac, Ghost blinky) {
@@ -815,9 +745,6 @@ public class ClientGameController extends GameController {
                 continue;
             }
             Player targetPlayer = findNearestPlayer(gameState, ghost);
-            if (targetPlayer == null) {
-                continue;
-            }
 
             Position pos = ghost.getPosition();
             Direction dir = getGhostDir(ghost);
@@ -842,12 +769,16 @@ public class ClientGameController extends GameController {
                 boolean atIntersection = countWalkableNeighbors(tiles, gx, gy) >= 3;
 
                 if (blockedAhead || atIntersection) {
-                    if (frightened) {
+                    if (targetPlayer != null && frightened) {
                         Pair<Integer, Integer> pGrid = targetPlayer.getPosition().ToGridPosition();
                         dir = chooseBestDirAwayFromPlayer(tiles, gx, gy, dir, pGrid.getKey(), pGrid.getValue());
                     } else {
-                        Pair<Integer, Integer> targetTile = computeGhostTargetTile(gameState, ghost, targetPlayer,
-                            blinky);
+                        Pair<Integer, Integer> targetTile;
+                        if (targetPlayer == null) {
+                            targetTile = getScatterCorner(gameState, ghost);
+                        } else {
+                            targetTile = computeGhostTargetTile(gameState, ghost, targetPlayer, blinky);
+                        }
                         dir = chooseBestDirTowardTarget(tiles, gx, gy, dir, targetTile.getKey(),
                             targetTile.getValue());
                     }
@@ -1152,14 +1083,14 @@ public class ClientGameController extends GameController {
         for (Player p : gameState.players()) {
             if (p == null) continue;
 
-            if (p.getInvulnerableTimer() > 0.0) {
+            if (p.isInvulnerable()) {
                 p.setInvulnerableTimer(Math.max(0.0, p.getInvulnerableTimer() - dt));
             }
         }
     }
 
     private boolean isInvulnerable(Player p) {
-        return p != null && p.getInvulnerableTimer() > 0.0;
+        return p != null && p.isInvulnerable();
     }
 
     public boolean allPlayersDead(GameState gameState) {
