@@ -10,7 +10,7 @@ public class Constants {
 
     public static String REMOTE_PUBLIC_URI;
     public static String LOCAL_GATE;
-    static {
+    static { // Run with: 'mvn javafx:run -Djvm.options="-Doffline=true"' for offline mode
         if (System.getProperty("offline") != null) {
             REMOTE_PUBLIC_URI = "tcp://127.0.0.1:50000/?keep";
             LOCAL_GATE = "tcp://127.0.0.1:50000/?keep";

@@ -13,7 +13,6 @@ import com.example.model.ActionList;
 import com.example.model.Constants;
 import com.example.model.Direction;
 import com.example.model.GameState;
-import com.example.model.Ghost;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
@@ -24,7 +23,6 @@ import java.util.Objects;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
@@ -44,10 +42,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-import javafx.geometry.Insets;
 
 public class UI extends Application {
 
@@ -81,10 +77,11 @@ public class UI extends Application {
     @Override
     public void start(Stage stage) {
         stage.setTitle("Pacman");
-        initializeLobby(stage);
+        //System.out.println("REMOTE_PUBLIC_URI: " + Constants.REMOTE_PUBLIC_URI + ", LOCAL_GATE: " + Constants.LOCAL_GATE);
+        initializeMainMenu(stage);
     }
 
-    private void initializeLobby(Stage stage) {
+    private void initializeMainMenu(Stage stage) {
         Canvas backgroundCanvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
         GraphicsContext bgGc = backgroundCanvas.getGraphicsContext2D();
         bgGc.setFill(Color.BLACK);
