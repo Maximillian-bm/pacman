@@ -216,9 +216,7 @@ public class UI extends Application {
 
         createLobbyButton.setOnAction(e -> {
             soundEngine.play(Sound.EAT_FRUIT);
-            Thread t = new Thread(createLobby);
-            t.setDaemon(true);
-            t.start();
+            createLobby.run();
         });
 
         startButton.setOnAction(e -> {
