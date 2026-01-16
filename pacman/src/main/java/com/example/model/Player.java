@@ -40,8 +40,8 @@ public class Player extends Entity {
     private boolean atePowerUp = false;
 
     public Player(int id) {
+        super(Maps.getPlayerSpawnTile(id));
         this.id = id;
-        initializeSpawnPosition(Maps.getPlayerSpawnTile(id));
         this.alive = true;
         this.lives = Constants.PLAYER_LIVES;
         this.direction = Direction.EAST;

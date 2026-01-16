@@ -7,8 +7,8 @@ public class Ghost extends Entity {
     private final GhostType type;
 
     public Ghost(GhostType type) {
+        super(Maps.getGhostSpawnTile(type));
         this.type = type;
-        initializeSpawnPosition(Maps.getGhostSpawnTile(type));
         this.direction = Direction.WEST;
     }
 

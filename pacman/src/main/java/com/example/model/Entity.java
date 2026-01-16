@@ -9,12 +9,12 @@ public abstract class Entity {
     protected Position position;
     @Getter @Setter
     protected Direction direction;
-    @Getter @Setter
+    @Getter
     protected Position spawnPosition;
     @Getter @Setter
     protected double respawnTimer = 0.0;
 
-    protected void initializeSpawnPosition(Pair<Integer, Integer> spawnTile) {
+    protected Entity(Pair<Integer, Integer> spawnTile) {
         this.spawnPosition = new Position().fromGridPosition(spawnTile);
         this.position = new Position(spawnPosition.x, spawnPosition.y);
     }
