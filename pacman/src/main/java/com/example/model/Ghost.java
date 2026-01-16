@@ -1,7 +1,5 @@
 package com.example.model;
 
-import static com.example.model.Constants.PLAYER_SPEED;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,7 +8,7 @@ public class Ghost extends Entity {
     private GhostType type;
 
     @Getter @Setter
-    private Position spawnPosition; 
+    private Position spawnPosition;
 
     @Getter @Setter
     private double respawnTimer = 0.0;

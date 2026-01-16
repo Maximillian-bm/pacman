@@ -1,7 +1,5 @@
 package com.example.model;
 
-import java.util.List;
-
 import javafx.scene.paint.Color;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,20 +9,19 @@ public class Player extends Entity {
     @Getter
     private final int id;
 
-    @Setter
     private int ghostsEatenThisEnergizer;
 
     @Getter @Setter
     private int points = 0;
 
     @Getter @Setter
-    private int lives = Constants.PLAYER_LIVES;
+    private int lives;
 
     @Getter @Setter
     private Direction intendedDirection;
 
     @Getter @Setter
-    private double respawnTimer = 0.0;
+    private double respawnTimer;
 
     private boolean alive;
 
@@ -63,6 +60,10 @@ public class Player extends Entity {
 
     public void addPoints(int points) {
         this.points += points;
+    }
+
+    public void resetGhostsEatenThisEnergizer() {
+        this.ghostsEatenThisEnergizer = 0;
     }
 
     public void eatGhost() {

@@ -30,7 +30,7 @@ public class LobbyActionHandler implements Runnable{
                 int tempClock = rawAction.getClock();
                 ActionUtil.handleRawAction(clock, actionCount, rawAction, cleanActions);
                 actionCount++;
-                clock = ((tempClock < clock) ? clock : tempClock);
+                clock = (Math.max(tempClock, clock));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
