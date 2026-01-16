@@ -37,7 +37,7 @@ public class Lobby implements Runnable{
 
         for(int i = 0; i < nrOfPlayers; i++){
             try {
-                sync.put(i, nrOfPlayers);
+                sync.put(i, nrOfPlayers, "PLAYERID");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -45,14 +45,14 @@ public class Lobby implements Runnable{
 
         for(int i = 0; i < nrOfPlayers; i++){
             try {
-                sync.get(new ActualField(i), new ActualField("OK"));
+                sync.get(new ActualField(i), new ActualField(nrOfPlayers), new ActualField("OK"));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
         try {
-            sync.put("START");
+            sync.put(0, nrOfPlayers, "START");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
