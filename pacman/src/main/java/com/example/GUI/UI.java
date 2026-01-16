@@ -8,23 +8,16 @@ import static com.example.model.Constants.TILE_SIZE;
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
 import com.example.GameLogic.ClientGameController;
-import com.example.model.Action;
-import com.example.model.ActionList;
-import com.example.model.Constants;
-import com.example.model.Direction;
-import com.example.model.GameState;
-import com.example.model.Ghost;
-import com.example.model.Player;
-import com.example.model.Position;
-import com.example.model.TileType;
-import com.example.model.Sound;
+import com.example.model.*;
+
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
@@ -45,10 +38,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.stream.Collectors;
-import javafx.geometry.Insets;
 
 public class UI extends Application {
 
@@ -67,6 +58,7 @@ public class UI extends Application {
             Objects.requireNonNull(getClass().getResource("/tilesets/pacman-sprite-sheet.png")).toExternalForm());
     private final Image wallSpriteSheet = new Image(
             Objects.requireNonNull(getClass().getResource("/tilesets/chompermazetiles.png")).toExternalForm());
+    private final Map<Color, Image> coloredPlayerCache = new HashMap<>();
 
     private KeyHandler keyHandler;
 
@@ -76,18 +68,72 @@ public class UI extends Application {
 
     private boolean eatingDot = false;
 
-    record TilePos(int x, int y) {
-    }
+    private long animationTimeNanos = 0;
+
+    record TilePos(int x, int y) { }
 
     public static final String FONT_FAMILY = "Pixelated Elegance Regular";
 
     @Override
-    public void start(Stage stage) {
-        stage.setTitle("Pacman");
-        initializeLobby(stage);
+    public void stop() {
+        System.exit(0);
     }
 
-    private void initializeLobby(Stage stage) {
+    @Override
+    public void start(Stage stage) {
+        stage.setTitle("Pacman");
+        System.out.println("REMOTE_PUBLIC_URI: " + Constants.REMOTE_PUBLIC_URI + ", LOCAL_GATE: " + Constants.LOCAL_GATE);
+        precomputePlayerColors();
+        initializeMainMenu(stage);
+    }
+
+    private void precomputePlayerColors() {
+        Color[] playerColors = {
+            Color.rgb(255, 241, 0),  // Player 0 - Yellow
+            Color.rgb(255, 0, 0),    // Player 1 - Red
+            Color.rgb(0, 255, 0),    // Player 2 - Green
+            Color.rgb(0, 0, 255)     // Player 3 - Blue
+        };
+        for (Color color : playerColors) {
+            coloredPlayerCache.put(color, createColoredPlayerImage(color));
+        }
+    }
+
+    // Modified function from:
+    // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
+    private Image createColoredPlayerImage(Color color) {
+        int W = (int) spriteSheet.getWidth();
+        int H = (int) spriteSheet.getHeight();
+        WritableImage outputImage = new WritableImage(W, H);
+        PixelReader reader = spriteSheet.getPixelReader();
+        PixelWriter writer = outputImage.getPixelWriter();
+        int nr = (int) (color.getRed() * 255);
+        int ng = (int) (color.getGreen() * 255);
+        int nb = (int) (color.getBlue() * 255);
+        // Yellow (the player)
+        int or = 255;
+        int og = 241;
+        int ob = 0;
+        for (int y = 0; y < H; y++) {
+            for (int x = 350; x < 900; x++) {
+                int argb = reader.getArgb(x, y);
+                int a = (argb >> 24) & 0xFF;
+                int r = (argb >> 16) & 0xFF;
+                int g = (argb >> 8) & 0xFF;
+                int b = argb & 0xFF;
+                if (g == og && r == or && b == ob) {
+                    r = nr;
+                    g = ng;
+                    b = nb;
+                }
+                argb = (a << 24) | (r << 16) | (g << 8) | b;
+                writer.setArgb(x, y, argb);
+            }
+        }
+        return outputImage;
+    }
+
+    private void initializeMainMenu(Stage stage) {
         Canvas backgroundCanvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
         GraphicsContext bgGc = backgroundCanvas.getGraphicsContext2D();
         bgGc.setFill(Color.BLACK);
@@ -242,7 +288,7 @@ public class UI extends Application {
 
         startButton.setOnAction(e -> {
             startButton.setDisable(true);
-            
+
             Text waitingText = new Text("Waiting for server to register all players");
             waitingText.setFill(Color.YELLOW);
             waitingText.setStyle("-fx-font-size: 14px;");
@@ -295,7 +341,6 @@ public class UI extends Application {
         gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
         savedState = gameController.deepCopyGameState(gameState);
 
-        // final Group root = new Group();
         final StackPane root = new StackPane();
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
@@ -353,13 +398,19 @@ public class UI extends Application {
             if (startTime == 0) {
                 startTime = time;
             }
-            if (time - (startTime + Constants.timeOffset) < (Constants.clock + Constants.COUNTDOWN_DURATION_TICKS)
-                    * (1000000000 / TARGET_FPS)) {
-                return;
+
+            animationTimeNanos = time - startTime;
+
+            draw();
+
+            long tickDurationNanos = 1_000_000_000 / TARGET_FPS;
+            long elapsedSinceStart = time - (startTime + Constants.timeOffset);
+            long expectedTicksElapsed = Constants.clock + Constants.COUNTDOWN_DURATION_TICKS;
+            if (elapsedSinceStart < expectedTicksElapsed * tickDurationNanos) {
+                return; // Not time for next game tick yet
             }
+
             if (Constants.clock < 0) {
-                draw(time);
-                drawCountdown();
                 Constants.clock++;
                 return;
             }
@@ -373,17 +424,7 @@ public class UI extends Application {
                 gameState = gameController.updateGameState(gameState, ActionOfClock);
             }
 
-            // Proof that action is sent to game controller
-            /*
-             * if(ActionOfClock.size() != 0){
-             * for (Action a : ActionOfClock) {
-             * System.out.println(a.getMove() +" "+ a.clock());
-             * }
-             * }
-             */
             playSounds();
-            draw(time);
-
             Constants.clock++;
         }
 
@@ -391,17 +432,18 @@ public class UI extends Application {
             startTime = 0;
         }
 
-        private void draw(long time) {
+        private void draw() {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
             drawMap();
 
-            drawPlayers(time);
+            drawPlayers();
 
-            drawGhosts(time);
+            drawGhosts();
 
             if (gameState.winner() == null) {
+                if (Constants.clock < 0) drawCountdown();
                 drawPoints();
                 restartButton.setVisible(false);
             } else {
@@ -595,7 +637,13 @@ public class UI extends Application {
             }
         }
 
-        private void drawPlayers(long time) {
+        private void drawPlayers() {
+            EntityTracker entityTracker = gameState.entityTracker();
+            int pacmanFrameCount = 4;
+            long pacmanNanosPerFrame = 75_000_000L;
+            long powerupBlinkNanosPerUnit = 200_000_000L;
+            long invulnBlinkNanosPerUnit = 500_000_000L;
+
             gameState.players().forEach(player -> {
                 int sy = switch (player.getDirection()) {
                     case WEST -> 50 * 6;
@@ -604,19 +652,25 @@ public class UI extends Application {
                     default -> 0;
                 };
 
-                int pacmanFrame = (int) (time / 75000000.0) % 4;
+                int pacmanFrame = (int) ((animationTimeNanos / pacmanNanosPerFrame) % pacmanFrameCount);
                 sy = switch (pacmanFrame) {
                     case 0 -> sy;
                     case 2 -> sy + 50 * 2;
                     default -> sy + 50;
                 };
 
-                double remainingRatio = player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC;
-                remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
-                double blinkPeriodSec = 0.75 + remainingRatio;
-                double timeSec = (time - startTime) / 500_000_000.0;
-                int blinkFrame = (int) (timeSec / blinkPeriodSec) % 2;
-                if (player.getInvulnerableTimer() > 0.0 && blinkFrame == 1) sy = 50 * 12;
+                boolean hasPowerUp = entityTracker.isPowerOwner(player);
+
+                if (player.isInvulnerable() || hasPowerUp) {
+                    int blinkFrame;
+                    if (hasPowerUp) {
+                        blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.8, Constants.FRIGHTENED_DURATION_SEC);
+                    } else {
+                        blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.9, Constants.PLAYER_SPAWN_PROTECT_SEC);
+                    }
+
+                    if (blinkFrame == 1) sy = 50 * 12;
+                }
 
                 Image coloredPlayer = colorPlayer(player.getColor());
                 Position playerTilePos = player.getPosition();
@@ -640,42 +694,25 @@ public class UI extends Application {
             });
         }
 
-        // Modified function from:
-        // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
-        public Image colorPlayer(Color color) {
-            // public Image colorPlayer(int nr, int ng, int nb) {
-            int W = (int) spriteSheet.getWidth();
-            int H = (int) spriteSheet.getHeight();
-            WritableImage outputImage = new WritableImage(W, H);
-            PixelReader reader = spriteSheet.getPixelReader();
-            PixelWriter writer = outputImage.getPixelWriter();
-            int nr = (int) (color.getRed() * 255);
-            int ng = (int) (color.getGreen() * 255);
-            int nb = (int) (color.getBlue() * 255);
-            // Yellow (the player)
-            int or = 255;
-            int og = 241;
-            int ob = 0;
-            for (int y = 0; y < H; y++) {
-                for (int x = 350; x < 900; x++) {
-                    int argb = reader.getArgb(x, y);
-                    int a = (argb >> 24) & 0xFF;
-                    int r = (argb >> 16) & 0xFF;
-                    int g = (argb >> 8) & 0xFF;
-                    int b = argb & 0xFF;
-                    if (g == og && r == or && b == ob) {
-                        r = nr;
-                        g = ng;
-                        b = nb;
-                    }
-                    argb = (a << 24) | (r << 16) | (g << 8) | b;
-                    writer.setArgb(x, y, argb);
-                }
-            }
-            return outputImage;
+        private int getBlinkFrame(long nanosPerUnit, double remainingRatio, double endDelayRatio, double effectDurationSec) {
+            remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
+            long effectElapsedNanos = (long) ((1.0 - remainingRatio) * effectDurationSec * 1_000_000_000L);
+            double t = 1.0 - remainingRatio;
+            double adjustedRemainingRatio = 1.0 - t * t * t;
+            double halfPeriodUnits = endDelayRatio + adjustedRemainingRatio;
+            long halfPeriodNanos = Math.max(1_000_000L, (long) (halfPeriodUnits * nanosPerUnit));
+            System.out.println("Blink period: " + (halfPeriodNanos / 1_000_000L) + "ms");
+            return ((effectElapsedNanos / halfPeriodNanos) % 2 == 0) ? 0 : 1;
         }
 
-        private void drawGhosts(long time) {
+        private Image colorPlayer(Color color) {
+            return coloredPlayerCache.get(color);
+        }
+
+        private void drawGhosts() {
+            int ghostFrameCount = 2;
+            long ghostNanosPerFrame = 300_000_000L;
+
             gameState.ghosts().forEach(ghost -> {
                 int sy = 0, sx = 0;
                 switch (ghost.getDirection()) {
@@ -705,7 +742,7 @@ public class UI extends Application {
                     sx = 0;
                 }
 
-                int ghostFrame = (int) (time / 300000000.0) % 2;
+                int ghostFrame = (int) ((animationTimeNanos / ghostNanosPerFrame) % ghostFrameCount);
                 if (ghostFrame == 1) {
                     sy += 50;
                     if (fTimer > 0 && fTimer < 2.0)
@@ -725,13 +762,11 @@ public class UI extends Application {
         private void drawWall(int y, int x) {
             TileType[][] tiles = gameState.tiles();
 
-            // Check adjacent walls (cardinal directions)
             boolean n = isWall(tiles, y - 1, x);
             boolean s = isWall(tiles, y + 1, x);
             boolean e = isWall(tiles, y, x + 1);
             boolean w = isWall(tiles, y, x - 1);
 
-            // Check diagonal walls
             boolean ne = isWall(tiles, y - 1, x + 1);
             boolean nw = isWall(tiles, y - 1, x - 1);
             boolean se = isWall(tiles, y + 1, x + 1);
