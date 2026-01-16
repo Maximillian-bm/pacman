@@ -40,6 +40,23 @@ import java.util.stream.Collectors;
 
 public class UI extends Application {
 
+    // ===== Tick-based animation constants =====
+    // At TARGET_FPS=20, each tick = 50ms. Conversion: ticksPerFrame = round((nanos / 1e9) * TARGET_FPS)
+
+    // Pacman animation: original 75_000_000 ns/frame → (75ms * 20 FPS / 1000) ≈ 1.5, rounded to 2 ticks
+    private static final int PACMAN_FRAME_COUNT = 4;
+    private static final int PACMAN_TICKS_PER_FRAME = 2;
+
+    // Ghost animation: original 300_000_000 ns/frame → (300ms * 20 FPS / 1000) = 6 ticks
+    private static final int GHOST_FRAME_COUNT = 2;
+    private static final int GHOST_TICKS_PER_FRAME = 6;
+
+    // Blink animation base rates (ticks per "unit" for variable-rate blinking)
+    // Power-up blink: original 200_000_000 ns/unit → (200ms * 20 FPS / 1000) = 4 ticks
+    private static final int POWERUP_BLINK_TICKS_PER_UNIT = 4;
+    // Invulnerability blink: original 500_000_000 ns/unit → (500ms * 20 FPS / 1000) = 10 ticks
+    private static final int INVULN_BLINK_TICKS_PER_UNIT = 10;
+
     private final SoundEngine soundEngine = new SoundEngine();
 
     private final ConnectToLobby lobbyHandler = new ConnectToLobby();
@@ -65,6 +82,11 @@ public class UI extends Application {
     private boolean eatingDot = false;
 
     record TilePos(int x, int y) {
+    }
+
+    @Override
+    public void stop() {
+        System.exit(0);
     }
 
     @Override
@@ -163,7 +185,7 @@ public class UI extends Application {
             errorText.setText("");
             joinLobbyButton.setDisable(true);
 
-            new Thread(() -> {
+            Thread joinThread = new Thread(() -> {
                 try {
                     lobbyHandler.joinLobby(input);
                     javafx.application.Platform.runLater(() -> {
@@ -181,7 +203,9 @@ public class UI extends Application {
                         System.err.println(ex.getMessage());
                     });
                 }
-            }).start();
+            });
+            joinThread.setDaemon(true);
+            joinThread.start();
         });
 
         createLobby = () -> {
@@ -292,13 +316,24 @@ public class UI extends Application {
             if (startTime == 0) {
                 startTime = time;
             }
-            if (time - (startTime + Constants.timeOffset) < (Constants.clock + Constants.COUNTDOWN_DURATION_TICKS)
-                    * (1000000000 / TARGET_FPS)) {
-                return;
-            }
+
+            // === Rendering (runs at full AnimationTimer rate, typically 60 FPS) ===
+            draw();
             if (Constants.clock < 0) {
-                draw(time);
                 drawCountdown();
+            }
+
+            // === Game logic tick check (runs at TARGET_FPS = 20 FPS) ===
+            long tickDurationNanos = 1_000_000_000 / TARGET_FPS;
+            long elapsedSinceStart = time - (startTime + Constants.timeOffset);
+            long expectedTicksElapsed = Constants.clock + Constants.COUNTDOWN_DURATION_TICKS;
+            if (elapsedSinceStart < expectedTicksElapsed * tickDurationNanos) {
+                return; // Not time for next game tick yet
+            }
+
+            // === Game logic update (20 FPS) ===
+            if (Constants.clock < 0) {
+                // Countdown tick - just increment
                 Constants.clock++;
                 return;
             }
@@ -312,17 +347,7 @@ public class UI extends Application {
                 gameState = gameController.updateGameState(gameState, ActionOfClock);
             }
 
-            // Proof that action is sent to game controller
-            /*
-             * if(ActionOfClock.size() != 0){
-             * for (Action a : ActionOfClock) {
-             * System.out.println(a.getMove() +" "+ a.clock());
-             * }
-             * }
-             */
             playSounds();
-            draw(time);
-
             Constants.clock++;
         }
 
@@ -330,15 +355,15 @@ public class UI extends Application {
             startTime = 0;
         }
 
-        private void draw(long time) {
+        private void draw() {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
             drawMap();
 
-            drawPlayers(time);
+            drawPlayers();
 
-            drawGhosts(time);
+            drawGhosts();
 
             if (gameState.winner() == null) {
                 drawPoints();
@@ -522,8 +547,10 @@ public class UI extends Application {
             }
         }
 
-        private void drawPlayers(long time) {
+        private void drawPlayers() {
             EntityTracker entityTracker = gameState.entityTracker();
+            // Use absolute tick count (offset by countdown) for consistent animation across game states
+            int ticksSinceStart = Constants.clock + Constants.COUNTDOWN_DURATION_TICKS;
 
             gameState.players().forEach(player -> {
                 int sy = switch (player.getDirection()) {
@@ -533,19 +560,24 @@ public class UI extends Application {
                     default -> 0;
                 };
 
-                int pacmanFrame = (int) (time / 75000000.0) % 4;
+                // Tick-based pacman animation: cycles through 4 frames
+                int pacmanFrame = Math.floorMod(ticksSinceStart / PACMAN_TICKS_PER_FRAME, PACMAN_FRAME_COUNT);
                 sy = switch (pacmanFrame) {
                     case 0 -> sy;
                     case 2 -> sy + 50 * 2;
                     default -> sy + 50;
                 };
 
-                if (player.isInvulnerable() || entityTracker.isPowerOwner(player)) {
-                    double remainingRatio = player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC;
-                    remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
-                    double blinkPeriodSec = 0.75 + remainingRatio;
-                    double timeSec = (time - startTime) / 500_000_000.0;
-                    int blinkFrame = (int) (timeSec / blinkPeriodSec) % 2;
+                boolean hasPowerUp = entityTracker.isPowerOwner(player);
+
+                if (player.isInvulnerable() || hasPowerUp) {
+                    int blinkFrame;
+                    if (hasPowerUp) {
+                        blinkFrame = getBlinkFrame(POWERUP_BLINK_TICKS_PER_UNIT, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.8);
+                    } else {
+                        blinkFrame = getBlinkFrame(INVULN_BLINK_TICKS_PER_UNIT, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.9);
+                    }
+
                     if (blinkFrame == 1) sy = 50 * 12;
                 }
 
@@ -553,6 +585,31 @@ public class UI extends Application {
                 Position playerTilePos = player.getPosition();
                 gc.drawImage(coloredPlayer, 850, sy, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
             });
+        }
+
+        /**
+         * Tick-based blink frame calculation.
+         * @param ticksPerUnit Base ticks per blink "unit" (converted from original nanoseconds)
+         * @param remainingRatio Fraction of effect time remaining (0.0 to 1.0)
+         * @param endDelayRatio Minimum blink period multiplier when time is almost out
+         * @return 0 for normal sprite, 1 for blink sprite
+         */
+        private int getBlinkFrame(int ticksPerUnit, double remainingRatio, double endDelayRatio) {
+            // Clamp remaining ratio to [0, 1]
+            remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
+            // Apply quadratic curve to make blinking accelerate as time runs out
+            double t = 1.0 - remainingRatio;
+            remainingRatio = 1.0 - t * t;
+            // Blink period in "units" - ranges from endDelayRatio (fast) to endDelayRatio+1 (slow)
+            double blinkPeriodUnits = endDelayRatio + remainingRatio;
+
+            // Use tick count offset by countdown duration to get ticks since game start
+            int ticksSinceStart = Constants.clock + Constants.COUNTDOWN_DURATION_TICKS;
+            // Convert ticks to "units" for the blink calculation
+            double tickUnits = (double) ticksSinceStart / ticksPerUnit;
+            // Calculate position within blink cycle (full cycle = 2 * blinkPeriodUnits)
+            double cycleTime = tickUnits % (blinkPeriodUnits * 2.0);
+            return cycleTime < blinkPeriodUnits ? 0 : 1;
         }
 
         // Modified function from:
@@ -590,7 +647,10 @@ public class UI extends Application {
             return outputImage;
         }
 
-        private void drawGhosts(long time) {
+        private void drawGhosts() {
+            // Use absolute tick count (offset by countdown) for consistent animation across game states
+            int ticksSinceStart = Constants.clock + Constants.COUNTDOWN_DURATION_TICKS;
+
             gameState.ghosts().forEach(ghost -> {
                 int sy = 0, sx = 0;
                 switch (ghost.getDirection()) {
@@ -620,7 +680,8 @@ public class UI extends Application {
                     sx = 0;
                 }
 
-                int ghostFrame = (int) (time / 300000000.0) % 2;
+                // Tick-based ghost animation: cycles through 2 frames
+                int ghostFrame = Math.floorMod(ticksSinceStart / GHOST_TICKS_PER_FRAME, GHOST_FRAME_COUNT);
                 if (ghostFrame == 1) {
                     sy += 50;
                     if (fTimer > 0 && fTimer < 2.0)
