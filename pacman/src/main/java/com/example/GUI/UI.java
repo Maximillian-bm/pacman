@@ -9,6 +9,7 @@ import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
 import com.example.GameLogic.ClientGameController;
 import com.example.model.Action;
+import com.example.model.ActionList;
 import com.example.model.Constants;
 import com.example.model.Direction;
 import com.example.model.GameState;
@@ -17,6 +18,7 @@ import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
 import com.example.model.Sound;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javafx.animation.AnimationTimer;
@@ -29,6 +31,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.text.Font;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -43,6 +46,9 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.text.DecimalFormat;
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import javafx.geometry.Insets;
 
 public class UI extends Application {
 
@@ -72,6 +78,8 @@ public class UI extends Application {
 
     record TilePos(int x, int y) {
     }
+
+    public static final String FONT_FAMILY = "Pixelated Elegance Regular";
 
     @Override
     public void start(Stage stage) {
@@ -143,7 +151,7 @@ public class UI extends Application {
 
         Text header = new Text("Pacman");
         header.setFill(Color.WHITE);
-        header.setStyle("-fx-font: 48 arial;");
+        header.setStyle("-fx-font-size: 96px;");
 
         VBox startRoot = new VBox(
                 header,
@@ -160,6 +168,7 @@ public class UI extends Application {
                 root,
                 Constants.INIT_SCREEN_WIDTH,
                 Constants.INIT_SCREEN_HEIGHT);
+        startScene.getStylesheets().add("style.css");
 
         joinLobbyButton.setOnAction(e -> {
             soundEngine.play(Sound.EAT_FRUIT);
@@ -168,7 +177,7 @@ public class UI extends Application {
             errorText.setText("");
             joinLobbyButton.setDisable(true);
 
-            new Thread(() -> {
+            Thread joinThread = new Thread(() -> {
                 try {
                     lobbyHandler.joinLobby(input);
                     javafx.application.Platform.runLater(() -> {
@@ -186,7 +195,9 @@ public class UI extends Application {
                         System.err.println(ex.getMessage());
                     });
                 }
-            }).start();
+            });
+            joinThread.setDaemon(true);
+            joinThread.start();
         });
 
         createLobby = () -> {
@@ -197,14 +208,31 @@ public class UI extends Application {
 
             System.out.println("Creating lobby with " + playerCount + " number of player");
 
-            lobbyHandler.createLobby(Integer.parseInt(playerCount));
+            createLobbyButton.setDisable(true);
 
-            startRoot.getChildren().remove(joinLobbyV);
-            startRoot.getChildren().remove(createLobbyV);
+            Thread createThread = new Thread(() -> {
+                try {
+                    lobbyHandler.createLobby(Integer.parseInt(playerCount));
 
-            joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
-            startRoot.getChildren().add(startButton);
-            startRoot.getChildren().add(joinedLobbyText);
+                    javafx.application.Platform.runLater(() -> {
+                        startRoot.getChildren().remove(joinLobbyV);
+                        startRoot.getChildren().remove(createLobbyV);
+
+                        joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
+                        startRoot.getChildren().add(startButton);
+                        startRoot.getChildren().add(joinedLobbyText);
+                    });
+                } catch (Exception ex) {
+                    javafx.application.Platform.runLater(() -> {
+                        errorText.setText(ex.getMessage());
+                        createLobbyButton.setDisable(false);
+                        System.err.println("--- Create Failed ---");
+                        System.err.println(ex.getMessage());
+                    });
+                }
+            });
+            createThread.setDaemon(true);
+            createThread.start();
         };
 
         createLobbyButton.setOnAction(e -> {
@@ -213,8 +241,33 @@ public class UI extends Application {
         });
 
         startButton.setOnAction(e -> {
-            startLobby(stage);
-            soundEngine.play(Sound.START_MUSIC);
+            startButton.setDisable(true);
+            
+            Text waitingText = new Text("Waiting for server to register all players");
+            waitingText.setFill(Color.YELLOW);
+            waitingText.setStyle("-fx-font-size: 14px;");
+            startRoot.getChildren().add(waitingText);
+
+            Thread startThread = new Thread(() -> {
+                try {
+                    lobbyHandler.startGame();
+                    javafx.application.Platform.runLater(() -> {
+                        startRoot.getChildren().remove(waitingText);
+                        startGame(stage);
+                    });
+                } catch (Exception ex) {
+                    javafx.application.Platform.runLater(() -> {
+                        errorText.setText("Failed to start game: " + ex.getMessage());
+                        startButton.setDisable(false);
+                        startRoot.getChildren().remove(waitingText);
+                        System.err.println("--- Start Game Failed ---");
+                        System.err.println(ex.getMessage());
+                    });
+                }
+                soundEngine.play(Sound.START_MUSIC);
+            });
+            startThread.setDaemon(true);
+            startThread.start();
         });
 
         stage.setScene(startScene);
@@ -242,7 +295,8 @@ public class UI extends Application {
         gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
         savedState = gameController.deepCopyGameState(gameState);
 
-        final Group root = new Group();
+        // final Group root = new Group();
+        final StackPane root = new StackPane();
 
         final Scene scene = new Scene(root, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
@@ -253,11 +307,30 @@ public class UI extends Application {
 
         stage.setScene(scene);
 
-        canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
-        root.getChildren().add(canvas);
+        Button quitButton = new Button("QUIT");
+        quitButton.setPrefSize(200, 100);
+        quitButton.setTranslateX(Constants.INIT_SCREEN_WIDTH/100);
+        quitButton.setTranslateY(Constants.INIT_SCREEN_HEIGHT/50);
+        quitButton.setVisible(false);
 
-        final AnimationTimer tm = new GameAnimator();
-        tm.start();
+        final GameAnimator gameAnimator = new GameAnimator(quitButton);
+        gameAnimator.start();
+
+        stage.setOnCloseRequest(event -> {
+            lobbyHandler.quit();
+            gameAnimator.stop();
+            System.exit(0);
+        });
+
+        quitButton.setOnAction(e -> {
+            lobbyHandler.quit();
+            stage.close();
+        });
+
+        canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
+
+        root.getChildren().add(canvas);
+        root.getChildren().add(quitButton);
 
         gc = canvas.getGraphicsContext2D();
 
@@ -265,7 +338,13 @@ public class UI extends Application {
     }
 
     private class GameAnimator extends AnimationTimer {
-        long startTime = 0;
+        private Button restartButton;
+        private long startTime;
+
+        public GameAnimator(Button button) {
+            restartButton = button;
+            startTime = 0;
+        }
 
         @Override
         public void handle(long time) {
@@ -306,6 +385,10 @@ public class UI extends Application {
             Constants.clock++;
         }
 
+        public void resetTime() {
+            startTime = 0;
+        }
+
         private void draw(long time) {
             gc.setFill(Color.BLACK);
             gc.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -316,7 +399,37 @@ public class UI extends Application {
 
             drawGhosts(time);
 
-            drawPoints();
+            if (gameState.winner() == null) {
+                drawPoints();
+                restartButton.setVisible(false);
+            } else {
+                drawEndscreen();
+                restartButton.setVisible(true);
+            }
+        }
+
+        private void drawEndscreen() {
+            gc.setFill(Color.GRAY);
+            int padding = 150;
+            gc.fillRect(
+                Constants.INIT_SCREEN_WIDTH/2-padding,
+                Constants.INIT_SCREEN_HEIGHT/2-padding,
+                padding*2,
+                padding*2
+            );
+            gc.setFont(new javafx.scene.text.Font(24));
+            List<Player> players = gameState.players()
+                    .stream()
+                    .sorted(Comparator.comparing((Player p) -> p.getPoints()))
+                        .collect(Collectors.toList());
+            Collections.reverse(players);
+            for (int i = 0; i < players.size(); i++) {
+                gc.setFill(players.get(i).getColor());
+                gc.fillText("Score: " + players.get(i).getPoints(), 
+                    Constants.INIT_SCREEN_WIDTH/2-padding+100, 
+                    Constants.INIT_SCREEN_HEIGHT/2-padding+(i+2)*40
+                );
+            }
         }
 
         private void playSounds(){
@@ -374,9 +487,7 @@ public class UI extends Application {
             float seconds = -1 * (float) (Constants.clock) / Constants.TARGET_FPS;
 
             gc.setFill(playerColor);
-            gc.setFont(new javafx.scene.text.Font(80));
-            gc.fillText((int)seconds + "", Constants.INIT_SCREEN_WIDTH / 2 - 20, Constants.INIT_SCREEN_HEIGHT / 2 - 40);
-            gc.setFont(new javafx.scene.text.Font(80));
+            gc.setFont(new Font(FONT_FAMILY, 80));
             gc.fillText((int)seconds + "", Constants.INIT_SCREEN_WIDTH / 2 - 20, Constants.INIT_SCREEN_HEIGHT / 2 - 40);
 
             gc.fillRect(0, 0, Constants.INIT_SCREEN_WIDTH, 4);
@@ -389,7 +500,7 @@ public class UI extends Application {
             List<Player> players = gameState.players();
             for (int i = 0; i < players.size(); i++) {
                 gc.setFill(players.get(i).getColor());
-                gc.setFont(new javafx.scene.text.Font(20));
+                gc.setFont(new Font(FONT_FAMILY, 20));
 
                 StringBuilder hearts = new StringBuilder("");
                 for (int j = 0; j < players.get(i).getLives(); j++) {
