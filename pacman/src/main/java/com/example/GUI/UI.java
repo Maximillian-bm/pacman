@@ -324,7 +324,9 @@ public class UI extends Application {
 
         quitButton.setOnAction(e -> {
             lobbyHandler.quit();
+            gameAnimator.stop();
             stage.close();
+            System.exit(0);
         });
 
         canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
@@ -604,7 +606,23 @@ public class UI extends Application {
 
                 Image coloredPlayer = colorPlayer(player.getColor());
                 Position playerTilePos = player.getPosition();
-                gc.drawImage(coloredPlayer, 850, sy, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+
+                double rsTimer = player.getRespawnTimer();
+                if (rsTimer <= 0) {
+                    gc.drawImage(coloredPlayer, 850, sy, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                } else {
+                    double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC/11;
+                    float y = 0;
+                    for (int i = 1; i < 11; i++) {
+                        if (rsTimer < rsFrameInterval*i) {
+                            y = 50*(11-i);
+                            break;
+                        }
+                    }
+
+                    gc.drawImage(spriteSheet, 350, y, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                    // gc.drawImage(coloredPlayer, 0, 0, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                }
             });
         }
 
@@ -625,7 +643,7 @@ public class UI extends Application {
             int og = 241;
             int ob = 0;
             for (int y = 0; y < H; y++) {
-                for (int x = 850; x < 900; x++) {
+                for (int x = 350; x < 900; x++) {
                     int argb = reader.getArgb(x, y);
                     int a = (argb >> 24) & 0xFF;
                     int r = (argb >> 16) & 0xFF;
