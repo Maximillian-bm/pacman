@@ -688,7 +688,7 @@ public class UI extends Application {
                         }
                     }
 
-                    gc.drawImage(spriteSheet, 350, y, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                    gc.drawImage(coloredPlayer, 350, y, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
                     // gc.drawImage(coloredPlayer, 0, 0, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
                 }
             });
