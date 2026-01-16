@@ -28,6 +28,7 @@ public class LobbyActionHandler implements Runnable{
             try {
                 Action rawAction = ActionUtil.convertObjToAction(rawActions.get(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class)));
                 int tempClock = rawAction.clock();
+                System.out.println("got action "+actionCount+" with clock "+rawAction.clock());
                 ActionUtil.handleRawAction(clock, actionCount, rawAction, cleanActions);
                 actionCount++;
                 clock = (Math.max(tempClock, clock));

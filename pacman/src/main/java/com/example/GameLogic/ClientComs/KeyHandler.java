@@ -65,18 +65,22 @@ public class KeyHandler{
     }
 
     public void moveUp() {
+        System.out.println("Sending action with clock "+Constants.clock + Constants.actionOffset);
         ActionUtil.registerRawAction(new Action(playerID, Constants.clock + Constants.actionOffset, 3), rawActions);
     }
 
     public void moveDown() {
+        System.out.println("Sending action with clock "+Constants.clock + Constants.actionOffset);
         ActionUtil.registerRawAction(new Action(playerID, Constants.clock + Constants.actionOffset, 4), rawActions);
     }
 
     public void moveLeft() {
+        System.out.println("Sending action with clock "+Constants.clock + Constants.actionOffset);
         ActionUtil.registerRawAction(new Action(playerID, Constants.clock + Constants.actionOffset, 1), rawActions);
     }
 
     public void moveRight() {
+        System.out.println("Sending action with clock "+Constants.clock + Constants.actionOffset);
         ActionUtil.registerRawAction(new Action(playerID, Constants.clock + Constants.actionOffset, 2), rawActions);
     }
 }

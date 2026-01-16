@@ -320,19 +320,15 @@ public class UI extends Application {
                 gameState = gameController.updateGameStateFor(savedState, Constants.clock);
             } else {
                 List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
-                if (!ActionOfClock.isEmpty())
+                if (!ActionOfClock.isEmpty()){
                     savedState = gameController.deepCopyGameState(gameState);
+                    for (Action a : ActionOfClock) {
+                        System.out.println(a.getMove() +" "+ a.clock());
+                    }
+                }
                 gameState = gameController.updateGameState(gameState, ActionOfClock);
             }
-
-            // Proof that action is sent to game controller
-            /*
-             * if(ActionOfClock.size() != 0){
-             * for (Action a : ActionOfClock) {
-             * System.out.println(a.getMove() +" "+ a.clock());
-             * }
-             * }
-             */
+            
             playSounds();
             draw(time);
 

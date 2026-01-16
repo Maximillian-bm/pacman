@@ -38,6 +38,7 @@ public class Reader implements Runnable {
             while(running) {
                 Action action = ActionUtil.convertObjToAction(remoteActions.query(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new ActualField(nrOfActions)));
                 Constants.cleanActions.addAction(action);
+                System.out.println("got action "+action.getIndex()+" with clock "+action.clock());
                 nrOfActions++;
             }
         } catch (UnknownHostException e) {
