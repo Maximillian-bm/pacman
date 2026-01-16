@@ -110,44 +110,35 @@ public class ClientGameController extends GameController {
         int totalPoints = gameState.players().stream().mapToInt(Player::getPoints).sum();
 
         // Spawn cherry after ~70 pellets (700 points)
-        if (totalPoints >= 700) {
-            TileType[][] tiles = gameState.tiles();
-            boolean hasFruit = false;
-            for (TileType[] row : tiles) {
-                for (TileType t : row) {
-                    if (t == TileType.CHERRY || t == TileType.STRAWBERRY) {
-                        hasFruit = true;
-                        break;
+        if (totalPoints < 700) return;
+
+        if (entityTracker.isFruitOnMap()) return;
+
+        TileType[][] tiles = gameState.tiles();
+
+        // Collect empty tiles near center
+        int centerX = tiles[0].length / 2;
+        int centerY = tiles.length / 2;
+        int radius = 5;
+        List<int[]> candidates = new ArrayList<>();
+
+        for (int dy = -radius; dy <= radius; dy++) {
+            for (int dx = -radius; dx <= radius; dx++) {
+                int x = centerX + dx;
+                int y = centerY + dy;
+                if (x >= 0 && x < tiles[0].length && y >= 0 && y < tiles.length) {
+                    if (tiles[y][x] == TileType.EMPTY) {
+                        candidates.add(new int[]{x, y});
                     }
                 }
-                if (hasFruit) break;
             }
+        }
 
-            if (!hasFruit) {
-                // Collect empty tiles near center
-                int centerX = tiles[0].length / 2;
-                int centerY = tiles.length / 2;
-                int radius = 5;
-                List<int[]> candidates = new ArrayList<>();
-
-                for (int dy = -radius; dy <= radius; dy++) {
-                    for (int dx = -radius; dx <= radius; dx++) {
-                        int x = centerX + dx;
-                        int y = centerY + dy;
-                        if (x >= 0 && x < tiles[0].length && y >= 0 && y < tiles.length) {
-                            if (tiles[y][x] == TileType.EMPTY) {
-                                candidates.add(new int[]{x, y});
-                            }
-                        }
-                    }
-                }
-
-                if (!candidates.isEmpty()) {
-                    int index = Math.abs(gameState.clock() * 31) % candidates.size();
-                    int[] pos = candidates.get(index);
-                    tiles[pos[1]][pos[0]] = TileType.CHERRY;
-                }
-            }
+        if (!candidates.isEmpty()) {
+            int index = Math.abs(gameState.clock() * 31) % candidates.size();
+            int[] pos = candidates.get(index);
+            tiles[pos[1]][pos[0]] = TileType.CHERRY;
+            entityTracker.setFruitOnMap(true);
         }
     }
 
@@ -358,6 +349,7 @@ public class ClientGameController extends GameController {
             if (tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON) {
                 player.setAteFruit(true);
                 entityTracker.setFruitCooldownTimer(FRUIT_RESPAWN_DELAY_SEC);
+                entityTracker.setFruitOnMap(false);
             }
 
             boolean isPowerup = tiles[tileY][tileX] == TileType.ENERGIZER;
