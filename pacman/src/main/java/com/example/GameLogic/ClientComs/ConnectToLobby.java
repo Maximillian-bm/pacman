@@ -76,19 +76,17 @@ public class ConnectToLobby {
         } catch (Exception e) {
             return;
         }
-        startGame();
     }
 
     public void startGame() {
         try {
+            sync.put(playerID, "OK");
+            sync.query(new ActualField("START"));
 
             reader = new Reader(lobbyID);
             Thread t = new Thread(reader);
             t.setDaemon(true);
             t.start();
-
-            sync.put(playerID, "OK");
-            sync.query(new ActualField("START"));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

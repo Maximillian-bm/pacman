@@ -14,12 +14,13 @@ public class Lobby implements Runnable{
 
     private final SpaceRepository rep;
     private final int nrOfPlayers;
-    private final LobbyActionHandler actionHandler;
+    private LobbyActionHandler actionHandler;
     @Getter
     private final int lobbyID;
     @Getter
     private final long timeOfCreation;
     private final boolean[] readyForReplay;
+    private Space sync;
 
     public Lobby(SpaceRepository rep, int nrOfPlayers, int lobbyID, long timeOfCreation){
         this.lobbyID = lobbyID;
@@ -28,6 +29,7 @@ public class Lobby implements Runnable{
         this.actionHandler = new LobbyActionHandler(rep, lobbyID);
         this.timeOfCreation = timeOfCreation;
         this.readyForReplay = new boolean[nrOfPlayers];
+        this.sync = rep.get(lobbyID+"sync");
     }
 
     @Override
@@ -35,8 +37,6 @@ public class Lobby implements Runnable{
         Thread actionThread = new Thread(actionHandler);
         actionThread.setDaemon(true);
         actionThread.start();
-
-        Space sync = rep.get(lobbyID+"sync");
 
         for(int i = 0; i < nrOfPlayers; i++){
             try {
@@ -50,8 +50,6 @@ public class Lobby implements Runnable{
     }
 
     public void startGame(){
-
-        Space sync = rep.get(lobbyID+"sync");
 
         for(int i = 0; i < nrOfPlayers; i++){
             try {
@@ -76,7 +74,7 @@ public class Lobby implements Runnable{
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-        actionHandler.reStart();
+        actionHandler = new LobbyActionHandler(rep, lobbyID);
         Thread actionThread = new Thread(actionHandler);
         actionThread.setDaemon(true);
         actionThread.start();
@@ -87,7 +85,6 @@ public class Lobby implements Runnable{
     }
 
     public void checkForReplay() {
-        Space sync = rep.get(lobbyID+"sync");
         try {
 			Object[] t = sync.getp(new ActualField("START"));
             if(t == null){

@@ -279,6 +279,7 @@ public class UI extends Application {
             Constants.actionOffset = 6;
             Constants.timeOffset = 0;
             gameAnimator.resetTime();
+            lobbyHandler.startGame();
         });
 
         canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
