@@ -2,7 +2,63 @@ package com.example.ServerLogic;
 
 import java.util.*;
 
+import org.jspace.ActualField;
+import org.jspace.FormalField;
+import org.jspace.PileSpace;
+import org.jspace.QueueSpace;
+import org.jspace.RandomSpace;
+import org.jspace.Space;
+import org.jspace.SpaceRepository;
+
+import com.example.model.Constants;
+
 public class ServerController {
  
-    private List<Lobby> lobbys;
+    private static final List<Lobby> lobbys = new ArrayList<>();
+
+    private static final SpaceRepository rep = new SpaceRepository();
+
+    private static final Space space1 = new RandomSpace();
+
+    public static void main(String[] arg){
+        rep.addGate(Constants.LOCAL_GATE);
+        rep.add("space1", space1);
+        for(int i = 0; i < Constants.NR_OF_LOBBYS_CAP; i++){
+            try {
+                space1.put(i, 0, "FREE");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        LobbyCleaner lobbyCleaner = new LobbyCleaner(lobbys, space1);
+        Thread cleanerThread = new Thread(lobbyCleaner);
+        cleanerThread.setDaemon(true);
+        cleanerThread.start();
+        ServerIO serverIO = new ServerIO(lobbyCleaner);
+        Thread serverIOThread = new Thread(serverIO);
+        serverIOThread.setDaemon(true);
+        serverIOThread.start();
+
+        while(true){
+            try {
+                Object[] lobbyInstruction = space1.get(new FormalField(Integer.class), new FormalField(Integer.class), new ActualField("CREATE"));
+                int lobbyID = (int) lobbyInstruction[0];
+                System.out.println("creating lobby with id: "+lobbyID);
+                int nrOfPlayers = (int) lobbyInstruction[1];
+                rep.add(lobbyID+"sync", new RandomSpace());
+                rep.add(lobbyID+"rawAction", new QueueSpace());
+                rep.add(lobbyID+"cleanAction", new PileSpace());
+                Lobby lobby = new Lobby(rep, nrOfPlayers, lobbyID, System.currentTimeMillis());
+                space1.put(lobbyID, nrOfPlayers, "OK");
+                Thread lobbyThread = new Thread(lobby);
+                lobbyThread.setDaemon(true);
+                lobbyThread.start();
+                lobbyCleaner.addLobby(lobby);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+    }
 }

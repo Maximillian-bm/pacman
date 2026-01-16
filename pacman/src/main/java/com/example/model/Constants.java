@@ -1,23 +1,54 @@
 package com.example.model;
 
-import java.util.ArrayList;
-
-import org.jspace.SpaceRepository;
-
-import static com.example.model.Maps.map1;
+import static com.example.model.Maps.getCurrentLevelTiles;
 
 public class Constants {
-    public final static boolean online = false;
-    public final static ArrayList<Action> cleanActions = new ArrayList<>();
-    public final static String REMOTE_URI_CLEAN = "tcp://XXX.XXX.X.XXX/cleanAction?rep";
-    public final static String REMOTE_URI_RAW = "tcp://XXX.XXX.X.XXX/rawAction?rep";
-    public final static String GATE_URI = "tcp://XXX.XXX.X.XXX/?rep";
+    //Constants
+    public final static long LOBBY_TTL = 300000;
+    public final static int NR_OF_LOBBYS_CAP = 100;
+    public static ActionList cleanActions = new ActionList();
 
-    public final static int TILE_SIZE = 48;
+    public static String REMOTE_PUBLIC_URI;
+    public static String LOCAL_GATE;
+    static { // Run with: 'mvn javafx:run -Djvm.options="-Doffline=true"' for offline mode
+        if (System.getProperty("offline") != null) {
+            REMOTE_PUBLIC_URI = "tcp://127.0.0.1:50000/?keep";
+            LOCAL_GATE = "tcp://127.0.0.1:50000/?keep";
+        } else {
+            REMOTE_PUBLIC_URI = "tcp://pacman.maximillian.info:50000/?keep";
+            LOCAL_GATE = "tcp://192.168.1.112:50000/?keep";
+        }
+    }
+
+
+    public final static int TILES_WIDE = getCurrentLevelTiles()[0].length;
+    public final static int TILES_TALL = getCurrentLevelTiles().length;
+    public final static int TILE_SIZE = 800 / TILES_TALL;
+    public final static int INIT_SCREEN_WIDTH = TILES_WIDE * TILE_SIZE;
+    public final static int INIT_SCREEN_HEIGHT = TILES_TALL * TILE_SIZE;
+
+    public final static long TARGET_FPS = 20;
+    public static final double CENTER_EPS_PX = 1.5;
+
+    public final static int COUNTDOWN_DURATION_TICKS = 60;
+    public static final double COLLISION_DISTANCE_PVG = TILE_SIZE/2;
+    public static final double COLLISION_DISTANCE_PVP = TILE_SIZE;
+
+    public static final double FRUIT_RESPAWN_DELAY_SEC = 5.0;
+
+    // Player
     public final static int PLAYER_LIVES = 3;
-    public final static double PLAYER_SPEED = 250;
+    public final static double PLAYER_SPEED = 175;
+    public final static double PLAYER_FRIGHTENED_SPEED = 150;
+    public final static double PLAYER_SPAWN_PROTECT_SEC = 2.0;
+    public static final double PLAYER_RESPAWN_DELAY_SEC = 2.0;
 
-    public final static int INIT_SCREEN_WIDTH = map1[0].length * TILE_SIZE;
-    public final static int INIT_SCREEN_HEIGHT = map1.length * TILE_SIZE;
-    public final static int TARGET_FPS = 30;
+    // Ghost
+    public static final double GHOST_RESPAWN_DELAY_SEC  = 8.0;
+    public final static double FRIGHTENED_DURATION_SEC = 8.0;
+
+    //Varibles
+    public static int clock = -COUNTDOWN_DURATION_TICKS;
+    public static int actionOffset = 6;
+    public static long timeOffset = 0;
 }
