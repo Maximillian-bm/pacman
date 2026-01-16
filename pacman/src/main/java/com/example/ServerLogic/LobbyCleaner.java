@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jspace.ActualField;
+import org.jspace.FormalField;
 import org.jspace.Space;
 
 import com.example.model.Constants;
@@ -34,14 +35,14 @@ public class LobbyCleaner implements Runnable{
             for (Lobby lobby : lobbys) {
                 try {
                     Space sync = lobby.getRep().get(lobby.getLobbyID()+"sync");
-                    Object[] t = sync.getp(new ActualField("QUIT"));
+                    Object[] t = sync.getp(new FormalField(Integer.class), new FormalField(Integer.class), new ActualField("QUIT"));
                     if(t != null){
                         int lobbyID = lobby.getLobbyID();
                         lobby.stop();
                         toBeRemoved.add(lobby);
                         System.out.println("Closing lobby "+lobby.getLobbyID()+" due to player quiting");
                         try {
-                            space1.put(lobbyID);
+                            space1.put(lobbyID, 0, "FREE");
                         } catch (InterruptedException e1) {
                             e1.printStackTrace();
                         }
@@ -56,7 +57,7 @@ public class LobbyCleaner implements Runnable{
                     toBeRemoved.add(lobby);
                     System.out.println("Closing lobby "+lobby.getLobbyID()+" due to exeeded TTL");
                     try {
-                        space1.put(lobbyID);
+                        space1.put(lobbyID, 0, "FREE");
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -79,7 +80,7 @@ public class LobbyCleaner implements Runnable{
                 lobby.stop();
                 toBeRemoved.add(lobby);
                 try {
-                    space1.put(lobby.getLobbyID());
+                    space1.put(lobby.getLobbyID(), 0, "FREE");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

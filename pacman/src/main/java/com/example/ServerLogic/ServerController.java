@@ -2,6 +2,7 @@ package com.example.ServerLogic;
 
 import java.util.*;
 
+import org.jspace.ActualField;
 import org.jspace.FormalField;
 import org.jspace.PileSpace;
 import org.jspace.QueueSpace;
@@ -24,7 +25,7 @@ public class ServerController {
         rep.add("space1", space1);
         for(int i = 0; i < Constants.NR_OF_LOBBYS_CAP; i++){
             try {
-                space1.put(i);
+                space1.put(i, 0, "FREE");
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -41,7 +42,7 @@ public class ServerController {
 
         while(true){
             try {
-                Object[] lobbyInstruction = space1.get(new FormalField(Integer.class), new FormalField(Integer.class));
+                Object[] lobbyInstruction = space1.get(new FormalField(Integer.class), new FormalField(Integer.class), new ActualField("CREATE"));
                 int lobbyID = (int) lobbyInstruction[0];
                 System.out.println("creating lobby with id: "+lobbyID);
                 int nrOfPlayers = (int) lobbyInstruction[1];
