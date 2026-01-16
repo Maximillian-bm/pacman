@@ -1,0 +1,30 @@
+@font-face {
+    src: url('fonts/PixelatedEleganceRegular-ovyAA.ttf');
+}
+
+.text {
+	-fx-font-family: 'PixelatedEleganceRegular';
+    /* font-family: 'PixelatedEleganceRegular'; */
+}
+
+.text-field {
+	-fx-font-family: 'PixelatedElegance';
+	-fx-background-color: black;
+	-fx-border-color: blue;
+	-fx-mid-text-color: white;
+}
+
+.choice-box .context-menu {
+	-fx-background-color: black;
+	-fx-border-color: blue;
+}
+
+.choice-box {
+	-fx-background-color: black;
+	-fx-border-color: blue;
+	-fx-border-width: 1;
+	-fx-border-style: solid;
+	-fx-mid-text-color: white;
+	-fx-light-text-color: white;
+	-fx-mark-color: white;
+}
