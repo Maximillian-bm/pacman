@@ -32,17 +32,6 @@ public class LobbyCleaner implements Runnable{
             }
             List<Lobby> toBeRemoved = new ArrayList<>();
             for (Lobby lobby : lobbys) {
-                if(System.currentTimeMillis() - lobby.getTimeOfCreation() > Constants.LOBBY_TTL){
-                    int lobbyID = lobby.getLobbyID();
-                    lobby.stop();
-                    toBeRemoved.add(lobby);
-                    System.out.println("Closing lobby "+lobby.getLobbyID()+" due to exeeded TTL");
-                    try {
-                        space1.put(lobbyID);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
                 try {
                     Space sync = lobby.getRep().get(lobby.getLobbyID()+"sync");
                     Object[] t = sync.getp(new ActualField("QUIT"));
@@ -60,6 +49,17 @@ public class LobbyCleaner implements Runnable{
                 } catch (Exception e) {
                     System.out.println("tried to check lobby "+lobby.getLobbyID()+" but it was already deleted");
                     //e.printStackTrace();
+                }
+                if(System.currentTimeMillis() - lobby.getTimeOfCreation() > Constants.LOBBY_TTL){
+                    int lobbyID = lobby.getLobbyID();
+                    lobby.stop();
+                    toBeRemoved.add(lobby);
+                    System.out.println("Closing lobby "+lobby.getLobbyID()+" due to exeeded TTL");
+                    try {
+                        space1.put(lobbyID);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             if(showActiveLobbys){
