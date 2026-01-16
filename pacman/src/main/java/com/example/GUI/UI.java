@@ -42,22 +42,22 @@ import java.util.stream.Collectors;
 
 public class UI extends Application {
 
-    // ===== Tick-based animation constants =====
-    // At TARGET_FPS=20, each tick = 50ms. Conversion: ticksPerFrame = round((nanos / 1e9) * TARGET_FPS)
+    // ===== Wall-clock animation constants (nanoseconds) =====
+    // These are independent of game tick rate, using real time for smooth animations
 
-    // Pacman animation: original 75_000_000 ns/frame → (75ms * 20 FPS / 1000) ≈ 1.5, rounded to 2 ticks
+    // Pacman animation: 75ms per frame, 4 frames total
     private static final int PACMAN_FRAME_COUNT = 4;
-    private static final int PACMAN_TICKS_PER_FRAME = 2;
+    private static final long PACMAN_NANOS_PER_FRAME = 75_000_000L;
 
-    // Ghost animation: original 300_000_000 ns/frame → (300ms * 20 FPS / 1000) = 6 ticks
+    // Ghost animation: 300ms per frame, 2 frames total
     private static final int GHOST_FRAME_COUNT = 2;
-    private static final int GHOST_TICKS_PER_FRAME = 6;
+    private static final long GHOST_NANOS_PER_FRAME = 300_000_000L;
 
-    // Blink animation base rates (ticks per "unit" for variable-rate blinking)
-    // Power-up blink: original 200_000_000 ns/unit → (200ms * 20 FPS / 1000) = 4 ticks
-    private static final int POWERUP_BLINK_TICKS_PER_UNIT = 4;
-    // Invulnerability blink: original 500_000_000 ns/unit → (500ms * 20 FPS / 1000) = 10 ticks
-    private static final int INVULN_BLINK_TICKS_PER_UNIT = 10;
+    // Blink animation base rates (nanoseconds per "unit" for variable-rate blinking)
+    // Power-up blink: 200ms per unit
+    private static final long POWERUP_BLINK_NANOS_PER_UNIT = 200_000_000L;
+    // Invulnerability blink: 500ms per unit
+    private static final long INVULN_BLINK_NANOS_PER_UNIT = 500_000_000L;
 
     private final SoundEngine soundEngine = new SoundEngine();
 
@@ -83,6 +83,9 @@ public class UI extends Application {
     private Text notificationText;
 
     private boolean eatingDot = false;
+
+    // Wall-clock time for animations (nanoseconds since animation start)
+    private long animationTimeNanos = 0;
 
     record TilePos(int x, int y) {
     }
@@ -386,6 +389,9 @@ public class UI extends Application {
                 startTime = time;
             }
 
+            // Update animation time (wall-clock based, independent of game ticks)
+            animationTimeNanos = time - startTime;
+
             // === Rendering (runs at full AnimationTimer rate, typically 60 FPS) ===
             draw();
             if (Constants.clock < 0) {
@@ -618,8 +624,6 @@ public class UI extends Application {
 
         private void drawPlayers() {
             EntityTracker entityTracker = gameState.entityTracker();
-            // Use absolute tick count (offset by countdown) for consistent animation across game states
-            int ticksSinceStart = Constants.clock + Constants.COUNTDOWN_DURATION_TICKS;
 
             gameState.players().forEach(player -> {
                 int sy = switch (player.getDirection()) {
@@ -629,8 +633,8 @@ public class UI extends Application {
                     default -> 0;
                 };
 
-                // Tick-based pacman animation: cycles through 4 frames
-                int pacmanFrame = Math.floorMod(ticksSinceStart / PACMAN_TICKS_PER_FRAME, PACMAN_FRAME_COUNT);
+                // Wall-clock pacman animation: cycles through 4 frames
+                int pacmanFrame = (int) ((animationTimeNanos / PACMAN_NANOS_PER_FRAME) % PACMAN_FRAME_COUNT);
                 sy = switch (pacmanFrame) {
                     case 0 -> sy;
                     case 2 -> sy + 50 * 2;
@@ -642,9 +646,9 @@ public class UI extends Application {
                 if (player.isInvulnerable() || hasPowerUp) {
                     int blinkFrame;
                     if (hasPowerUp) {
-                        blinkFrame = getBlinkFrame(POWERUP_BLINK_TICKS_PER_UNIT, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.8);
+                        blinkFrame = getBlinkFrame(POWERUP_BLINK_NANOS_PER_UNIT, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.8);
                     } else {
-                        blinkFrame = getBlinkFrame(INVULN_BLINK_TICKS_PER_UNIT, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.9);
+                        blinkFrame = getBlinkFrame(INVULN_BLINK_NANOS_PER_UNIT, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.9);
                     }
 
                     if (blinkFrame == 1) sy = 50 * 12;
@@ -657,24 +661,23 @@ public class UI extends Application {
         }
 
         /**
-         * Tick-based blink frame calculation.
-         * @param ticksPerUnit Base ticks per blink "unit" (converted from original nanoseconds)
+         * Wall-clock blink frame calculation.
+         * @param nanosPerUnit Base nanoseconds per blink "unit"
          * @param remainingRatio Fraction of effect time remaining (0.0 to 1.0)
          * @param endDelayRatio Minimum blink period multiplier when time is almost out
          * @return 0 for normal sprite, 1 for blink sprite
          */
-        private int getBlinkFrame(int ticksPerUnit, double remainingRatio, double endDelayRatio) {
+        private int getBlinkFrame(long nanosPerUnit, double remainingRatio, double endDelayRatio) {
             remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
-            // accelerate blinking as time runs out (your existing curve)
+            // accelerate blinking as time runs out
             double t = 1.0 - remainingRatio;
             remainingRatio = 1.0 - t * t;
             // half-period in "units"
             double halfPeriodUnits = endDelayRatio + remainingRatio;
-            int ticksSinceStart = Constants.clock + Constants.COUNTDOWN_DURATION_TICKS;
-            // Convert half-period to ticks and clamp to >= 1 tick
-            int halfPeriodTicks = Math.max(1, (int) Math.round(halfPeriodUnits * ticksPerUnit));
-            // Toggle every halfPeriodTicks ticks
-            return ((ticksSinceStart / halfPeriodTicks) % 2 == 0) ? 0 : 1;
+            // Convert half-period to nanoseconds and clamp to >= 1ms
+            long halfPeriodNanos = Math.max(1_000_000L, (long) (halfPeriodUnits * nanosPerUnit));
+            // Toggle every halfPeriodNanos nanoseconds
+            return ((animationTimeNanos / halfPeriodNanos) % 2 == 0) ? 0 : 1;
         }
 
         private Image colorPlayer(Color color) {
@@ -682,9 +685,6 @@ public class UI extends Application {
         }
 
         private void drawGhosts() {
-            // Use absolute tick count (offset by countdown) for consistent animation across game states
-            int ticksSinceStart = Constants.clock + Constants.COUNTDOWN_DURATION_TICKS;
-
             gameState.ghosts().forEach(ghost -> {
                 int sy = 0, sx = 0;
                 switch (ghost.getDirection()) {
@@ -714,8 +714,8 @@ public class UI extends Application {
                     sx = 0;
                 }
 
-                // Tick-based ghost animation: cycles through 2 frames
-                int ghostFrame = Math.floorMod(ticksSinceStart / GHOST_TICKS_PER_FRAME, GHOST_FRAME_COUNT);
+                // Wall-clock ghost animation: cycles through 2 frames
+                int ghostFrame = (int) ((animationTimeNanos / GHOST_NANOS_PER_FRAME) % GHOST_FRAME_COUNT);
                 if (ghostFrame == 1) {
                     sy += 50;
                     if (fTimer > 0 && fTimer < 2.0)
