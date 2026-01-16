@@ -624,13 +624,13 @@ public class UI extends Application {
                 case 10 -> // E+W
                     drawTileFromTileset(gc, wallSpriteSheet, 8, 0, destX, destY);
                 case 11 -> // N+E+W
-                    drawTileFromTileset(gc, wallSpriteSheet, 4, 2, destX, destY);
+                    drawTileFromTileset(gc, wallSpriteSheet, nw || ne ? 1 : 4, 2, destX, destY);
                 case 12 -> // S+W
                     drawTileFromTileset(gc, wallSpriteSheet, sw ? 2 : 5, 0, destX, destY);
                 case 13 -> // N+S+W
                     drawTileFromTileset(gc, wallSpriteSheet, 5, 1, destX, destY);
                 case 14 -> // E+S+W
-                    drawTileFromTileset(gc, wallSpriteSheet, 4, 0, destX, destY);
+                    drawTileFromTileset(gc, wallSpriteSheet, sw || se ? 1 : 4, 0, destX, destY);
                 case 15 -> // N+E+S+W (all cardinal directions)
                     drawCrossWall(destX, destY, ne, nw, se, sw);
             }
