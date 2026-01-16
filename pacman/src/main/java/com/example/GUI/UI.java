@@ -173,7 +173,7 @@ public class UI extends Application {
             errorText.setText("");
             joinLobbyButton.setDisable(true);
 
-            new Thread(() -> {
+            Thread joinThread = new Thread(() -> {
                 try {
                     lobbyHandler.joinLobby(input);
                     javafx.application.Platform.runLater(() -> {
@@ -191,7 +191,9 @@ public class UI extends Application {
                         System.err.println(ex.getMessage());
                     });
                 }
-            }).start();
+            });
+            joinThread.setDaemon(true);
+            joinThread.start();
         });
 
         createLobby = () -> {
@@ -214,7 +216,9 @@ public class UI extends Application {
 
         createLobbyButton.setOnAction(e -> {
             soundEngine.play(Sound.EAT_FRUIT);
-            createLobby.run();
+            Thread t = new Thread(createLobby);
+            t.setDaemon(true);
+            t.start();
         });
 
         startButton.setOnAction(e -> {
