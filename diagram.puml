@@ -129,6 +129,7 @@ package "GUI" {
       + TilePos(x: int, y: int): record
       + stop(): void
       + start(stage: Stage): void
+      - colorPlayer(color: Color): Image
       - precomputePlayerColors(): void
       - createColoredPlayerImage(color: Color): Image
       - initializeMainMenu(stage: Stage): void
@@ -174,16 +175,17 @@ package "model" {
       + TILE_SIZE: int
       + INIT_SCREEN_WIDTH: int
       + INIT_SCREEN_HEIGHT: int
-      + PLAYER_RESPAWN_DELAY_SEC: double
       + TARGET_FPS: long
       + CENTER_EPS_PX: double
       + COUNTDOWN_DURATION_TICKS: int
       + COLLISION_DISTANCE_PVG: double
       + COLLISION_DISTANCE_PVP: double
+      + FRUIT_RESPAWN_DELAY_SEC: double
       + PLAYER_LIVES: int
       + PLAYER_SPEED: double
       + PLAYER_FRIGHTENED_SPEED: double
       + PLAYER_SPAWN_PROTECT_SEC: double
+      + PLAYER_RESPAWN_DELAY_SEC: double
       + GHOST_RESPAWN_DELAY_SEC: double
       + FRIGHTENED_DURATION_SEC: double
       + clock: int
@@ -210,6 +212,8 @@ package "model" {
       - ghostChaseTimer: double
       - frightenedTimerSec: double
       - powerOwnerId: int
+      - fruitCooldownTimer: double
+      - fruitOnMap: boolean
       + clearPowerOwner(): void
       + isAnyPowerActive(): boolean
       + isPowerOwner(p: Player): boolean
@@ -233,10 +237,11 @@ package "model" {
       + name: String
   }
     class Maps {
-      - currentLevel: Levels
+      - currentLevel: Level
       + getCurrentLevelTiles(): TileType
       + getGhostSpawnTile(ghostType: GhostType): Pair
       + getPlayerSpawnTile(playerId: int): Pair
+      + getFruitToSpawn(totalPoints: int): TileType
       + incrementLevel(): void
   }
     class Player extends Entity {
@@ -252,6 +257,7 @@ package "model" {
       - ateFruit: boolean
       - ateGhost: boolean
       - atePowerUp: boolean
+      - deadWithNoHearts: boolean
       + addPoints(points: int): void
       + resetGhostsEatenThisEnergizer(): void
       + eatGhost(): void
