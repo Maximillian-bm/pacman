@@ -895,12 +895,6 @@ public class ClientGameController extends GameController {
 
                 int livesLeft = player.loseLife();
 
-                if (livesLeft <= 0) {
-                    player.setAlive(false);
-                    player.setIntendedDirection(null);
-                    break;
-                }
-
                 player.setAlive(false);
                 player.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
                 player.setIntendedDirection(null);
@@ -1042,12 +1036,6 @@ public class ClientGameController extends GameController {
 
         int livesLeft = Math.max(0, victim.getLives() - 1);
         victim.setLives(livesLeft);
-
-        if (livesLeft <= 0) {
-            victim.setAlive(false);
-            victim.setIntendedDirection(null);
-            return;
-        }
 
         victim.setAlive(false);
         victim.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
