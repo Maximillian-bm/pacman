@@ -173,7 +173,7 @@ public class UI extends Application {
             errorText.setText("");
             joinLobbyButton.setDisable(true);
 
-            new Thread(() -> {
+            Thread joinThread = new Thread(() -> {
                 try {
                     lobbyHandler.joinLobby(input);
                     javafx.application.Platform.runLater(() -> {
@@ -191,7 +191,9 @@ public class UI extends Application {
                         System.err.println(ex.getMessage());
                     });
                 }
-            }).start();
+            });
+            joinThread.setDaemon(true);
+            joinThread.start();
         });
 
         createLobby = () -> {
@@ -202,14 +204,31 @@ public class UI extends Application {
 
             System.out.println("Creating lobby with " + playerCount + " number of player");
 
-            lobbyHandler.createLobby(Integer.parseInt(playerCount));
+            createLobbyButton.setDisable(true);
 
-            startRoot.getChildren().remove(joinLobbyV);
-            startRoot.getChildren().remove(createLobbyV);
+            Thread createThread = new Thread(() -> {
+                try {
+                    lobbyHandler.createLobby(Integer.parseInt(playerCount));
 
-            joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
-            startRoot.getChildren().add(startButton);
-            startRoot.getChildren().add(joinedLobbyText);
+                    javafx.application.Platform.runLater(() -> {
+                        startRoot.getChildren().remove(joinLobbyV);
+                        startRoot.getChildren().remove(createLobbyV);
+
+                        joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
+                        startRoot.getChildren().add(startButton);
+                        startRoot.getChildren().add(joinedLobbyText);
+                    });
+                } catch (Exception ex) {
+                    javafx.application.Platform.runLater(() -> {
+                        errorText.setText(ex.getMessage());
+                        createLobbyButton.setDisable(false);
+                        System.err.println("--- Create Failed ---");
+                        System.err.println(ex.getMessage());
+                    });
+                }
+            });
+            createThread.setDaemon(true);
+            createThread.start();
         };
 
         createLobbyButton.setOnAction(e -> {
@@ -244,9 +263,6 @@ public class UI extends Application {
     }
 
     private void startGame(Stage stage) {
-        stage.setOnCloseRequest(event -> {
-            lobbyHandler.quit();
-        });
         gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
         savedState = gameController.deepCopyGameState(gameState);
 
@@ -262,16 +278,22 @@ public class UI extends Application {
 
         stage.setScene(scene);
 
-        Button restartButton = new Button("QUIT");
-        restartButton.setPrefSize(200, 100);
-        restartButton.setTranslateX(Constants.INIT_SCREEN_WIDTH/100);
-        restartButton.setTranslateY(Constants.INIT_SCREEN_HEIGHT/50);
-        restartButton.setVisible(false);
+        Button quitButton = new Button("QUIT");
+        quitButton.setPrefSize(200, 100);
+        quitButton.setTranslateX(Constants.INIT_SCREEN_WIDTH/100);
+        quitButton.setTranslateY(Constants.INIT_SCREEN_HEIGHT/50);
+        quitButton.setVisible(false);
 
-        final GameAnimator gameAnimator = new GameAnimator(restartButton);
+        final GameAnimator gameAnimator = new GameAnimator(quitButton);
         gameAnimator.start();
 
-        restartButton.setOnAction(e -> {
+        stage.setOnCloseRequest(event -> {
+            lobbyHandler.quit();
+            gameAnimator.stop();
+            System.exit(0);
+        });
+
+        quitButton.setOnAction(e -> {
             lobbyHandler.quit();
             stage.close();
         });
@@ -279,7 +301,7 @@ public class UI extends Application {
         canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
         root.getChildren().add(canvas);
-        root.getChildren().add(restartButton);
+        root.getChildren().add(quitButton);
 
         gc = canvas.getGraphicsContext2D();
 
