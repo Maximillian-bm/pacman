@@ -27,11 +27,11 @@ public class ConnectToLobby {
     public void createLobby(int nrOfPlayers) {
         try {
             Space space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
-            lobbyID = (int) space1.get(new FormalField(Integer.class))[0];
-            space1.put(lobbyID, nrOfPlayers);
+            lobbyID = (int) space1.get(new FormalField(Integer.class), new ActualField(0), new ActualField("FREE"))[0];
+            space1.put(lobbyID, nrOfPlayers, "CREATE");
             space1.get(new ActualField(lobbyID), new ActualField(nrOfPlayers), new ActualField("OK"));
             sync = new RemoteSpace(URIUtil.getSyncURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
-            Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
+            Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class), new ActualField("PLAYERID"));
             playerID = (int) t[0];
             this.nrOfPlayers = (int) t[1];
         } catch (Exception e) {
@@ -44,7 +44,7 @@ public class ConnectToLobby {
         try {
             this.lobbyID = Integer.parseInt(lobbyID);
             sync = new RemoteSpace(URIUtil.getSyncURI(Constants.REMOTE_PUBLIC_URI, this.lobbyID));
-            Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class));
+            Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class), new ActualField("PLAYERID"));
             playerID = (int) t[0];
             nrOfPlayers = (int) t[1];
         } catch (NumberFormatException e) {
@@ -83,8 +83,8 @@ public class ConnectToLobby {
             t.setDaemon(true);
             t.start();
 
-            sync.put(playerID, "OK");
-            sync.query(new ActualField("START"));
+            sync.put(playerID, nrOfPlayers, "OK");
+            sync.query(new ActualField(0), new ActualField(nrOfPlayers), new ActualField("START"));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -94,7 +94,7 @@ public class ConnectToLobby {
     public void quit() {
         reader.stop();
         try {
-            sync.put("QUIT");
+            sync.put(playerID, nrOfPlayers, "QUIT");
         } catch (Exception e) {
             return;
         }
