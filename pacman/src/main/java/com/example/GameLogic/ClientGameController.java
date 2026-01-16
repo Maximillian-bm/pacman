@@ -100,10 +100,7 @@ public class ClientGameController extends GameController {
 
     private void handleFruitSpawning(GameState gameState) {
         // Count total points earned (approximation for pellets eaten)
-        int totalPoints = 0;
-        for (Player p : gameState.players()) {
-            totalPoints += p.getPoints();
-        }
+        int totalPoints = gameState.players().stream().mapToInt(Player::getPoints).sum();
 
         // Spawn cherry after ~70 pellets (700 points)
         if (totalPoints >= 700) {
