@@ -269,7 +269,7 @@ public class UI extends Application {
         gameAnimator.start();
 
         restartButton.setOnAction(e -> {
-            lobbyHandler.startGame();
+            lobbyHandler.replay();
             Constants.cleanActions = new ActionList();
             gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
             Constants.clock = -Constants.COUNTDOWN_DURATION_TICKS;
