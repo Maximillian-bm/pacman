@@ -54,13 +54,16 @@ public class GhostLogicTest extends BaseTest {
             }
         }
         boxMap[2][2] = TileType.EMPTY;
+        boxMap[4][4] = TileType.PAC_DOT; // Prevent win condition reset
+        for(Player p : state.players()) p.setPosition(new Position(0,0));
 
         GameState boxState = new GameState(
             0,
             state.players(),
             state.ghosts(),
             boxMap,
-            null
+            null,
+            state.entityTracker().copy()
         );
 
         Ghost g = boxState.ghosts().getFirst();

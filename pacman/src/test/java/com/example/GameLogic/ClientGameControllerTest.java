@@ -654,7 +654,8 @@ public class ClientGameControllerTest extends BaseTest {
             initialState.players(),
             initialState.ghosts(),
             initialState.tiles(),
-            null
+            null,
+            initialState.entityTracker().copy()
         );
 
         GameState nextState = controller.updateGameState(highClockState, new ArrayList<>());
@@ -921,7 +922,7 @@ public class ClientGameControllerTest extends BaseTest {
     public void testUpdateGameStateForClockRegression() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
-        GameState futureState = new GameState(10, initialState.players(), initialState.ghosts(), initialState.tiles(), null);
+        GameState futureState = new GameState(10, initialState.players(), initialState.ghosts(), initialState.tiles(), null, initialState.entityTracker().copy());
         
         // tarclock (5) < futureState.clock() (10)
         GameState resultState = controller.updateGameStateFor(futureState, 5);
@@ -973,18 +974,19 @@ public class ClientGameControllerTest extends BaseTest {
     public void testUpdateGameStateForMissedActionDetection() {
         Constants.cleanActions = new ActionList();
         initialState = controller.initializeGameState(1);
-        
-        // Add action with index 0 at clock 1
-        Constants.cleanActions.addAction(new Action(0, 1, 2, 0));
-        // Add action with index 5 at clock 2 (indices 1, 2, 3, 4 are missing)
-        Constants.cleanActions.addAction(new Action(0, 2, 2, 5));
-        
-        Constants.cleanActions.fixedMissedAction();
-        assertFalse(Constants.cleanActions.missedAction());
-        
-        controller.updateGameStateFor(initialState, 3);
-        
-        assertTrue(Constants.cleanActions.missedAction(), "Missed action should be detected during resimulation");
+
+        // Run to clock 10
+        controller.updateGameStateFor(initialState, 10);
+
+        // "Late" action arrives for clock 5
+        Constants.cleanActions.addAction(new Action(0, 5, 2, 0));
+
+        // Check missedAction with current clock (10)
+        assertTrue(Constants.cleanActions.missedAction(10), "Missed action should be detected");
+
+        // Fix by processing it
+        Constants.cleanActions.getActions(5);
+        assertFalse(Constants.cleanActions.missedAction(10));
     }
 
     @Test
