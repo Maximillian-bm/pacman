@@ -49,9 +49,9 @@ public class GhostLogicTest extends BaseTest {
     public void testGhostTrappedInBox() {
 
         TileType[][] boxMap = new TileType[5][5];
-        for (int x = 0; x < 5; x++) {
-            for (int y = 0; y < 5; y++) {
-                boxMap[x][y] = TileType.WALL;
+        for (int y = 0; y < 5; y++) {
+            for (int x = 0; x < 5; x++) {
+                boxMap[y][x] = TileType.WALL;
             }
         }
         boxMap[2][2] = TileType.EMPTY;

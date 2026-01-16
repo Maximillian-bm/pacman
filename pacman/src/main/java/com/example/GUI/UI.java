@@ -11,7 +11,9 @@ import com.example.GameLogic.ClientGameController;
 import com.example.model.Action;
 import com.example.model.ActionList;
 import com.example.model.Constants;
+import com.example.model.Direction;
 import com.example.model.GameState;
+import com.example.model.Ghost;
 import com.example.model.Player;
 import com.example.model.Position;
 import com.example.model.TileType;
@@ -36,12 +38,12 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Pair;
+
 import java.text.DecimalFormat;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -70,6 +72,8 @@ public class UI extends Application {
     private Runnable createLobby;
 
     private Text notificationText;
+
+    private boolean eatingDot = false;
 
     record TilePos(int x, int y) {
     }
@@ -209,8 +213,8 @@ public class UI extends Application {
         };
 
         createLobbyButton.setOnAction(e -> {
-            createLobby.run();
             soundEngine.play(Sound.EAT_FRUIT);
+            createLobby.run();
         });
 
         startButton.setOnAction(e -> {
@@ -241,7 +245,7 @@ public class UI extends Application {
 
     private void startGame(Stage stage) {
         gameState = gameController.initializeGameState(lobbyHandler.getNrOfPlayers());
-        savedState = gameState;
+        savedState = gameController.deepCopyGameState(gameState);
 
         // final Group root = new Group();
         final StackPane root = new StackPane();
@@ -309,13 +313,12 @@ public class UI extends Application {
                 return;
             }
 
-            List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
-            if (Constants.cleanActions.missedAction()) {
+            if (Constants.cleanActions.missedAction(Constants.clock)) {
                 gameState = gameController.updateGameStateFor(savedState, Constants.clock);
-                Constants.cleanActions.fixedMissedAction();
             } else {
+                List<Action> ActionOfClock = Constants.cleanActions.getActions(Constants.clock);
                 if (!ActionOfClock.isEmpty())
-                    savedState = gameState;
+                    savedState = gameController.deepCopyGameState(gameState);
                 gameState = gameController.updateGameState(gameState, ActionOfClock);
             }
 
@@ -327,7 +330,7 @@ public class UI extends Application {
              * }
              * }
              */
-
+            playSounds();
             draw(time);
 
             Constants.clock++;
@@ -380,6 +383,56 @@ public class UI extends Application {
             }
         }
 
+        private void playSounds(){
+            Player localPlayer = gameState.players().get(lobbyHandler.getPlayerID());
+            if(localPlayer.isLostHeart()){
+                soundEngine.play(Sound.FAIL);
+                localPlayer.setLostHeart(false);
+            }
+            if(localPlayer.isAteFruit()){
+                soundEngine.play(Sound.EAT_FRUIT);
+                localPlayer.setAteFruit(false);
+            }
+            if(localPlayer.isAteGhost()){
+                soundEngine.play(Sound.EAT_GHOST);
+                soundEngine.play(Sound.GHOST_HOME);
+                localPlayer.setAteGhost(false);
+            }
+            for (Player p : gameState.players()) {
+                if(p.isAtePowerUp()){
+                    soundEngine.play(Sound.GHOST_BLUE);
+                    p.setAtePowerUp(false);
+                }
+            }
+
+            Pair<Integer, Integer> pos = localPlayer.getPosition().ToGridPosition();
+            int xOffset = 0;
+            int yOffset = 0;
+            switch (localPlayer.getDirection()) {
+                case Direction.NORTH:
+                    yOffset = -1;
+                    break;
+                case Direction.SOUTH:
+                    yOffset = 1;
+                    break;
+                case Direction.EAST:
+                    xOffset = 1;
+                    break;
+                case Direction.WEST:
+                    xOffset = -1;
+                    break;
+                default:
+                    break;
+            }
+            if(!eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] == TileType.PAC_DOT){
+                eatingDot = true;
+                soundEngine.play(Sound.EAT_DOT);
+            }else if(eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] != TileType.PAC_DOT){
+                eatingDot = false;
+                soundEngine.stop(Sound.EAT_DOT);
+            }
+        }
+
         private void drawCountdown() {
             Color playerColor = gameState.players().get(lobbyHandler.getPlayerID()).getColor();
             float seconds = -1 * (float) (Constants.clock) / Constants.TARGET_FPS;
@@ -416,44 +469,44 @@ public class UI extends Application {
 
         private void drawMap() {
             TileType[][] tiles = gameState.tiles();
-            for (int i = 0; i < tiles.length; i++) {
-                for (int j = 0; j < tiles[0].length; j++) {
-                    switch (tiles[i][j]) {
+            for (int y = 0; y < tiles.length; y++) {
+                for (int x = 0; x < tiles[0].length; x++) {
+                    switch (tiles[y][x]) {
                         case EMPTY:
                             // gc.setFill(Color.BLACK);
                             // gc.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                             break;
                         case WALL:
-                            drawWall(i, j);
+                            drawWall(y, x);
                             break;
                         case PAC_DOT:
                             double pacDotSize = TILE_SIZE / 8.0;
                             gc.setFill(Color.YELLOW);
-                            gc.fillRect(i * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0,
-                                    j * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
+                            gc.fillRect(x * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0,
+                                    y * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
                             break;
                         case CHERRY:
-                            gc.drawImage(spriteSheet, 600, 0, 50, 50, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 600, 0, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
                         case STRAWBERRY:
-                            gc.drawImage(spriteSheet, 600, 50, 50, 50, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 600, 50, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
                         case ORANGE:
-                            gc.drawImage(spriteSheet, 600, 100, 50, 50, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 600, 100, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
                         case APPLE:
-                            gc.drawImage(spriteSheet, 600, 150, 50, 50, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 600, 150, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
                         case MELON:
-                            gc.drawImage(spriteSheet, 600, 200, 50, 50, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 600, 200, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
                         case ENERGIZER:
-                            gc.drawImage(spriteSheet, 415, 415, 25, 25, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(spriteSheet, 415, 415, 25, 25, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                             break;
 
@@ -488,12 +541,19 @@ public class UI extends Application {
                     default -> 0;
                 };
 
-                int pacmanFrame = (int) (time / 75000000) % 4;
+                int pacmanFrame = (int) (time / 75000000.0) % 4;
                 sy = switch (pacmanFrame) {
                     case 0 -> sy;
                     case 2 -> sy + 50 * 2;
                     default -> sy + 50;
                 };
+
+                double remainingRatio = player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC;
+                remainingRatio = Math.max(0.0, Math.min(1.0, remainingRatio));
+                double blinkPeriodSec = 0.75 + remainingRatio;
+                double timeSec = (time - startTime) / 500_000_000.0;
+                int blinkFrame = (int) (timeSec / blinkPeriodSec) % 2;
+                if (player.getInvulnerableTimer() > 0.0 && blinkFrame == 1) sy = 50 * 12;
 
                 Image coloredPlayer = colorPlayer(player.getColor());
                 Position playerTilePos = player.getPosition();
@@ -559,14 +619,14 @@ public class UI extends Application {
                     case PURPLE -> 250; // ("Sue");
                 };
 
-                double fTimer = ghost.getFrightenedTimerSec();
+                double fTimer = gameState.entityTracker().getFrightenedTimerSec();
 
                 if (fTimer > 0) {
                     sy += 50 * 11;
                     sx = 0;
                 }
 
-                int ghostFrame = (int) (time / 300000000) % 2;
+                int ghostFrame = (int) (time / 300000000.0) % 2;
                 if (ghostFrame == 1) {
                     sy += 50;
                     if (fTimer > 0 && fTimer < 2.0)
@@ -578,36 +638,36 @@ public class UI extends Application {
             });
         }
 
-        private void drawWall(int i, int j) {
+        private void drawWall(int y, int x) {
             TileType[][] tiles = gameState.tiles();
             final int N = tiles.length;
             final int M = tiles[0].length;
 
-            boolean nWall = 0 > j - 1 || tiles[i][j - 1] != TileType.WALL;
-            boolean wWall = 0 > i - 1 || tiles[i - 1][j] != TileType.WALL;
-            boolean sWall = M <= j + 1 || tiles[i][j + 1] != TileType.WALL;
-            boolean eWall = N <= i + 1 || tiles[i + 1][j] != TileType.WALL;
+            boolean nWall = 0 > y - 1 || tiles[y - 1][x] != TileType.WALL;
+            boolean wWall = 0 > x - 1 || tiles[y][x - 1] != TileType.WALL;
+            boolean sWall = N <= y + 1 || tiles[y + 1][x] != TileType.WALL;
+            boolean eWall = M <= x + 1 || tiles[y][x + 1] != TileType.WALL;
 
-            boolean neWall = 0 > j - 1 || N <= i + 1 || tiles[i + 1][j - 1] != TileType.WALL;
-            boolean nwWall = 0 > j - 1 || 0 > i - 1 || tiles[i - 1][j - 1] != TileType.WALL;
-            boolean seWall = M <= j + 1 || N <= i + 1 || tiles[i + 1][j + 1] != TileType.WALL;
-            boolean swWall = M <= j + 1 || 0 > i - 1 || tiles[i - 1][j + 1] != TileType.WALL;
+            boolean neWall = 0 > y - 1 || M <= x + 1 || tiles[y - 1][x + 1] != TileType.WALL;
+            boolean nwWall = 0 > y - 1 || 0 > x - 1 || tiles[y - 1][x - 1] != TileType.WALL;
+            boolean seWall = N <= y + 1 || M <= x + 1 || tiles[y + 1][x + 1] != TileType.WALL;
+            boolean swWall = N <= y + 1 || 0 > x - 1 || tiles[y + 1][x - 1] != TileType.WALL;
 
             if (wWall) {
                 if (sWall) {
                     if (eWall) {
-                        gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                        gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                 TILE_SIZE);
                     } else {
                         if (nWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE);
                         } else {
                             if (neWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             }
                         }
@@ -615,23 +675,23 @@ public class UI extends Application {
                 } else {
                     if (eWall) {
                         if (nWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 6, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 6, 32, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 6, 32, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                         }
                     } else {
                         if (nWall) {
                             if (seWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 3, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 0, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             }
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 0, 32, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 0, 32, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                         }
                     }
@@ -640,70 +700,70 @@ public class UI extends Application {
                 if (eWall) {
                     if (nWall) {
                         if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 9, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 9, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE);
                         } else {
                             if (swWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             }
                         }
                     } else {
                         if (sWall) {
                             if (nwWall) {
-                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             } else {
-                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                gc.drawImage(wallSpriteSheet, 32 * 2, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                         TILE_SIZE, TILE_SIZE);
                             }
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 2, 32, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 2, 32, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                         }
                     }
                 } else {
                     if (nWall) {
                         if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32 * 8, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 8, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE);
                         } else {
-                            gc.drawImage(wallSpriteSheet, 32 * 4, 32 * 0, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32 * 4, 32 * 0, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                     TILE_SIZE, TILE_SIZE);
                         }
                     } else {
                         if (sWall) {
-                            gc.drawImage(wallSpriteSheet, 32, 32 * 2, 32, 32, i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE,
+                            gc.drawImage(wallSpriteSheet, 32, 32 * 2, 32, 32, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
                                     TILE_SIZE);
                         } else {
                             if (neWall) {
                                 if (seWall) {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                             TILE_SIZE, TILE_SIZE);
                                     gc.drawImage(wallSpriteSheet, 32 * 3 + 16, 32 * 1, 32 / 2.0, 32,
-                                            i * TILE_SIZE + TILE_SIZE / 2.0, j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
+                                            x * TILE_SIZE + TILE_SIZE / 2.0, y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
                                             TILE_SIZE);
                                 } else {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                             TILE_SIZE, TILE_SIZE);
                                     gc.drawImage(wallSpriteSheet, 32 * 7, 32 * 1 + 16, 32 / 2.0, 32 / 2.0,
-                                            i * TILE_SIZE + TILE_SIZE / 2.0, j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
+                                            x * TILE_SIZE + TILE_SIZE / 2.0, y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
                                             TILE_SIZE - TILE_SIZE / 2.0);
                                 }
                             } else if (nwWall) {
                                 if (swWall) {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                             TILE_SIZE, TILE_SIZE);
-                                    gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 1, 32 / 2.0, 32, i * TILE_SIZE,
-                                            j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0, TILE_SIZE);
+                                    gc.drawImage(wallSpriteSheet, 32 * 5, 32 * 1, 32 / 2.0, 32, x * TILE_SIZE,
+                                            y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0, TILE_SIZE);
                                 } else {
-                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, i * TILE_SIZE, j * TILE_SIZE,
+                                    gc.drawImage(wallSpriteSheet, 32 * 1, 32 * 1, 32, 32, x * TILE_SIZE, y * TILE_SIZE,
                                             TILE_SIZE, TILE_SIZE);
                                     gc.drawImage(wallSpriteSheet, 32 * 7 + 16, 32 * 1 + 16, 32 / 2.0, 32 / 2.0,
-                                            i * TILE_SIZE, j * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
+                                            x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE - TILE_SIZE / 2.0,
                                             TILE_SIZE - TILE_SIZE / 2.0);
                                 }
                             }

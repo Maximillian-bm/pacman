@@ -1,5 +1,6 @@
 package com.example.GUI;
 
+import javafx.scene.media.AudioClip;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 
@@ -10,38 +11,60 @@ import com.example.model.Sound;
 
 public class SoundEngine {
 
-    private final Map<Sound, MediaPlayer> players = new EnumMap<>(Sound.class);
+    private final Map<Sound, AudioClip> soundPlayers = new EnumMap<>(Sound.class);
+    private final Map<Sound, AudioClip> soundLoopers = new EnumMap<>(Sound.class);
 
     public SoundEngine() {
         try {
             for (Sound sound : Sound.values()) {
-                Media media = new Media(
-                    getClass().getResource("/" + sound.getPath()).toExternalForm()
-                );
-                MediaPlayer player = new MediaPlayer(media);
-                players.put(sound, player);
-            }
+            String url = getClass().getResource("/" + sound.getPath()).toExternalForm();
+            AudioClip player = new AudioClip(url);
+            AudioClip looper = new AudioClip(url);
+            looper.setCycleCount(AudioClip.INDEFINITE);
+            soundPlayers.put(sound, player);
+            soundLoopers.put(sound, looper);
+        }
         } catch (Exception e) {
-            System.out.println("WARNING: Sound does not work");
+            e.printStackTrace();
         }
     }
 
     public void play(Sound sound) {
         try {
-            MediaPlayer player = players.get(sound);
+            AudioClip player = soundPlayers.get(sound);
             player.stop();   // IMPORTANT: restart sound if already playing
             player.play();
         } catch (Exception e) {
-            System.out.println("WARNING: failed to play sound");
+            e.printStackTrace();
+        }
+    }
+
+    public void loop(Sound sound) {
+        try {
+            AudioClip looper = soundLoopers.get(sound);
+            looper.stop();   // IMPORTANT: restart sound if already playing
+            looper.play();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void stop(Sound sound) {
-        players.get(sound).stop();
+        try {
+            soundPlayers.get(sound).stop();
+            soundPlayers.get(sound).stop();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setVolume(double volume) {
-        players.values().forEach(p -> p.setVolume(volume));
+        try {
+            soundPlayers.values().forEach(p -> p.setVolume(volume));
+            soundLoopers.values().forEach(p -> p.setVolume(volume));    
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 

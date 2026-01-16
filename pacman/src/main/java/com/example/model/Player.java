@@ -11,6 +11,7 @@ public class Player extends Entity {
     @Getter
     private final int id;
 
+    @Setter
     private int ghostsEatenThisEnergizer;
 
     @Getter @Setter
@@ -35,61 +36,14 @@ public class Player extends Entity {
 
     @Getter @Setter
     private double invulnerableTimer = 0.0;
-
-    private static int powerOwnerId = -1;
-
-    public static int getPowerOwnerId() {
-        return powerOwnerId;
-    }
-
-    public static void setPowerOwnerId(int playerId) {
-        powerOwnerId = playerId;
-    }
-
-    public static void clearPowerOwner() {
-        powerOwnerId = -1;
-    }
-
-    public static boolean isAnyPowerActive() {
-        return powerOwnerId != -1;
-    }
-
-    public static boolean isPowerOwner(Player p) {
-        return p != null
-            && p.getId() == powerOwnerId
-            && p.getPowerUpTimer() > 0.0
-            && p.isAlive()
-            && p.getRespawnTimer() <= 0.0;
-    }
-
-    public static void assignPowerTo(Player owner) {
-        if (owner == null) return;
-        powerOwnerId = owner.getId();
-        owner.ghostsEatenThisEnergizer = 0;
-    }
-    public static boolean clearPowerIfOwnerInvalid(List<Player> players) {
-    if (powerOwnerId == -1) return false;
-
-    Player owner = null;
-    if (players != null) {
-        for (Player p : players) {
-            if (p != null && p.getId() == powerOwnerId) {
-                owner = p;
-                break;
-            }
-        }
-    }
-    if (owner == null
-        || owner.getPowerUpTimer() <= 0.0
-        || !owner.isAlive()
-        || owner.getRespawnTimer() > 0.0) {
-
-        powerOwnerId = -1;
-        return true;
-    }
-
-    return false;
-}
+    @Getter @Setter
+    private boolean lostHeart = false;
+    @Getter @Setter
+    private boolean ateFruit = false;
+    @Getter @Setter
+    private boolean ateGhost = false;
+    @Getter @Setter
+    private boolean atePowerUp = false;
 
     public Player(int id) {
         this.id = id;
@@ -112,6 +66,7 @@ public class Player extends Entity {
     }
 
     public void eatGhost() {
+        ateGhost = true;
         points += switch (ghostsEatenThisEnergizer) {
             case 0 -> 200;
             case 1 -> 400;
@@ -122,8 +77,13 @@ public class Player extends Entity {
         ghostsEatenThisEnergizer++;
     }
 
-    public void loseLife() {
-        if (!isDead()) lives--;
+    public int loseLife() {
+        if (!isDead()){
+            lives--;
+            lostHeart = true;
+        }
+
+        return lives;
     }
 
     public boolean isDead() {
@@ -137,5 +97,21 @@ public class Player extends Entity {
             case 3: return Color.rgb(0, 0, 255);
             default: return Color.rgb(255, 241, 0);
         }
+    }
+
+    public Player copy() {
+        Player copy = new Player(this.id);
+        copy.position = this.position != null ? new Position(this.position.x, this.position.y) : null;
+        copy.direction = this.direction;
+        copy.points = this.points;
+        copy.lives = this.lives;
+        copy.intendedDirection = this.intendedDirection;
+        copy.respawnTimer = this.respawnTimer;
+        copy.alive = this.alive;
+        copy.spawnPosition = this.spawnPosition != null ? new Position(this.spawnPosition.x, this.spawnPosition.y) : null;
+        copy.powerUpTimer = this.powerUpTimer;
+        copy.invulnerableTimer = this.invulnerableTimer;
+        copy.ghostsEatenThisEnergizer = this.ghostsEatenThisEnergizer;
+        return copy;
     }
 }
