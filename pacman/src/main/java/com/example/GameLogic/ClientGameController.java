@@ -91,47 +91,8 @@ public class ClientGameController extends GameController {
             }
         }
         TileType[][] tiles = gameState.tiles();
-
-        // if (allPointsGathered(gameState)) {
-        //     // Find player with highest points as winner
-        //     Player highestScorer = null;
-        //     int highestPoints = -1;
-        //     for (Player p : gameState.players()) {
-        //         if (p.getPoints() > highestPoints) {
-        //             highestPoints = p.getPoints();
-        //             highestScorer = p;
-        //         }
-        //     }
-        //     winner = highestScorer;
-        //
-        //     // Reset map for next level
-        //     TileType[][] newTiles = Maps.getMap1();
-        //     tiles = newTiles;
-        //
-        //     // Increase ghost speed for next level
-        //     entityTracker.setGhostSpeed(entityTracker.getGhostSpeed() * 1.1);
-        //
-        //     // Reset player positions
-        //     for (Player p : gameState.players()) {
-        //         Position sp = p.getSpawnPosition();
-        //         if (sp != null) {
-        //             p.setPosition(new Position(sp.x, sp.y));
-        //         }
-        //         p.setDirection(Direction.EAST);
-        //         p.setIntendedDirection(null);
-        //     }
-        //
-        //     // Reset ghost positions
-        //     for (Ghost g : gameState.ghosts()) {
-        //         Position sp = g.getSpawnPosition();
-        //         if (sp != null) {
-        //             g.setPosition(new Position(sp.x, sp.y));
-        //         }
-        //         g.setDirection(Direction.NORTH);
-        //         g.setRespawnTimer(0.0);
-        //     }
-        //
-        //     newClock = 1;
+        // Handle fruit spawning based on pellets eaten
+        handleFruitSpawning(gameState);
 
         // Handle fruit spawning based on pellets eaten
         handleFruitSpawning(gameState);
@@ -598,9 +559,13 @@ public class ClientGameController extends GameController {
             }
         }
 
+        if (candidates.isEmpty()) {
+            return currentDir;
+        }
+
         List<Direction> tieBreak = List.of(Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST);
 
-        Direction best = candidates.get(0);
+        Direction best = candidates.getFirst();
         int bestDist = Integer.MAX_VALUE;
 
         for (Direction d : tieBreak) {
@@ -646,9 +611,13 @@ public class ClientGameController extends GameController {
             }
         }
 
+        if (candidates.isEmpty()) {
+            return currentDir;
+        }
+
         List<Direction> tieBreak = List.of(Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST);
 
-        Direction best = candidates.get(0);
+        Direction best = candidates.getFirst();
         int bestDist = Integer.MIN_VALUE;
 
         for (Direction d : tieBreak) {

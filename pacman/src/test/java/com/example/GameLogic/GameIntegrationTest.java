@@ -82,14 +82,24 @@ public class GameIntegrationTest extends BaseTest {
     @DisplayName("ActionList should detect missing intermediate actions")
     public void testActionListMissedActionLogic() {
         ActionList list = new ActionList();
-        Action a1 = new Action(1, 10, 2, 5);
-        list.addAction(a1);
+        // Add action for clock 10
+        list.addAction(new Action(1, 10, 2, 0));
 
+        // Process it
         list.getActions(10);
-        assertTrue(list.missedAction(), "Should have missed action");
 
-        list.fixedMissedAction();
-        assertFalse(list.missedAction());
+        // Add action for clock 15 (late arrival scenario)
+        // Suppose we are now at clock 20
+        list.addAction(new Action(1, 15, 2, 1));
+
+        // Check if we missed action at clock 20
+        assertTrue(list.missedAction(20), "Should detect missed action (late arrival)");
+
+        // "Fix" it by processing the action (simulating catch up)
+        list.getActions(15);
+
+        // Should be fixed
+        assertFalse(list.missedAction(20));
     }
 
     @Test

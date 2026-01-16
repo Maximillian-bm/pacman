@@ -20,33 +20,36 @@ public class EntityTracker {
     private int powerOwnerId = -1;
 
     public void clearPowerOwner() {
-        powerOwnerId = -1;
+        this.powerOwnerId = -1;
     }
 
     public boolean isAnyPowerActive() {
-        return powerOwnerId != -1;
+        return this.powerOwnerId != -1;
     }
 
     public boolean isPowerOwner(Player p) {
         return p != null
-            && p.getId() == powerOwnerId
+            && p.getId() == this.powerOwnerId
             && p.getPowerUpTimer() > 0.0
             && p.isAlive()
             && p.getRespawnTimer() <= 0.0;
     }
 
     public void assignPowerTo(Player owner) {
-        if (owner == null) return;
-        powerOwnerId = owner.getId();
-        owner.setGhostsEatenThisEnergizer(0);
+        if (owner == null)
+            return;
+        this.powerOwnerId = owner.getId();
+        owner.resetGhostsEatenThisEnergizer();
     }
+
     public boolean clearPowerIfOwnerInvalid(List<Player> players) {
-        if (powerOwnerId == -1) return false;
+        if (this.powerOwnerId == -1)
+            return false;
 
         Player owner = null;
         if (players != null) {
             for (Player p : players) {
-                if (p != null && p.getId() == powerOwnerId) {
+                if (p != null && p.getId() == this.powerOwnerId) {
                     owner = p;
                     break;
                 }
@@ -57,7 +60,7 @@ public class EntityTracker {
             || !owner.isAlive()
             || owner.getRespawnTimer() > 0.0) {
 
-            powerOwnerId = -1;
+            this.powerOwnerId = -1;
             return true;
         }
 

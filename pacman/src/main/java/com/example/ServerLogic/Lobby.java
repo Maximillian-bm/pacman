@@ -2,6 +2,7 @@ package com.example.ServerLogic;
 
 import com.example.model.*;
 
+import lombok.Getter;
 import org.jspace.ActualField;
 import org.jspace.Space;
 import org.jspace.SpaceRepository;
@@ -10,11 +11,13 @@ import com.example.GameLogic.*;
 
 public class Lobby implements Runnable{
 
-    private SpaceRepository rep;
-    private int nrOfPlayers;
-    private LobbyActionHandler actionHandler;
-    private int lobbyID;
-    private long timeOfCreation;
+    private final SpaceRepository rep;
+    private final int nrOfPlayers;
+    private final LobbyActionHandler actionHandler;
+    @Getter
+    private final int lobbyID;
+    @Getter
+    private final long timeOfCreation;
 
     public Lobby(SpaceRepository rep, int nrOfPlayers, int lobbyID, long timeOfCreation){
         this.lobbyID = lobbyID;
@@ -53,14 +56,6 @@ public class Lobby implements Runnable{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    public long getTimeOfCreation(){
-        return timeOfCreation;
-    }
-
-    public int getLobbyID(){
-        return lobbyID;
     }
 
     public void stop(){
