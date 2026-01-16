@@ -84,10 +84,6 @@ public class ClientGameController extends GameController {
             }
         }
         TileType[][] tiles = gameState.tiles();
-        // Handle fruit spawning based on pellets eaten
-        handleFruitSpawning(gameState);
-
-        // Handle fruit spawning based on pellets eaten
         handleFruitSpawning(gameState);
 
         GameState newGameState = new GameState(
@@ -124,18 +120,28 @@ public class ClientGameController extends GameController {
             }
 
             if (!hasFruit) {
-                // Find an empty tile near center to spawn fruit
+                // Collect empty tiles near center
                 int centerX = tiles[0].length / 2;
                 int centerY = tiles.length / 2;
-                for (int dx = 0; dx < tiles[0].length; dx++) {
-                    for (int dy = 0; dy < tiles.length; dy++) {
-                        int x = (centerX + dx) % tiles[0].length;
-                        int y = (centerY + dy) % tiles.length;
-                        if (tiles[y][x] == TileType.EMPTY) {
-                            tiles[y][x] = TileType.CHERRY;
-                            return;
+                int radius = 5;
+                List<int[]> candidates = new ArrayList<>();
+
+                for (int dy = -radius; dy <= radius; dy++) {
+                    for (int dx = -radius; dx <= radius; dx++) {
+                        int x = centerX + dx;
+                        int y = centerY + dy;
+                        if (x >= 0 && x < tiles[0].length && y >= 0 && y < tiles.length) {
+                            if (tiles[y][x] == TileType.EMPTY) {
+                                candidates.add(new int[]{x, y});
+                            }
                         }
                     }
+                }
+
+                if (!candidates.isEmpty()) {
+                    int index = Math.abs(gameState.clock() * 31) % candidates.size();
+                    int[] pos = candidates.get(index);
+                    tiles[pos[1]][pos[0]] = TileType.CHERRY;
                 }
             }
         }
@@ -377,8 +383,7 @@ public class ClientGameController extends GameController {
             player.addPoints(tileType.points);
 
             switch (tileType) {
-                case EMPTY, WALL -> {
-                }
+                case EMPTY, WALL -> { }
                 default -> tiles[tileY][tileX] = TileType.EMPTY;
             }
         });
