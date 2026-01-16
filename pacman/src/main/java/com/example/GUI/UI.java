@@ -87,18 +87,21 @@ public class UI extends Application {
         initializeMainMenu(stage);
     }
 
+    private Image colorPlayer(Color color) {
+        return coloredPlayerCache.get(color);
+    }
     private void precomputePlayerColors() {
         Color[] playerColors = {
             Color.rgb(255, 241, 0),  // Player 0 - Yellow
             Color.rgb(255, 0, 0),    // Player 1 - Red
             Color.rgb(0, 255, 0),    // Player 2 - Green
-            Color.rgb(0, 0, 255)     // Player 3 - Blue
+            Color.rgb(0, 0, 255),    // Player 3 - Blue
+            Color.rgb(255, 255, 255) // Player w/ powerup - White
         };
         for (Color color : playerColors) {
             coloredPlayerCache.put(color, createColoredPlayerImage(color));
         }
     }
-
     // Modified function from:
     // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
     private Image createColoredPlayerImage(Color color) {
@@ -622,11 +625,27 @@ public class UI extends Application {
                             break;
                         case MELON:
                             gc.drawImage(spriteSheet, 600, 200, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
+                                TILE_SIZE);
+                            break;
+                        case GALAXIAN:
+                            gc.drawImage(spriteSheet, 600, 350, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
+                                TILE_SIZE);
+                            break;
+                        case BELL:
+                            gc.drawImage(spriteSheet, 600, 400, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
+                                TILE_SIZE);
+                            break;
+                        case KEY:
+                            gc.drawImage(spriteSheet, 600, 450, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
+                                TILE_SIZE);
                             break;
                         case ENERGIZER:
-                            gc.drawImage(spriteSheet, 415, 415, 25, 25, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
+                            if (gameState.entityTracker().isAnyPowerActive()) {
+                                gc.setGlobalAlpha(0.33);
+                            }
+                            gc.drawImage(spriteSheet, 400, 450, 50, 50, x * TILE_SIZE - TILE_SIZE / 3.0, y * TILE_SIZE - TILE_SIZE / 3.0, TILE_SIZE + (TILE_SIZE / 3.0) * 2,
+                                    TILE_SIZE + (TILE_SIZE / 3.0) * 2);
+                            gc.setGlobalAlpha(1.0);
                             break;
 
                     }
@@ -655,7 +674,7 @@ public class UI extends Application {
             EntityTracker entityTracker = gameState.entityTracker();
             int pacmanFrameCount = 4;
             long pacmanNanosPerFrame = 75_000_000L;
-            long powerupBlinkNanosPerUnit = 200_000_000L;
+            long powerupBlinkNanosPerUnit = 300_000_000L;
             long invulnBlinkNanosPerUnit = 500_000_000L;
 
             gameState.players().forEach(player -> {
@@ -674,21 +693,22 @@ public class UI extends Application {
                         default -> sy + 50;
                     };
 
-                    boolean hasPowerUp = entityTracker.isPowerOwner(player);
+                Image coloredPlayer = colorPlayer(player.getColor());
 
-                    if (player.isInvulnerable() || hasPowerUp) {
-                        int blinkFrame;
-                        if (hasPowerUp) {
-                            blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.65, Constants.FRIGHTENED_DURATION_SEC);
-                        } else {
-                            blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.5, Constants.PLAYER_SPAWN_PROTECT_SEC);
-                        }
-
-                        if (blinkFrame == 1) sy = 50 * 12;
+                boolean hasPowerUp = entityTracker.isPowerOwner(player);
+                if (player.isInvulnerable() || hasPowerUp) {
+                    int blinkFrame = 0;
+                    if (hasPowerUp) {
+                        blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.65, Constants.FRIGHTENED_DURATION_SEC);
+                    } else {
+                        blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.5, Constants.PLAYER_SPAWN_PROTECT_SEC);
                     }
+                    if (blinkFrame == 1) {
+                        coloredPlayer = colorPlayer(Color.WHITE);
+                    }
+                }
 
-                    Image coloredPlayer = colorPlayer(player.getColor());
-                    Position playerTilePos = player.getPosition();
+                Position playerTilePos = player.getPosition();
 
                     double rsTimer = player.getRespawnTimer();
                     if (rsTimer <= 0) {
@@ -718,10 +738,6 @@ public class UI extends Application {
             double halfPeriodUnits = endDelayRatio + (1.0 - endDelayRatio) * adjustedRemainingRatio;
             long halfPeriodNanos = Math.max(1_000_000L, (long) (halfPeriodUnits * nanosPerUnit));
             return ((effectElapsedNanos / halfPeriodNanos) % 2 == 0) ? 0 : 1;
-        }
-
-        private Image colorPlayer(Color color) {
-            return coloredPlayerCache.get(color);
         }
 
         private void drawGhosts() {
