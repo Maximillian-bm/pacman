@@ -207,6 +207,12 @@ public class UI extends Application {
         startRoot.setAlignment(Pos.CENTER);
         startRoot.setSpacing(48);
 
+        Text statusText = new Text("");
+        statusText.setFill(Color.YELLOW);
+        statusText.setStyle("-fx-font-size: 14px;");
+        statusText.setVisible(false);
+        startRoot.getChildren().add(statusText);
+
         StackPane root = new StackPane();
         root.getChildren().addAll(backgroundCanvas, startRoot);
 
@@ -223,12 +229,16 @@ public class UI extends Application {
             errorText.setText("");
             joinLobbyButton.setDisable(true);
 
+            statusText.setText("Joining lobby...");
+            statusText.setVisible(true);
+
             Thread joinThread = new Thread(() -> {
                 try {
                     lobbyHandler.joinLobby(input);
                     javafx.application.Platform.runLater(() -> {
                         startRoot.getChildren().remove(joinLobbyV);
                         startRoot.getChildren().remove(createLobbyV);
+                        statusText.setVisible(false);
                         joinedLobbyText.setText("Joined lobby with ID: " + input);
                         startRoot.getChildren().add(startButton);
                         startRoot.getChildren().add(joinedLobbyText);
@@ -237,6 +247,7 @@ public class UI extends Application {
                     javafx.application.Platform.runLater(() -> {
                         errorText.setText(ex.getMessage());
                         joinLobbyButton.setDisable(false);
+                        statusText.setVisible(false);
                         System.err.println("--- Join Failed ---");
                         System.err.println(ex.getMessage());
                     });
@@ -256,6 +267,9 @@ public class UI extends Application {
 
             createLobbyButton.setDisable(true);
 
+            statusText.setText("Creating lobby...");
+            statusText.setVisible(true);
+
             Thread createThread = new Thread(() -> {
                 try {
                     lobbyHandler.createLobby(Integer.parseInt(playerCount));
@@ -263,6 +277,7 @@ public class UI extends Application {
                     javafx.application.Platform.runLater(() -> {
                         startRoot.getChildren().remove(joinLobbyV);
                         startRoot.getChildren().remove(createLobbyV);
+                        statusText.setVisible(false);
 
                         joinedLobbyText.setText("Joined lobby with ID: " + lobbyHandler.getLobbyID());
                         startRoot.getChildren().add(startButton);
@@ -272,6 +287,7 @@ public class UI extends Application {
                     javafx.application.Platform.runLater(() -> {
                         errorText.setText(ex.getMessage());
                         createLobbyButton.setDisable(false);
+                        statusText.setVisible(false);
                         System.err.println("--- Create Failed ---");
                         System.err.println(ex.getMessage());
                     });
@@ -289,23 +305,21 @@ public class UI extends Application {
         startButton.setOnAction(e -> {
             startButton.setDisable(true);
 
-            Text waitingText = new Text("Waiting for server to register all players");
-            waitingText.setFill(Color.YELLOW);
-            waitingText.setStyle("-fx-font-size: 14px;");
-            startRoot.getChildren().add(waitingText);
+            statusText.setText("Waiting for server to register all players");
+            statusText.setVisible(true);
 
             Thread startThread = new Thread(() -> {
                 try {
                     lobbyHandler.startGame();
                     javafx.application.Platform.runLater(() -> {
-                        startRoot.getChildren().remove(waitingText);
+                        statusText.setVisible(false);
                         startGame(stage);
                     });
                 } catch (Exception ex) {
                     javafx.application.Platform.runLater(() -> {
                         errorText.setText("Failed to start game: " + ex.getMessage());
                         startButton.setDisable(false);
-                        startRoot.getChildren().remove(waitingText);
+                        statusText.setVisible(false);
                         System.err.println("--- Start Game Failed ---");
                         System.err.println(ex.getMessage());
                     });
