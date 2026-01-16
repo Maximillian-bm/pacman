@@ -324,7 +324,9 @@ public class UI extends Application {
 
         quitButton.setOnAction(e -> {
             lobbyHandler.quit();
+            gameAnimator.stop();
             stage.close();
+            System.exit(0);
         });
 
         canvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
