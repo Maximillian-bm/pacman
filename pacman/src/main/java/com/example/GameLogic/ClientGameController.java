@@ -990,13 +990,11 @@ public class ClientGameController extends GameController {
                 if (livesLeft <= 0) {
                     player.setAlive(false);
                     player.setIntendedDirection(null);
-                    player.setPosition(new Position(-1000, -1000));
                     break;
                 }
 
                 player.setAlive(false);
                 player.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
-                player.setPosition(new Position(-1000, -1000));
                 player.setIntendedDirection(null);
                 break;
             }
@@ -1043,7 +1041,6 @@ public class ClientGameController extends GameController {
                         p.setLives(livesLeft);
                         p.setAlive(false);
                         p.setRespawnTimer(livesLeft > 0 ? PLAYER_RESPAWN_DELAY_SEC : 0.0);
-                        p.setPosition(new Position(-1000, -1000));
                         p.setIntendedDirection(null);
                     } else {
                         p.setInvulnerableTimer(Constants.PLAYER_SPAWN_PROTECT_SEC);
@@ -1141,13 +1138,11 @@ public class ClientGameController extends GameController {
         if (livesLeft <= 0) {
             victim.setAlive(false);
             victim.setIntendedDirection(null);
-            victim.setPosition(new Position(-1000, -1000));
             return;
         }
 
         victim.setAlive(false);
         victim.setRespawnTimer(PLAYER_RESPAWN_DELAY_SEC);
-        victim.setPosition(new Position(-1000, -1000));
         victim.setIntendedDirection(null);
 
         victim.setPowerUpTimer(0.0);
