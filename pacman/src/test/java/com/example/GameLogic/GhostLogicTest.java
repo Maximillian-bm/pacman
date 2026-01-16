@@ -82,18 +82,18 @@ public class GhostLogicTest extends BaseTest {
         state.ghosts().clear();
 
         Ghost g1 = new Ghost(GhostType.RED);
-        g1.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE));
+        g1.setPosition(new Position(6 * TILE_SIZE, 1 * TILE_SIZE));
         g1.setRespawnTimer(0.0);
 
         Ghost g2 = new Ghost(GhostType.PINK);
-        g2.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE));
+        g2.setPosition(new Position(6 * TILE_SIZE, 1 * TILE_SIZE));
         g2.setRespawnTimer(0.0);
 
         state.ghosts().add(g1);
         state.ghosts().add(g2);
 
         Player p = state.players().getFirst();
-        p.setPosition(new Position(5 * TILE_SIZE, 5 * TILE_SIZE));
+        p.setPosition(new Position(6 * TILE_SIZE, 1 * TILE_SIZE));
         
         p.setPowerUpTimer(10.0);
         state.entityTracker().assignPowerTo(p);
@@ -188,8 +188,8 @@ public class GhostLogicTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("Ghost should retreat to its home corner if no players are alive")
-    public void testGhostGoesToCornerWhenNoAlivePlayers() {
+    @DisplayName("Ghost should retreat to its spawn if no players are alive")
+    public void testGhostGoesToSpawnWhenNoAlivePlayers() {
         Ghost blinky = state.ghosts().stream().filter(g -> g.getType() == GhostType.RED).findFirst()
             .orElseThrow(() -> new AssertionError("Blinky not found"));
 

@@ -1,6 +1,6 @@
 package com.example.model;
 
-import static com.example.model.Maps.getMap1;
+import static com.example.model.Maps.getCurrentLevelTiles;
 
 public class Constants {
     //Constants
@@ -21,8 +21,8 @@ public class Constants {
     }
 
 
-    public final static int TILES_WIDE = getMap1()[0].length;
-    public final static int TILES_TALL = getMap1().length;
+    public final static int TILES_WIDE = getCurrentLevelTiles()[0].length;
+    public final static int TILES_TALL = getCurrentLevelTiles().length;
     public final static int TILE_SIZE = 800 / TILES_TALL;
     public final static int INIT_SCREEN_WIDTH = TILES_WIDE * TILE_SIZE;
     public final static int INIT_SCREEN_HEIGHT = TILES_TALL * TILE_SIZE;

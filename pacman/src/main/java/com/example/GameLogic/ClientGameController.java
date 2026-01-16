@@ -151,7 +151,7 @@ public class ClientGameController extends GameController {
     public GameState initializeGameState(int nrOfPlayers) {
         List<Player> players = new ArrayList<>();
         List<Ghost> ghosts = new ArrayList<>();
-        TileType[][] tiles = Maps.getMap1();
+        TileType[][] tiles = Maps.getCurrentLevelTiles();
 
         for (int i = 0; i < nrOfPlayers; i++) {
             Player player = new Player(i);
@@ -184,62 +184,13 @@ public class ClientGameController extends GameController {
             players.add(player);
         }
 
-        Ghost ghost1 = new Ghost(GhostType.RED);
-        ghost1.setPosition(
-            new Position(
-                9 * TILE_SIZE,
-                12 * TILE_SIZE
-            ));
-        ghosts.add(ghost1);
-
-        Ghost ghost2 = new Ghost(GhostType.PINK);
-        ghost2.setPosition(
-            new Position(
-                8 * TILE_SIZE,
-                12 * TILE_SIZE
-            ));
-        ghosts.add(ghost2);
-
-        Ghost ghost3 = new Ghost(GhostType.CYAN);
-        ghost3.setPosition(
-            new Position(
-                10 * TILE_SIZE,
-                12 * TILE_SIZE
-            ));
-        ghosts.add(ghost3);
-
-        Ghost ghost4 = new Ghost(GhostType.ORANGE);
-        ghost4.setPosition(
-            new Position(
-                9 * TILE_SIZE,
-                12 * TILE_SIZE
-            ));
-        ghosts.add(ghost4);
-
-        Ghost ghost5 = new Ghost(GhostType.PURPLE);
-        ghost5.setPosition(
-            new Position(
-                9 * TILE_SIZE,
-                12 * TILE_SIZE
-            ));
-        ghosts.add(ghost5);
-
-        ghost1.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-        ghost2.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-        ghost3.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-        ghost4.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-        ghost5.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
-        ghost1.setRespawnTimer(0.0);
-        ghost2.setRespawnTimer(0.0);
-        ghost3.setRespawnTimer(0.0);
-        ghost4.setRespawnTimer(0.0);
-        ghost5.setRespawnTimer(0.0);
-
-        ghost1.setDirection(Direction.NORTH);
-        ghost2.setDirection(Direction.NORTH);
-        ghost3.setDirection(Direction.NORTH);
-        ghost4.setDirection(Direction.NORTH);
-        ghost5.setDirection(Direction.NORTH);
+        for (GhostType type : GhostType.values()) {
+            Ghost ghost = new Ghost(type);
+            ghost.setSpawnPosition(new Position(9 * TILE_SIZE, 12 * TILE_SIZE));
+            ghost.setRespawnTimer(0.0);
+            ghost.setDirection(Direction.NORTH);
+            ghosts.add(ghost);
+        }
 
         return new GameState(
             -1,
@@ -664,6 +615,10 @@ public class ClientGameController extends GameController {
                 continue;
             }
 
+            if (!p.isAlive() || p.getRespawnTimer() > 0.0) {
+                continue;
+            }
+
             Pair<Integer, Integer> pt = p.getPosition().ToGridPosition();
             int px = pt.getKey();
             int py = pt.getValue();
@@ -683,6 +638,20 @@ public class ClientGameController extends GameController {
         }
 
         return best;
+    }
+
+    private Pair<Integer, Integer> getScatterCorner(GameState gameState, Ghost ghost) {
+        int maxX = gameState.tiles()[0].length - 1;
+        int maxY = gameState.tiles().length - 1;
+
+        return switch (ghost.getType()) {
+            case RED -> new Pair<>(maxX, 0);
+            case PINK -> new Pair<>(0, 0);
+            case CYAN -> new Pair<>(maxX, maxY);
+            case ORANGE -> new Pair<>(0, maxY);
+            case PURPLE -> new Pair<>(maxX / 2, maxY / 2);
+            default -> new Pair<>(maxX, 0);
+        };
     }
 
     private Pair<Integer, Integer> computeGhostTargetTile(GameState gameState, Ghost ghost, Player pac, Ghost blinky) {
@@ -815,9 +784,6 @@ public class ClientGameController extends GameController {
                 continue;
             }
             Player targetPlayer = findNearestPlayer(gameState, ghost);
-            if (targetPlayer == null) {
-                continue;
-            }
 
             Position pos = ghost.getPosition();
             Direction dir = getGhostDir(ghost);
@@ -842,12 +808,16 @@ public class ClientGameController extends GameController {
                 boolean atIntersection = countWalkableNeighbors(tiles, gx, gy) >= 3;
 
                 if (blockedAhead || atIntersection) {
-                    if (frightened) {
+                    if (targetPlayer != null && frightened) {
                         Pair<Integer, Integer> pGrid = targetPlayer.getPosition().ToGridPosition();
                         dir = chooseBestDirAwayFromPlayer(tiles, gx, gy, dir, pGrid.getKey(), pGrid.getValue());
                     } else {
-                        Pair<Integer, Integer> targetTile = computeGhostTargetTile(gameState, ghost, targetPlayer,
-                            blinky);
+                        Pair<Integer, Integer> targetTile;
+                        if (targetPlayer == null) {
+                            targetTile = getScatterCorner(gameState, ghost);
+                        } else {
+                            targetTile = computeGhostTargetTile(gameState, ghost, targetPlayer, blinky);
+                        }
                         dir = chooseBestDirTowardTarget(tiles, gx, gy, dir, targetTile.getKey(),
                             targetTile.getValue());
                     }
