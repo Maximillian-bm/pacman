@@ -42,23 +42,6 @@ import java.util.stream.Collectors;
 
 public class UI extends Application {
 
-    // ===== Wall-clock animation constants (nanoseconds) =====
-    // These are independent of game tick rate, using real time for smooth animations
-
-    // Pacman animation: 75ms per frame, 4 frames total
-    private static final int PACMAN_FRAME_COUNT = 4;
-    private static final long PACMAN_NANOS_PER_FRAME = 75_000_000L;
-
-    // Ghost animation: 300ms per frame, 2 frames total
-    private static final int GHOST_FRAME_COUNT = 2;
-    private static final long GHOST_NANOS_PER_FRAME = 300_000_000L;
-
-    // Blink animation base rates (nanoseconds per "unit" for variable-rate blinking)
-    // Power-up blink: 200ms per unit
-    private static final long POWERUP_BLINK_NANOS_PER_UNIT = 200_000_000L;
-    // Invulnerability blink: 500ms per unit
-    private static final long INVULN_BLINK_NANOS_PER_UNIT = 500_000_000L;
-
     private final SoundEngine soundEngine = new SoundEngine();
 
     private final ConnectToLobby lobbyHandler = new ConnectToLobby();
@@ -624,6 +607,10 @@ public class UI extends Application {
 
         private void drawPlayers() {
             EntityTracker entityTracker = gameState.entityTracker();
+            int pacmanFrameCount = 4;
+            long pacmanNanosPerFrame = 75_000_000L;
+            long powerupBlinkNanosPerUnit = 200_000_000L;
+            long invulnBlinkNanosPerUnit = 500_000_000L;
 
             gameState.players().forEach(player -> {
                 int sy = switch (player.getDirection()) {
@@ -634,7 +621,7 @@ public class UI extends Application {
                 };
 
                 // Wall-clock pacman animation: cycles through 4 frames
-                int pacmanFrame = (int) ((animationTimeNanos / PACMAN_NANOS_PER_FRAME) % PACMAN_FRAME_COUNT);
+                int pacmanFrame = (int) ((animationTimeNanos / pacmanNanosPerFrame) % pacmanFrameCount);
                 sy = switch (pacmanFrame) {
                     case 0 -> sy;
                     case 2 -> sy + 50 * 2;
@@ -646,9 +633,9 @@ public class UI extends Application {
                 if (player.isInvulnerable() || hasPowerUp) {
                     int blinkFrame;
                     if (hasPowerUp) {
-                        blinkFrame = getBlinkFrame(POWERUP_BLINK_NANOS_PER_UNIT, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.8);
+                        blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.8);
                     } else {
-                        blinkFrame = getBlinkFrame(INVULN_BLINK_NANOS_PER_UNIT, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.9);
+                        blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.9);
                     }
 
                     if (blinkFrame == 1) sy = 50 * 12;
@@ -676,6 +663,7 @@ public class UI extends Application {
             double halfPeriodUnits = endDelayRatio + remainingRatio;
             // Convert half-period to nanoseconds and clamp to >= 1ms
             long halfPeriodNanos = Math.max(1_000_000L, (long) (halfPeriodUnits * nanosPerUnit));
+            System.out.println("Blink period: " + (halfPeriodNanos / 1_000_000) + "ms");
             // Toggle every halfPeriodNanos nanoseconds
             return ((animationTimeNanos / halfPeriodNanos) % 2 == 0) ? 0 : 1;
         }
@@ -685,6 +673,9 @@ public class UI extends Application {
         }
 
         private void drawGhosts() {
+            int ghostFrameCount = 2;
+            long ghostNanosPerFrame = 300_000_000L;
+
             gameState.ghosts().forEach(ghost -> {
                 int sy = 0, sx = 0;
                 switch (ghost.getDirection()) {
@@ -715,7 +706,7 @@ public class UI extends Application {
                 }
 
                 // Wall-clock ghost animation: cycles through 2 frames
-                int ghostFrame = (int) ((animationTimeNanos / GHOST_NANOS_PER_FRAME) % GHOST_FRAME_COUNT);
+                int ghostFrame = (int) ((animationTimeNanos / ghostNanosPerFrame) % ghostFrameCount);
                 if (ghostFrame == 1) {
                     sy += 50;
                     if (fTimer > 0 && fTimer < 2.0)
