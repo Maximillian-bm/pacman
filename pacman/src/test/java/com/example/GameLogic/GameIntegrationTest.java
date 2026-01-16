@@ -38,7 +38,7 @@ public class GameIntegrationTest extends BaseTest {
         Action action = ActionUtil.convertObjToAction(input);
 
         assertEquals(1, action.getPlayerId());
-        assertEquals(100, action.getClock());
+        assertEquals(100, action.clock());
         assertEquals(2, action.getMove());
         assertEquals(5, action.getIndex());
     }
@@ -75,7 +75,7 @@ public class GameIntegrationTest extends BaseTest {
         List<Action> actions = list.getActions(10);
         assertFalse(actions.isEmpty());
         assertEquals(1, actions.size());
-        assertEquals(10, actions.getFirst().getClock());
+        assertEquals(10, actions.getFirst().clock());
     }
 
     @Test

@@ -29,7 +29,7 @@ public class Action {
         return playerId;
     }
 
-    public int getClock(){
+    public int clock(){
         return clock;
     }
 

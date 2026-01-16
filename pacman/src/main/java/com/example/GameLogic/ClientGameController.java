@@ -28,11 +28,11 @@ import javafx.util.Pair;
 
 public class ClientGameController extends GameController {
 
-    public GameState updateGameStateFor(GameState gameState, int targetClock) {
+    public GameState updateGameStateFor(GameState gameState, int tarclock) {
         // Create a deep copy to avoid mutating the original state
         gameState = deepCopyGameState(gameState);
 
-        while(gameState.clock() < targetClock){
+        while(gameState.clock() < tarclock){
             gameState = updateGameState(gameState, Constants.cleanActions.getActions(gameState.clock()+1));
         }
         return gameState;

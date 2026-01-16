@@ -296,7 +296,7 @@ public class UI extends Application {
             /*
              * if(ActionOfClock.size() != 0){
              * for (Action a : ActionOfClock) {
-             * System.out.println(a.getMove() +" "+ a.getClock());
+             * System.out.println(a.getMove() +" "+ a.clock());
              * }
              * }
              */
