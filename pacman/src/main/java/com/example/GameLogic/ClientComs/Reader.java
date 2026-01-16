@@ -19,6 +19,8 @@ public class Reader implements Runnable {
 
     private int lobbyID;
 
+    private boolean running = true;
+
     public Reader(int lobbyID){
         this.lobbyID = lobbyID;
     }
@@ -33,7 +35,7 @@ public class Reader implements Runnable {
         int nrOfActions = 0;
         try {
             Space remoteActions = new RemoteSpace(URIUtil.getCleanActionURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
-            while(true) {
+            while(running) {
                 Action action = ActionUtil.convertObjToAction(remoteActions.query(new FormalField(Integer.class), new FormalField(Integer.class), new FormalField(Integer.class), new ActualField(nrOfActions)));
                 Constants.cleanActions.addAction(action);
                 nrOfActions++;
@@ -45,6 +47,10 @@ public class Reader implements Runnable {
         }catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void stop(){
+        running = false;
     }
  
 }

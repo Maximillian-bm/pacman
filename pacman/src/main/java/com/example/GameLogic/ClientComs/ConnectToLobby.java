@@ -22,6 +22,8 @@ public class ConnectToLobby {
 
     private Space sync;
 
+    private Reader reader;
+
     public void createLobby(int nrOfPlayers) {
         try {
             Space space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
@@ -58,6 +60,7 @@ public class ConnectToLobby {
     }
 
     public void quit() {
+        reader.stop();
         try {
             sync.put("QUIT");
         } catch (Exception e) {
@@ -66,6 +69,7 @@ public class ConnectToLobby {
     }
 
     public void replay() {
+        reader.stop();
         try {
             sync.getp(new ActualField("START"));
             sync.put(playerID, "REPLAY");
@@ -77,7 +81,7 @@ public class ConnectToLobby {
     public void startGame() {
         try {
 
-            Reader reader = new Reader(lobbyID);
+            reader = new Reader(lobbyID);
             Thread t = new Thread(reader);
             t.setDaemon(true);
             t.start();
