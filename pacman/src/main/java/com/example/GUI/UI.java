@@ -223,12 +223,18 @@ public class UI extends Application {
             errorText.setText("");
             joinLobbyButton.setDisable(true);
 
+            Text joiningText = new Text("Joining lobby...");
+            joiningText.setFill(Color.YELLOW);
+            joiningText.setStyle("-fx-font-size: 14px;");
+            startRoot.getChildren().add(joiningText);
+
             Thread joinThread = new Thread(() -> {
                 try {
                     lobbyHandler.joinLobby(input);
                     javafx.application.Platform.runLater(() -> {
                         startRoot.getChildren().remove(joinLobbyV);
                         startRoot.getChildren().remove(createLobbyV);
+                        startRoot.getChildren().remove(joiningText);
                         joinedLobbyText.setText("Joined lobby with ID: " + input);
                         startRoot.getChildren().add(startButton);
                         startRoot.getChildren().add(joinedLobbyText);
@@ -237,6 +243,7 @@ public class UI extends Application {
                     javafx.application.Platform.runLater(() -> {
                         errorText.setText(ex.getMessage());
                         joinLobbyButton.setDisable(false);
+                        startRoot.getChildren().remove(joiningText);
                         System.err.println("--- Join Failed ---");
                         System.err.println(ex.getMessage());
                     });
