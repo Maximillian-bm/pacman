@@ -26,22 +26,22 @@ public class Constants {
     public final static int TILE_SIZE = 800 / TILES_TALL;
     public final static int INIT_SCREEN_WIDTH = TILES_WIDE * TILE_SIZE;
     public final static int INIT_SCREEN_HEIGHT = TILES_TALL * TILE_SIZE;
-    
-    public static final double PLAYER_RESPAWN_DELAY_SEC = 2.0;
 
     public final static long TARGET_FPS = 20;
     public static final double CENTER_EPS_PX = 1.5;
 
-    
     public final static int COUNTDOWN_DURATION_TICKS = 60;
     public static final double COLLISION_DISTANCE_PVG = TILE_SIZE/2;
     public static final double COLLISION_DISTANCE_PVP = TILE_SIZE;
+
+    public static final double FRUIT_RESPAWN_DELAY_SEC = 5.0;
 
     // Player
     public final static int PLAYER_LIVES = 3;
     public final static double PLAYER_SPEED = 175;
     public final static double PLAYER_FRIGHTENED_SPEED = 150;
     public final static double PLAYER_SPAWN_PROTECT_SEC = 2.0;
+    public static final double PLAYER_RESPAWN_DELAY_SEC = 2.0;
 
     // Ghost
     public static final double GHOST_RESPAWN_DELAY_SEC  = 8.0;

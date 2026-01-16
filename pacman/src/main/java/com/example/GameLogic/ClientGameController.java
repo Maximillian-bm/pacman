@@ -99,6 +99,13 @@ public class ClientGameController extends GameController {
     }
 
     private void handleFruitSpawning(GameState gameState) {
+        EntityTracker entityTracker = gameState.entityTracker();
+
+        if (entityTracker.getFruitCooldownTimer() > 0) {
+            entityTracker.setFruitCooldownTimer(entityTracker.getFruitCooldownTimer() - (1.0 / TARGET_FPS));
+            return;
+        }
+
         // Count total points earned (approximation for pellets eaten)
         int totalPoints = gameState.players().stream().mapToInt(Player::getPoints).sum();
 
@@ -348,9 +355,10 @@ public class ClientGameController extends GameController {
             if (tileY < 0 || tileY >= tiles.length || tileX < 0 || tileX >= tiles[0].length) return;
 
             TileType tileType = tiles[tileY][tileX];
-            if (tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON)
+            if (tileType == TileType.CHERRY || tileType == TileType.STRAWBERRY || tileType == TileType.ORANGE || tileType == TileType.APPLE || tileType == TileType.MELON) {
                 player.setAteFruit(true);
-
+                entityTracker.setFruitCooldownTimer(FRUIT_RESPAWN_DELAY_SEC);
+            }
 
             boolean isPowerup = tiles[tileY][tileX] == TileType.ENERGIZER;
             boolean powerupActive = entityTracker.isAnyPowerActive();
