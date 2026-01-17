@@ -528,8 +528,8 @@ public class UI extends Application {
             );
             gc.setFont(new Font(FONT_FAMILY, 32));
             gc.setFill(Color.YELLOW);
-            gc.fillText("GAME OVER", 
-                Constants.INIT_SCREEN_WIDTH/2-padding+50, 
+            gc.fillText("GAME OVER",
+                Constants.INIT_SCREEN_WIDTH/2-padding+50,
                 Constants.INIT_SCREEN_HEIGHT/2-padding+50
             );
             List<Player> players = gameState.players()
@@ -540,8 +540,8 @@ public class UI extends Application {
             gc.setFont(new Font(FONT_FAMILY, 20));
             for (int i = 0; i < players.size(); i++) {
                 gc.setFill(players.get(i).getColor());
-                gc.fillText("Score: " + players.get(i).getPoints(), 
-                    Constants.INIT_SCREEN_WIDTH/2-padding+40, 
+                gc.fillText("Score: " + players.get(i).getPoints(),
+                    Constants.INIT_SCREEN_WIDTH/2-padding+40,
                     Constants.INIT_SCREEN_HEIGHT/2-padding+100+i*50
                 );
             }
@@ -648,39 +648,34 @@ public class UI extends Application {
                                     y * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
                             break;
                         case CHERRY:
-                            drawSpriteFromSheet(gc, spriteSheet, 600, 0, x * TILE_SIZE, y * TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 12, 0, x, y);
                             break;
                         case STRAWBERRY:
-                            drawSpriteFromSheet(gc, spriteSheet, 600, 50, x * TILE_SIZE, y * TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 12, 1, x, y);
                             break;
                         case ORANGE:
-                            drawSpriteFromSheet(gc, spriteSheet, 600, 100, x * TILE_SIZE, y * TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 12, 2, x, y);
                             break;
                         case APPLE:
-                            drawSpriteFromSheet(gc, spriteSheet, 600, 150, x * TILE_SIZE, y * TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 12, 3, x, y);
                             break;
                         case MELON:
-                            drawSpriteFromSheet(gc, spriteSheet, 600, 200, x * TILE_SIZE, y * TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 12, 4, x, y);
                             break;
                         case GALAXIAN:
-                            drawSpriteFromSheet(gc, spriteSheet, 600, 350, x * TILE_SIZE, y * TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 12, 7, x, y);
                             break;
                         case BELL:
-                            drawSpriteFromSheet(gc, spriteSheet, 600, 400, x * TILE_SIZE, y * TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 12, 8, x, y);
                             break;
                         case KEY:
-                            drawSpriteFromSheet(gc, spriteSheet, 600, 450, x * TILE_SIZE, y * TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 12, 9, x, y);
                             break;
                         case ENERGIZER:
-                            if (gameState.entityTracker().isAnyPowerActive()) {
-                                gc.setGlobalAlpha(0.33);
-                            }
-                            drawSpriteFromSheet(gc, spriteSheet, 400, 450,
-                                x * TILE_SIZE + TILE_SIZE / 2.0, y * TILE_SIZE + TILE_SIZE / 2.0,
-                                1.0 + 2.0/3.0);
+                            if (gameState.entityTracker().isAnyPowerActive()) gc.setGlobalAlpha(0.33);
+                            drawSpriteFromSheet(gc, spriteSheet, 8, 9, x, y);
                             gc.setGlobalAlpha(1.0);
                             break;
-
                     }
 
                     // Show which tile the player is on
@@ -712,18 +707,18 @@ public class UI extends Application {
 
             gameState.players().forEach(player -> {
                 if(!player.isDeadWithNoHearts()){
-                    int sy = switch (player.getDirection()) {
-                        case WEST -> 50 * 6;
-                        case NORTH -> 50 * 9;
-                        case SOUTH -> 50 * 3;
+                    int tileY = switch (player.getDirection()) {
+                        case WEST -> 6;
+                        case NORTH -> 9;
+                        case SOUTH -> 3;
                         default -> 0;
                     };
 
                     int pacmanFrame = (int) ((animationTimeNanos / pacmanNanosPerFrame) % pacmanFrameCount);
-                    sy = switch (pacmanFrame) {
-                        case 0 -> sy;
-                        case 2 -> sy + 50 * 2;
-                        default -> sy + 50;
+                    tileY = switch (pacmanFrame) {
+                        case 0 -> tileY;
+                        case 2 -> tileY + 2;
+                        default -> tileY + 1;
                     };
 
                 Image coloredPlayer = colorPlayer(player.getColor());
@@ -745,18 +740,18 @@ public class UI extends Application {
 
                     double rsTimer = player.getRespawnTimer();
                     if (rsTimer <= 0) {
-                        drawSpriteFromSheet(gc, coloredPlayer, 850, sy, playerTilePos.x, playerTilePos.y);
+                        drawSpriteFromSheet(gc, coloredPlayer, 17, tileY, playerTilePos.x, playerTilePos.y);
                     } else {
                         double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC/11;
-                        float y = 0;
+                        int respawnTileY = 0;
                         for (int i = 1; i < 11; i++) {
                             if (rsTimer < rsFrameInterval*i) {
-                                y = 50*(11-i);
+                                respawnTileY = 11-i;
                                 break;
                             }
                         }
 
-                        drawSpriteFromSheet(gc, coloredPlayer, 350, (int)y, playerTilePos.x, playerTilePos.y);
+                        drawSpriteFromSheet(gc, coloredPlayer, 7, respawnTileY, playerTilePos.x, playerTilePos.y);
                     }
                 }
             });
@@ -777,43 +772,43 @@ public class UI extends Application {
             long ghostNanosPerFrame = 300_000_000L;
 
             gameState.ghosts().forEach(ghost -> {
-                int sy = 0, sx = 0;
+                int tileY = 0, tileX = 0;
                 switch (ghost.getDirection()) {
                     case WEST:
-                        sy += 50 * 4;
+                        tileY = 4;
                         break;
                     case NORTH:
-                        sy += 50 * 6;
+                        tileY = 6;
                         break;
                     case SOUTH:
-                        sy += 50 * 2;
+                        tileY = 2;
                         break;
                 }
 
-                sx = switch (ghost.getType()) {
+                tileX = switch (ghost.getType()) {
                     case RED -> 0; // ("Blinky"),
-                    case PINK -> 50; // ("Pinky"),
-                    case CYAN -> 100; // ("Inky"),
-                    case ORANGE -> 150; // ("Clyde"),
-                    case PURPLE -> 250; // ("Sue");
+                    case PINK -> 1; // ("Pinky"),
+                    case CYAN -> 2; // ("Inky"),
+                    case ORANGE -> 3; // ("Clyde"),
+                    case PURPLE -> 5; // ("Sue");
                 };
 
                 double fTimer = gameState.entityTracker().getFrightenedTimerSec();
 
                 if (fTimer > 0) {
-                    sy += 50 * 11;
-                    sx = 0;
+                    tileY += 11;
+                    tileX = 0;
                 }
 
                 int ghostFrame = (int) ((animationTimeNanos / ghostNanosPerFrame) % ghostFrameCount);
                 if (ghostFrame == 1) {
-                    sy += 50;
+                    tileY += 1;
                     if (fTimer > 0 && fTimer < 2.0)
-                        sx += 50;
+                        tileX += 1;
                 }
 
                 Position ghostTilePos = ghost.getPosition();
-                drawSpriteFromSheet(gc, spriteSheet, sx, sy, ghostTilePos.x, ghostTilePos.y);
+                drawSpriteFromSheet(gc, spriteSheet, tileX, tileY, ghostTilePos.x, ghostTilePos.y);
             });
         }
 
@@ -838,146 +833,106 @@ public class UI extends Application {
             // Encode cardinal directions as bitmask: N=1, E=2, S=4, W=8
             int mask = (n ? 1 : 0) | (e ? 2 : 0) | (s ? 4 : 0) | (w ? 8 : 0);
 
-            double destX = x * TILE_SIZE;
-            double destY = y * TILE_SIZE;
-
             switch (mask) {
                 case 0 -> // isolated
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 8, 2, destX, destY);
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 8, 2, x, y);
                 case 1 -> // N
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 3, destX, destY); // Vertical
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 3, x, y); // Vertical
                 case 2 -> // E
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 4, x, y); // Horizontal
                 case 3 -> // N+E
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 4, destX, destY);
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 4, x, y);
                 case 4 -> // S
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 3, destX, destY); // Vertical
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 3, x, y); // Vertical
                 case 5 -> // N+S
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 3, destX, destY); // Vertical
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 3, x, y); // Vertical
                 case 6 -> // S+E
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 3, destX, destY);
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 3, x, y);
                 case 7 -> { // N+S+E
-                    if (!ne) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 4, destX, destY);
-                    else if (!se) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 3, destX, destY);
-                    else drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 3, destX, destY); // Vertical
+                    if (!ne) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 4, x, y);
+                    else if (!se) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 3, x, y);
+                    else drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 3, x, y); // Vertical
                 }
                 case 8 -> // W
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 4, x, y); // Horizontal
                 case 9 -> // N+W
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 4, destX, destY);
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 4, x, y);
                 case 10 -> // E+W
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 4, x, y); // Horizontal
                 case 11 -> { // N+E+W
-                    if (!ne) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 4, destX, destY);
-                    else if (!nw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 4 , destX, destY);
-                    else drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                    if (!ne) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 4, x, y);
+                    else if (!nw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 4 , x, y);
+                    else drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 4, x, y); // Horizontal
                 }
                 case 12 -> // S+W
-                    drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 3, destX, destY);
+                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 3, x, y);
                 case 13 -> { // N+S+W
-                    if (!nw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 4, destX, destY);
-                    else if (!sw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 3, destX, destY);
-                    else drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 3, destX, destY); // Vertical
+                    if (!nw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 4, x, y);
+                    else if (!sw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 3, x, y);
+                    else drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 3, x, y); // Vertical
                 }
                 case 14 -> { // S+E+W
-                    if (!se) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 3, destX, destY);
-                    else if (!sw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 3, destX, destY);
-                    else drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                    if (!se) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 3, x, y);
+                    else if (!sw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 3, x, y);
+                    else drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 4, x, y); // Horizontal
                 }
                 case 15 -> { // N+S+E+W
-                    if (!se) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 3, destX, destY);
-                    else if (!sw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 3, destX, destY);
-                    else if (!ne) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 4, destX, destY);
-                    else if (!nw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 4, destX, destY);
+                    if (!se) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 3, x, y);
+                    else if (!sw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 3, x, y);
+                    else if (!ne) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 4, x, y);
+                    else if (!nw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 4, x, y);
                 }
             }
         }
     }
 
-    private void drawTileFromTileset(
+    private void drawSpriteFromSheet(
         GraphicsContext gc,
-        Image tileset,
-        int tileX,
-        int tileY,
-        double destX,
-        double destY
+        Image spriteSheet,
+        int srcTileX,
+        int srcTileY,
+        int destTileX,
+        int destTileY
     ) {
-        drawTileFromTileset(gc, tileset, tileX, tileY, 0, 0, 32, 32, destX, destY);
-    }
-
-    private void drawTileFromTileset(
-        GraphicsContext gc,
-        Image tileset,
-        int tileX,
-        int tileY,
-        int srcOffsetX,
-        int srcOffsetY,
-        int srcWidth,
-        int srcHeight,
-        double destX,
-        double destY) {
-        double scale = Constants.TILE_SIZE / 32.0;
-        gc.drawImage(
-            tileset,
-            tileX * 32 + srcOffsetX,
-            tileY * 32 + srcOffsetY,
-            srcWidth,
-            srcHeight,
-            destX,
-            destY,
-            srcWidth * scale,
-            srcHeight * scale);
-    }
-
-    private void drawTileFromTileset(
-        GraphicsContext gc,
-        Image tileset,
-        int tileX,
-        int tileY,
-        double centerX,
-        double centerY,
-        double scaleFactor) {
-        double baseScale = Constants.TILE_SIZE / 32.0;
-        double finalScale = baseScale * scaleFactor;
-        double finalWidth = 32 * finalScale;
-        double finalHeight = 32 * finalScale;
-        double destX = centerX - finalWidth / 2.0;
-        double destY = centerY - finalHeight / 2.0;
-        gc.drawImage(
-            tileset,
-            tileX * 32,
-            tileY * 32,
-            32,
-            32,
-            destX,
-            destY,
-            finalWidth,
-            finalHeight);
+        drawSpriteFromSheet(gc, spriteSheet, srcTileX, srcTileY, destTileX, destTileY, 1.0);
     }
 
     private void drawSpriteFromSheet(
         GraphicsContext gc,
         Image spriteSheet,
-        int srcX,
-        int srcY,
-        double destX,
-        double destY) {
-        gc.drawImage(spriteSheet, srcX, srcY, 50, 50, destX, destY, TILE_SIZE, TILE_SIZE);
+        int srcTileX,
+        int srcTileY,
+        int destTileX,
+        int destTileY,
+        double scaleFactor
+    ) {
+        drawSpriteFromSheet(gc, spriteSheet, srcTileX, srcTileY, destTileX * TILE_SIZE, destTileY * TILE_SIZE, scaleFactor);
     }
 
     private void drawSpriteFromSheet(
         GraphicsContext gc,
         Image spriteSheet,
-        int srcX,
-        int srcY,
-        double centerX,
-        double centerY,
-        double scaleFactor) {
+        int srcTileX,
+        int srcTileY,
+        double destPixelX,
+        double destPixelY
+    ) {
+        drawSpriteFromSheet(gc, spriteSheet, srcTileX, srcTileY, destPixelX, destPixelY, 1.0);
+    }
+
+    private void drawSpriteFromSheet(
+        GraphicsContext gc,
+        Image spriteSheet,
+        int srcTileX,
+        int srcTileY,
+        double destPixelX,
+        double destPixelY,
+        double scaleFactor
+    ) {
         double finalWidth = TILE_SIZE * scaleFactor;
         double finalHeight = TILE_SIZE * scaleFactor;
-        double destX = centerX - finalWidth / 2.0;
-        double destY = centerY - finalHeight / 2.0;
-        gc.drawImage(spriteSheet, srcX, srcY, 50, 50, destX, destY, finalWidth, finalHeight);
+        gc.drawImage(spriteSheet, srcTileX * 50, srcTileY * 50, 50, 50, destPixelX, destPixelY, finalWidth,
+            finalHeight);
     }
 
     private void drawRectangle(GraphicsContext gc, int x, int y, int width, int height) {
@@ -1044,7 +999,7 @@ public class UI extends Application {
                     }
                 }
 
-                drawTileFromTileset(gc, coloredWallSpriteSheet, tileTilePos.x, tileTilePos.y, j * TILE_SIZE, i * TILE_SIZE);
+                drawSpriteFromSheet(gc, coloredWallSpriteSheet, tileTilePos.x, tileTilePos.y, j * TILE_SIZE, i * TILE_SIZE);
             }
         }
     }
