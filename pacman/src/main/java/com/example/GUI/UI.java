@@ -811,61 +811,53 @@ public class UI extends Application {
 
             switch (mask) {
                 case 0 -> // isolated
-                    drawTileFromTileset(gc, wallSpriteSheet, 7, 1, destX, destY);
-                case 1 -> // N only
-                    drawTileFromTileset(gc, wallSpriteSheet, 6, 2, destX, destY);
-                case 2 -> // E only
-                    drawTileFromTileset(gc, wallSpriteSheet, 7, 0, destX, destY);
+                    drawTileFromTileset(gc, wallSpriteSheet, 8, 2, destX, destY);
+                case 1 -> // N
+                    drawTileFromTileset(gc, wallSpriteSheet, 2, 3, destX, destY); // Vertical
+                case 2 -> // E
+                    drawTileFromTileset(gc, wallSpriteSheet, 2, 4, destX, destY); // Horizontal
                 case 3 -> // N+E
-                    drawTileFromTileset(gc, wallSpriteSheet, ne ? 0 : 3, 2, destX, destY);
-                case 4 -> // S only
-                    drawTileFromTileset(gc, wallSpriteSheet, 6, 0, destX, destY);
+                    drawTileFromTileset(gc, wallSpriteSheet, 0, 4, destX, destY);
+                case 4 -> // S
+                    drawTileFromTileset(gc, wallSpriteSheet, 2, 3, destX, destY); // Vertical
                 case 5 -> // N+S
-                    drawTileFromTileset(gc, wallSpriteSheet, 6, 1, destX, destY);
-                case 6 -> // E+S
-                    drawTileFromTileset(gc, wallSpriteSheet, se ? 0 : 3, 0, destX, destY);
-                case 7 -> // N+E+S
-                    drawTileFromTileset(gc, wallSpriteSheet, 3, 1, destX, destY);
-                case 8 -> // W only
-                    drawTileFromTileset(gc, wallSpriteSheet, 9, 0, destX, destY);
+                    drawTileFromTileset(gc, wallSpriteSheet, 2, 3, destX, destY); // Vertical
+                case 6 -> // S+E
+                    drawTileFromTileset(gc, wallSpriteSheet, 0, 3, destX, destY);
+                case 7 -> { // N+S+E
+                    if (!ne) drawTileFromTileset(gc, wallSpriteSheet, 0, 4, destX, destY);
+                    else if (!se) drawTileFromTileset(gc, wallSpriteSheet, 0, 3, destX, destY);
+                    else drawTileFromTileset(gc, wallSpriteSheet, 2, 3, destX, destY); // Vertical
+                }
+                case 8 -> // W
+                    drawTileFromTileset(gc, wallSpriteSheet, 2, 4, destX, destY); // Horizontal
                 case 9 -> // N+W
-                    drawTileFromTileset(gc, wallSpriteSheet, nw ? 2 : 5, 2, destX, destY);
+                    drawTileFromTileset(gc, wallSpriteSheet, 1, 4, destX, destY);
                 case 10 -> // E+W
-                    drawTileFromTileset(gc, wallSpriteSheet, 8, 0, destX, destY);
-                case 11 -> // N+E+W
-                    drawTileFromTileset(gc, wallSpriteSheet, nw || ne ? 1 : 4, 2, destX, destY);
+                    drawTileFromTileset(gc, wallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                case 11 -> { // N+E+W
+                    if (!ne) drawTileFromTileset(gc, wallSpriteSheet, 0, 4, destX, destY);
+                    else if (!nw) drawTileFromTileset(gc, wallSpriteSheet, 1, 4 , destX, destY);
+                    else drawTileFromTileset(gc, wallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                }
                 case 12 -> // S+W
-                    drawTileFromTileset(gc, wallSpriteSheet, sw ? 2 : 5, 0, destX, destY);
-                case 13 -> // N+S+W
-                    drawTileFromTileset(gc, wallSpriteSheet, 5, 1, destX, destY);
-                case 14 -> // E+S+W
-                    drawTileFromTileset(gc, wallSpriteSheet, sw || se ? 1 : 4, 0, destX, destY);
-                case 15 -> // N+E+S+W (all cardinal directions)
-                    drawCrossWall(destX, destY, ne, nw, se, sw);
-            }
-        }
-
-        private void drawCrossWall(double destX, double destY, boolean ne, boolean nw, boolean se, boolean sw) {
-            // Base: full cross
-            drawTileFromTileset(gc, wallSpriteSheet, 1, 1, destX, destY);
-
-            // Draw corner overlays for missing diagonal walls
-            double half = TILE_SIZE / 2.0;
-
-            if (!ne && !se) {
-                // Right edge missing both corners
-                drawTileFromTileset(gc, wallSpriteSheet, 3, 1, 16, 0, 16, 32, destX + half, destY);
-            } else if (!ne) {
-                // Top-right corner only
-                drawTileFromTileset(gc, wallSpriteSheet, 7, 1, 0, 16, 16, 16, destX + half, destY);
-            }
-
-            if (!nw && !sw) {
-                // Left edge missing both corners
-                drawTileFromTileset(gc, wallSpriteSheet, 5, 1, 0, 0, 16, 32, destX, destY);
-            } else if (!nw) {
-                // Top-left corner only
-                drawTileFromTileset(gc, wallSpriteSheet, 7, 1, 16, 16, 16, 16, destX, destY);
+                    drawTileFromTileset(gc, wallSpriteSheet, 1, 3, destX, destY);
+                case 13 -> { // N+S+W
+                    if (!nw) drawTileFromTileset(gc, wallSpriteSheet, 1, 4, destX, destY);
+                    else if (!sw) drawTileFromTileset(gc, wallSpriteSheet, 1, 3, destX, destY);
+                    else drawTileFromTileset(gc, wallSpriteSheet, 2, 3, destX, destY); // Vertical
+                }
+                case 14 -> { // S+E+W
+                    if (!se) drawTileFromTileset(gc, wallSpriteSheet, 0, 3, destX, destY);
+                    else if (!sw) drawTileFromTileset(gc, wallSpriteSheet, 1, 3, destX, destY);
+                    else drawTileFromTileset(gc, wallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                }
+                case 15 -> { // N+S+E+W
+                    if (!se) drawTileFromTileset(gc, wallSpriteSheet, 0, 3, destX, destY);
+                    else if (!sw) drawTileFromTileset(gc, wallSpriteSheet, 1, 3, destX, destY);
+                    else if (!ne) drawTileFromTileset(gc, wallSpriteSheet, 0, 4, destX, destY);
+                    else if (!nw) drawTileFromTileset(gc, wallSpriteSheet, 1, 4, destX, destY);
+                }
             }
         }
     }
