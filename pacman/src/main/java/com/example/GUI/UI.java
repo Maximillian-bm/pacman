@@ -60,6 +60,10 @@ public class UI extends Application {
             Objects.requireNonNull(getClass().getResource("/tilesets/chompermazetiles.png")).toExternalForm());
     private final Map<Color, Image> coloredPlayerCache = new HashMap<>();
 
+    // Wall color configuration - change this to customize wall color
+    private final Color wallColor = Color.rgb(52, 0, 254);
+    private Image coloredWallSpriteSheet;
+
     private KeyHandler keyHandler;
 
     private Runnable createLobby;
@@ -84,6 +88,7 @@ public class UI extends Application {
         stage.setTitle("Pacman");
         System.out.println("REMOTE_PUBLIC_URI: " + Constants.REMOTE_PUBLIC_URI + ", LOCAL_GATE: " + Constants.LOCAL_GATE);
         precomputePlayerColors();
+        precomputeWallColor();
         initializeMainMenu(stage);
     }
 
@@ -101,6 +106,10 @@ public class UI extends Application {
         for (Color color : playerColors) {
             coloredPlayerCache.put(color, createColoredPlayerImage(color));
         }
+    }
+
+    private void precomputeWallColor() {
+        coloredWallSpriteSheet = createColoredWallImage(wallColor);
     }
     // Modified function from:
     // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
@@ -136,10 +145,41 @@ public class UI extends Application {
         return outputImage;
     }
 
+    private Image createColoredWallImage(Color color) {
+        int W = (int) wallSpriteSheet.getWidth();
+        int H = (int) wallSpriteSheet.getHeight();
+        WritableImage outputImage = new WritableImage(W, H);
+        PixelReader reader = wallSpriteSheet.getPixelReader();
+        PixelWriter writer = outputImage.getPixelWriter();
+        int nr = (int) (color.getRed() * 255);
+        int ng = (int) (color.getGreen() * 255);
+        int nb = (int) (color.getBlue() * 255);
+        int or = 255;
+        int og = 255;
+        int ob = 255;
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                int argb = reader.getArgb(x, y);
+                int a = (argb >> 24) & 0xFF;
+                int r = (argb >> 16) & 0xFF;
+                int g = (argb >> 8) & 0xFF;
+                int b = argb & 0xFF;
+                if (g == og && r == or && b == ob) {
+                    r = nr;
+                    g = ng;
+                    b = nb;
+                }
+                argb = (a << 24) | (r << 16) | (g << 8) | b;
+                writer.setArgb(x, y, argb);
+            }
+        }
+        return outputImage;
+    }
+
     private void initializeMainMenu(Stage stage) {
         Canvas backgroundCanvas = new Canvas(Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
         GraphicsContext bgGc = backgroundCanvas.getGraphicsContext2D();
-        bgGc.setFill(Color.BLACK);
+        bgGc.setFill(Color.rgb(10, 10, 50));
         bgGc.fillRect(0, 0, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
         drawRectangle(bgGc, 0, 0, TILES_WIDE, TILES_TALL);
@@ -811,52 +851,52 @@ public class UI extends Application {
 
             switch (mask) {
                 case 0 -> // isolated
-                    drawTileFromTileset(gc, wallSpriteSheet, 8, 2, destX, destY);
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 8, 2, destX, destY);
                 case 1 -> // N
-                    drawTileFromTileset(gc, wallSpriteSheet, 2, 3, destX, destY); // Vertical
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 3, destX, destY); // Vertical
                 case 2 -> // E
-                    drawTileFromTileset(gc, wallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 4, destX, destY); // Horizontal
                 case 3 -> // N+E
-                    drawTileFromTileset(gc, wallSpriteSheet, 0, 4, destX, destY);
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 4, destX, destY);
                 case 4 -> // S
-                    drawTileFromTileset(gc, wallSpriteSheet, 2, 3, destX, destY); // Vertical
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 3, destX, destY); // Vertical
                 case 5 -> // N+S
-                    drawTileFromTileset(gc, wallSpriteSheet, 2, 3, destX, destY); // Vertical
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 3, destX, destY); // Vertical
                 case 6 -> // S+E
-                    drawTileFromTileset(gc, wallSpriteSheet, 0, 3, destX, destY);
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 3, destX, destY);
                 case 7 -> { // N+S+E
-                    if (!ne) drawTileFromTileset(gc, wallSpriteSheet, 0, 4, destX, destY);
-                    else if (!se) drawTileFromTileset(gc, wallSpriteSheet, 0, 3, destX, destY);
-                    else drawTileFromTileset(gc, wallSpriteSheet, 2, 3, destX, destY); // Vertical
+                    if (!ne) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 4, destX, destY);
+                    else if (!se) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 3, destX, destY);
+                    else drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 3, destX, destY); // Vertical
                 }
                 case 8 -> // W
-                    drawTileFromTileset(gc, wallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 4, destX, destY); // Horizontal
                 case 9 -> // N+W
-                    drawTileFromTileset(gc, wallSpriteSheet, 1, 4, destX, destY);
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 4, destX, destY);
                 case 10 -> // E+W
-                    drawTileFromTileset(gc, wallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 4, destX, destY); // Horizontal
                 case 11 -> { // N+E+W
-                    if (!ne) drawTileFromTileset(gc, wallSpriteSheet, 0, 4, destX, destY);
-                    else if (!nw) drawTileFromTileset(gc, wallSpriteSheet, 1, 4 , destX, destY);
-                    else drawTileFromTileset(gc, wallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                    if (!ne) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 4, destX, destY);
+                    else if (!nw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 4 , destX, destY);
+                    else drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 4, destX, destY); // Horizontal
                 }
                 case 12 -> // S+W
-                    drawTileFromTileset(gc, wallSpriteSheet, 1, 3, destX, destY);
+                    drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 3, destX, destY);
                 case 13 -> { // N+S+W
-                    if (!nw) drawTileFromTileset(gc, wallSpriteSheet, 1, 4, destX, destY);
-                    else if (!sw) drawTileFromTileset(gc, wallSpriteSheet, 1, 3, destX, destY);
-                    else drawTileFromTileset(gc, wallSpriteSheet, 2, 3, destX, destY); // Vertical
+                    if (!nw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 4, destX, destY);
+                    else if (!sw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 3, destX, destY);
+                    else drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 3, destX, destY); // Vertical
                 }
                 case 14 -> { // S+E+W
-                    if (!se) drawTileFromTileset(gc, wallSpriteSheet, 0, 3, destX, destY);
-                    else if (!sw) drawTileFromTileset(gc, wallSpriteSheet, 1, 3, destX, destY);
-                    else drawTileFromTileset(gc, wallSpriteSheet, 2, 4, destX, destY); // Horizontal
+                    if (!se) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 3, destX, destY);
+                    else if (!sw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 3, destX, destY);
+                    else drawTileFromTileset(gc, coloredWallSpriteSheet, 2, 4, destX, destY); // Horizontal
                 }
                 case 15 -> { // N+S+E+W
-                    if (!se) drawTileFromTileset(gc, wallSpriteSheet, 0, 3, destX, destY);
-                    else if (!sw) drawTileFromTileset(gc, wallSpriteSheet, 1, 3, destX, destY);
-                    else if (!ne) drawTileFromTileset(gc, wallSpriteSheet, 0, 4, destX, destY);
-                    else if (!nw) drawTileFromTileset(gc, wallSpriteSheet, 1, 4, destX, destY);
+                    if (!se) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 3, destX, destY);
+                    else if (!sw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 3, destX, destY);
+                    else if (!ne) drawTileFromTileset(gc, coloredWallSpriteSheet, 0, 4, destX, destY);
+                    else if (!nw) drawTileFromTileset(gc, coloredWallSpriteSheet, 1, 4, destX, destY);
                 }
             }
         }
@@ -961,7 +1001,7 @@ public class UI extends Application {
                     }
                 }
 
-                drawTileFromTileset(gc, wallSpriteSheet, tileTilePos.x, tileTilePos.y, j * TILE_SIZE, i * TILE_SIZE);
+                drawTileFromTileset(gc, coloredWallSpriteSheet, tileTilePos.x, tileTilePos.y, j * TILE_SIZE, i * TILE_SIZE);
             }
         }
     }
