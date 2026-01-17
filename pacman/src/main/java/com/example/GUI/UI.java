@@ -588,10 +588,12 @@ public class UI extends Application {
                 default:
                     break;
             }
-            if(!eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] == TileType.PAC_DOT){
+            if (!eatingDot &&
+                gameState.tiles()[Math.floorMod(pos.getValue() + yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey() + xOffset, Constants.TILES_WIDE)] == TileType.PAC_DOT) {
                 eatingDot = true;
                 soundEngine.play(Sound.EAT_DOT);
-            }else if(eatingDot && gameState.tiles()[Math.floorMod(pos.getValue()+yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey()+xOffset, Constants.TILES_WIDE)] != TileType.PAC_DOT){
+            } else if (eatingDot &&
+                gameState.tiles()[Math.floorMod(pos.getValue() + yOffset, Constants.TILES_TALL)][Math.floorMod(pos.getKey() + xOffset, Constants.TILES_WIDE)] != TileType.PAC_DOT) {
                 eatingDot = false;
                 soundEngine.stop(Sound.EAT_DOT);
             }
@@ -642,10 +644,7 @@ public class UI extends Application {
                             drawWall(y, x);
                             break;
                         case PAC_DOT:
-                            double pacDotSize = TILE_SIZE / 8.0;
-                            gc.setFill(Color.YELLOW);
-                            gc.fillRect(x * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0,
-                                    y * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
+                            drawSpriteFromSheet(gc, spriteSheet, 8, 8, x, y);
                             break;
                         case CHERRY:
                             drawSpriteFromSheet(gc, spriteSheet, 12, 0, x, y);
