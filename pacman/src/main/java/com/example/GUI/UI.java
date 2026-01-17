@@ -85,11 +85,16 @@ public class UI extends Application {
 
     @Override
     public void start(Stage stage) {
-        stage.setTitle("Pacman");
-        System.out.println("REMOTE_PUBLIC_URI: " + Constants.REMOTE_PUBLIC_URI + ", LOCAL_GATE: " + Constants.LOCAL_GATE);
-        precomputePlayerColors();
-        precomputeWallColor();
-        initializeMainMenu(stage);
+        try {
+            stage.setTitle("Pacman");
+            System.out.println("REMOTE_PUBLIC_URI: " + Constants.REMOTE_PUBLIC_URI + ", LOCAL_GATE: " + Constants.LOCAL_GATE);
+            precomputePlayerColors();
+            precomputeWallColor();
+            initializeMainMenu(stage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
     }
 
     private Image colorPlayer(Color color) {
