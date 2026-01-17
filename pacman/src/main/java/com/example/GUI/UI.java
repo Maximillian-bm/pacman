@@ -646,7 +646,7 @@ public class UI extends Application {
 
                     double rsTimer = player.getRespawnTimer();
                     if (rsTimer <= 0) {
-                        drawSpriteFromSheet(gc, playerSheet, 17, tileY, playerTilePos.x, playerTilePos.y);
+                        drawSpriteFromSheet(gc, playerSheet, 17, tileY, playerTilePos.x, playerTilePos.y, 1.5);
                     } else {
                         double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC/11;
                         int respawnTileY = 0;
@@ -657,7 +657,7 @@ public class UI extends Application {
                             }
                         }
 
-                        drawSpriteFromSheet(gc, playerSheet, 7, respawnTileY, playerTilePos.x, playerTilePos.y);
+                        drawSpriteFromSheet(gc, playerSheet, 7, respawnTileY, playerTilePos.x, playerTilePos.y, 1.5);
                     }
                 }
             });
@@ -679,17 +679,12 @@ public class UI extends Application {
 
             gameState.ghosts().forEach(ghost -> {
                 int tileY = 0, tileX = 0;
-                switch (ghost.getDirection()) {
-                    case WEST:
-                        tileY = 4;
-                        break;
-                    case NORTH:
-                        tileY = 6;
-                        break;
-                    case SOUTH:
-                        tileY = 2;
-                        break;
-                }
+                tileY = switch (ghost.getDirection()) {
+                    case WEST -> 4;
+                    case NORTH -> 6;
+                    case SOUTH -> 2;
+                    default -> tileY;
+                };
 
                 tileX = switch (ghost.getType()) {
                     case RED -> 0; // ("Blinky"),
@@ -714,7 +709,7 @@ public class UI extends Application {
                 }
 
                 Position ghostTilePos = ghost.getPosition();
-                drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, tileX, tileY, ghostTilePos.x, ghostTilePos.y);
+                drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, tileX, tileY, ghostTilePos.x, ghostTilePos.y, 1.5);
             });
         }
 
