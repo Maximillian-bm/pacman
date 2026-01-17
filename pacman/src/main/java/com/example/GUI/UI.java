@@ -54,10 +54,8 @@ public class UI extends Application {
     private GraphicsContext gc;
     private Canvas canvas;
 
-    private final Image spriteSheet = new Image(
-            Objects.requireNonNull(getClass().getResource("/tilesets/pacman-sprite-sheet.png")).toExternalForm());
-    private final Image wallSpriteSheet = new Image(
-            Objects.requireNonNull(getClass().getResource("/tilesets/chompermazetiles.png")).toExternalForm());
+    private final Image spriteSheet = new Image(Objects.requireNonNull(getClass().getResource("/tilesets/pacman-sprite-sheet.png")).toExternalForm());
+    private final Image wallSpriteSheet = new Image(Objects.requireNonNull(getClass().getResource("/tilesets/chompermazetiles.png")).toExternalForm());
     private final Map<Color, Image> coloredPlayerCache = new HashMap<>();
 
     // Wall color configuration - change this to customize wall color
@@ -216,13 +214,15 @@ public class UI extends Application {
         playerCountChoices.setValue("1");
         HBox createLobbyH = new HBox(
                 playerCountText,
-                playerCountChoices);
+                playerCountChoices
+        );
         createLobbyH.setAlignment(Pos.CENTER);
 
         Button createLobbyButton = createTiledButton("Create Lobby", 10, 3);
         VBox createLobbyV = new VBox(
                 createLobbyH,
-                createLobbyButton);
+                createLobbyButton
+        );
         createLobbyV.setAlignment(Pos.CENTER);
 
         Button startButton = createTiledButton("Start Game", 10, 3);
@@ -234,13 +234,15 @@ public class UI extends Application {
         lobbyIDInput.setMaxWidth(6 * TILE_SIZE);
         HBox joinLobbyH = new HBox(
                 LobbyIDText,
-                lobbyIDInput);
+                lobbyIDInput
+        );
         joinLobbyH.setAlignment(Pos.CENTER);
 
         VBox joinLobbyV = new VBox(
                 joinLobbyH,
                 joinLobbyButton,
-                errorText);
+                errorText
+        );
         joinLobbyV.setAlignment(Pos.CENTER);
 
         Text header = new Text("Pacman");
@@ -251,7 +253,8 @@ public class UI extends Application {
                 header,
                 joinLobbyV,
                 createLobbyV,
-                notificationText);
+                notificationText
+        );
         startRoot.setAlignment(Pos.CENTER);
         startRoot.setSpacing(48);
 
@@ -267,7 +270,8 @@ public class UI extends Application {
         Scene startScene = new Scene(
                 root,
                 Constants.INIT_SCREEN_WIDTH,
-                Constants.INIT_SCREEN_HEIGHT);
+                Constants.INIT_SCREEN_HEIGHT
+        );
         startScene.getStylesheets().add("style.css");
 
         joinLobbyButton.setOnAction(e -> {
@@ -306,9 +310,8 @@ public class UI extends Application {
         });
 
         createLobby = () -> {
-            if (playerCountChoices.getValue() == null) {
-                return;
-            }
+            if (playerCountChoices.getValue() == null) return;
+
             String playerCount = playerCountChoices.getValue().toString();
 
             System.out.println("Creating lobby with " + playerCount + " number of player");
@@ -910,7 +913,7 @@ public class UI extends Application {
         int destTileY,
         double scaleFactor
     ) {
-        drawSpriteFromSheet(gc, spriteSheet, srcTileX, srcTileY, destTileX * TILE_SIZE, destTileY * TILE_SIZE, scaleFactor);
+        drawSpriteFromSheet(gc, spriteSheet, srcTileX, srcTileY, (double) (destTileX * TILE_SIZE), (double) (destTileY * TILE_SIZE), scaleFactor);
     }
 
     private void drawSpriteFromSheet(
