@@ -22,15 +22,17 @@ public class Constants {
 
     public final static int TILES_WIDE = getCurrentLevelTiles()[0].length;
     public final static int TILES_TALL = getCurrentLevelTiles().length;
-    public final static int TILE_SIZE = 800 / TILES_TALL;
-    public final static int INIT_SCREEN_WIDTH = TILES_WIDE * TILE_SIZE;
-    public final static int INIT_SCREEN_HEIGHT = TILES_TALL * TILE_SIZE;
+
+    public final static int INIT_SCREEN_HEIGHT = 800;
+    public final static int INIT_SCREEN_WIDTH = (int) (INIT_SCREEN_HEIGHT * ((double) TILES_WIDE / TILES_TALL));
+
+    public final static int TILE_SIZE = INIT_SCREEN_HEIGHT / TILES_TALL;
 
     public final static long TARGET_FPS = 20;
     public static final double CENTER_EPS_PX = 1.5;
 
     public final static int COUNTDOWN_DURATION_TICKS = 60;
-    public static final double COLLISION_DISTANCE_PVG = TILE_SIZE/2;
+    public static final double COLLISION_DISTANCE_PVG = TILE_SIZE / 2;
     public static final double COLLISION_DISTANCE_PVP = TILE_SIZE;
 
     public static final double FRUIT_RESPAWN_DELAY_SEC = 5.0;
