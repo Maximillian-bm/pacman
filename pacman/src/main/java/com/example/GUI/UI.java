@@ -1,8 +1,6 @@
 package com.example.GUI;
 
 import static com.example.model.Constants.TARGET_FPS;
-import static com.example.model.Constants.TILES_TALL;
-import static com.example.model.Constants.TILES_WIDE;
 import static com.example.model.Constants.TILE_SIZE;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
@@ -11,10 +9,7 @@ import com.example.GameLogic.ClientGameController;
 import com.example.model.*;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -27,10 +22,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.text.Font;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.image.PixelReader;
-import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -54,13 +46,6 @@ public class UI extends Application {
     private GraphicsContext gc;
     private Canvas canvas;
 
-    private final Image spriteSheet = new Image(Objects.requireNonNull(getClass().getResource("/tilesets/pacman-sprite-sheet.png")).toExternalForm());
-    private final Image wallSpriteSheet = new Image(Objects.requireNonNull(getClass().getResource("/tilesets/chompermazetiles.png")).toExternalForm());
-    private final Map<Color, Image> coloredPlayerCache = new HashMap<>();
-
-    // Wall color configuration - change this to customize wall color
-    private final Color wallColor = Color.rgb(52, 0, 254);
-    private Image coloredWallSpriteSheet;
 
     private KeyHandler keyHandler;
 
@@ -86,97 +71,11 @@ public class UI extends Application {
         try {
             stage.setTitle("Pacman");
             System.out.println("REMOTE_PUBLIC_URI: " + Constants.REMOTE_PUBLIC_URI + ", LOCAL_GATE: " + Constants.LOCAL_GATE);
-            precomputePlayerColors();
-            precomputeWallColor();
             initializeMainMenu(stage);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
-    }
-
-    private Image colorPlayer(Color color) {
-        return coloredPlayerCache.get(color);
-    }
-    private void precomputePlayerColors() {
-        Color[] playerColors = {
-            Color.rgb(255, 241, 0),  // Player 0 - Yellow
-            Color.rgb(255, 0, 0),    // Player 1 - Red
-            Color.rgb(0, 255, 0),    // Player 2 - Green
-            Color.rgb(0, 0, 255),    // Player 3 - Blue
-            Color.rgb(255, 255, 255) // Player w/ powerup - White
-        };
-        for (Color color : playerColors) {
-            coloredPlayerCache.put(color, createColoredPlayerImage(color));
-        }
-    }
-
-    private void precomputeWallColor() {
-        coloredWallSpriteSheet = createColoredWallImage(wallColor);
-    }
-    // Modified function from:
-    // https://stackoverflow.com/questions/18124364/how-to-change-color-of-image-in-javafx
-    private Image createColoredPlayerImage(Color color) {
-        int W = (int) spriteSheet.getWidth();
-        int H = (int) spriteSheet.getHeight();
-        WritableImage outputImage = new WritableImage(W, H);
-        PixelReader reader = spriteSheet.getPixelReader();
-        PixelWriter writer = outputImage.getPixelWriter();
-        int nr = (int) (color.getRed() * 255);
-        int ng = (int) (color.getGreen() * 255);
-        int nb = (int) (color.getBlue() * 255);
-        // Yellow (the player)
-        int or = 255;
-        int og = 241;
-        int ob = 0;
-        for (int y = 0; y < H; y++) {
-            for (int x = 350; x < 900; x++) {
-                int argb = reader.getArgb(x, y);
-                int a = (argb >> 24) & 0xFF;
-                int r = (argb >> 16) & 0xFF;
-                int g = (argb >> 8) & 0xFF;
-                int b = argb & 0xFF;
-                if (g == og && r == or && b == ob) {
-                    r = nr;
-                    g = ng;
-                    b = nb;
-                }
-                argb = (a << 24) | (r << 16) | (g << 8) | b;
-                writer.setArgb(x, y, argb);
-            }
-        }
-        return outputImage;
-    }
-
-    private Image createColoredWallImage(Color color) {
-        int W = (int) wallSpriteSheet.getWidth();
-        int H = (int) wallSpriteSheet.getHeight();
-        WritableImage outputImage = new WritableImage(W, H);
-        PixelReader reader = wallSpriteSheet.getPixelReader();
-        PixelWriter writer = outputImage.getPixelWriter();
-        int nr = (int) (color.getRed() * 255);
-        int ng = (int) (color.getGreen() * 255);
-        int nb = (int) (color.getBlue() * 255);
-        int or = 255;
-        int og = 255;
-        int ob = 255;
-        for (int y = 0; y < H; y++) {
-            for (int x = 0; x < W; x++) {
-                int argb = reader.getArgb(x, y);
-                int a = (argb >> 24) & 0xFF;
-                int r = (argb >> 16) & 0xFF;
-                int g = (argb >> 8) & 0xFF;
-                int b = argb & 0xFF;
-                if (g == og && r == or && b == ob) {
-                    r = nr;
-                    g = ng;
-                    b = nb;
-                }
-                argb = (a << 24) | (r << 16) | (g << 8) | b;
-                writer.setArgb(x, y, argb);
-            }
-        }
-        return outputImage;
     }
 
     private void initializeMainMenu(Stage stage) {
@@ -185,7 +84,7 @@ public class UI extends Application {
         bgGc.setFill(Color.rgb(10, 10, 50));
         bgGc.fillRect(0, 0, Constants.INIT_SCREEN_WIDTH, Constants.INIT_SCREEN_HEIGHT);
 
-        drawRectangle(bgGc, 0, 0, TILES_WIDE, TILES_TALL);
+        drawRectangle(bgGc, 0, 0, Constants.TILES_WIDE, Constants.TILES_TALL);
 
         Button joinLobbyButton = createTiledButton("Join Lobby", 10, 3);
 
@@ -652,35 +551,35 @@ public class UI extends Application {
                             drawWall(y, x);
                             break;
                         case PAC_DOT:
-                            drawSpriteFromSheet(gc, spriteSheet, 8, 8, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 8, 8, x, y);
                             break;
                         case CHERRY:
-                            drawSpriteFromSheet(gc, spriteSheet, 12, 0, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 0, x, y);
                             break;
                         case STRAWBERRY:
-                            drawSpriteFromSheet(gc, spriteSheet, 12, 1, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 1, x, y);
                             break;
                         case ORANGE:
-                            drawSpriteFromSheet(gc, spriteSheet, 12, 2, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 2, x, y);
                             break;
                         case APPLE:
-                            drawSpriteFromSheet(gc, spriteSheet, 12, 3, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 3, x, y);
                             break;
                         case MELON:
-                            drawSpriteFromSheet(gc, spriteSheet, 12, 4, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 4, x, y);
                             break;
                         case GALAXIAN:
-                            drawSpriteFromSheet(gc, spriteSheet, 12, 7, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 7, x, y);
                             break;
                         case BELL:
-                            drawSpriteFromSheet(gc, spriteSheet, 12, 8, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 8, x, y);
                             break;
                         case KEY:
-                            drawSpriteFromSheet(gc, spriteSheet, 12, 9, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 9, x, y);
                             break;
                         case ENERGIZER:
                             if (gameState.entityTracker().isAnyPowerActive()) gc.setGlobalAlpha(0.33);
-                            drawSpriteFromSheet(gc, spriteSheet, 8, 9, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 8, 9, x, y);
                             gc.setGlobalAlpha(1.0);
                             break;
                     }
@@ -728,7 +627,7 @@ public class UI extends Application {
                         default -> tileY + 1;
                     };
 
-                Image coloredPlayer = colorPlayer(player.getColor());
+                SpriteSheet playerSheet = SpriteSheet.getPlayerSheet(player.getColor());
 
                 boolean hasPowerUp = entityTracker.isPowerOwner(player);
                 if (player.isInvulnerable() || hasPowerUp) {
@@ -739,7 +638,7 @@ public class UI extends Application {
                         blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.5, Constants.PLAYER_SPAWN_PROTECT_SEC);
                     }
                     if (blinkFrame == 1) {
-                        coloredPlayer = colorPlayer(Color.WHITE);
+                        playerSheet = SpriteSheet.getPlayerSheet(Color.WHITE);
                     }
                 }
 
@@ -747,7 +646,7 @@ public class UI extends Application {
 
                     double rsTimer = player.getRespawnTimer();
                     if (rsTimer <= 0) {
-                        drawSpriteFromSheet(gc, coloredPlayer, 17, tileY, playerTilePos.x, playerTilePos.y);
+                        drawSpriteFromSheet(gc, playerSheet, 17, tileY, playerTilePos.x, playerTilePos.y);
                     } else {
                         double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC/11;
                         int respawnTileY = 0;
@@ -758,7 +657,7 @@ public class UI extends Application {
                             }
                         }
 
-                        drawSpriteFromSheet(gc, coloredPlayer, 7, respawnTileY, playerTilePos.x, playerTilePos.y);
+                        drawSpriteFromSheet(gc, playerSheet, 7, respawnTileY, playerTilePos.x, playerTilePos.y);
                     }
                 }
             });
@@ -815,7 +714,7 @@ public class UI extends Application {
                 }
 
                 Position ghostTilePos = ghost.getPosition();
-                drawSpriteFromSheet(gc, spriteSheet, tileX, tileY, ghostTilePos.x, ghostTilePos.y);
+                drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, tileX, tileY, ghostTilePos.x, ghostTilePos.y);
             });
         }
 
@@ -842,52 +741,52 @@ public class UI extends Application {
 
             switch (mask) {
                 case 0 -> // isolated
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 8, 2, x, y);
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 8, 2, x, y);
                 case 1 -> // N
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 3, x, y); // Vertical
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 2, 3, x, y); // Vertical
                 case 2 -> // E
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 4, x, y); // Horizontal
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 2, 4, x, y); // Horizontal
                 case 3 -> // N+E
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 4, x, y);
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 0, 4, x, y);
                 case 4 -> // S
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 3, x, y); // Vertical
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 2, 3, x, y); // Vertical
                 case 5 -> // N+S
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 3, x, y); // Vertical
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 2, 3, x, y); // Vertical
                 case 6 -> // S+E
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 3, x, y);
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 0, 3, x, y);
                 case 7 -> { // N+S+E
-                    if (!ne) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 4, x, y);
-                    else if (!se) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 3, x, y);
-                    else drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 3, x, y); // Vertical
+                    if (!ne) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 0, 4, x, y);
+                    else if (!se) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 0, 3, x, y);
+                    else drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 2, 3, x, y); // Vertical
                 }
                 case 8 -> // W
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 4, x, y); // Horizontal
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 2, 4, x, y); // Horizontal
                 case 9 -> // N+W
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 4, x, y);
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 1, 4, x, y);
                 case 10 -> // E+W
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 4, x, y); // Horizontal
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 2, 4, x, y); // Horizontal
                 case 11 -> { // N+E+W
-                    if (!ne) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 4, x, y);
-                    else if (!nw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 4 , x, y);
-                    else drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 4, x, y); // Horizontal
+                    if (!ne) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 0, 4, x, y);
+                    else if (!nw) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 1, 4 , x, y);
+                    else drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 2, 4, x, y); // Horizontal
                 }
                 case 12 -> // S+W
-                    drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 3, x, y);
+                    drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 1, 3, x, y);
                 case 13 -> { // N+S+W
-                    if (!nw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 4, x, y);
-                    else if (!sw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 3, x, y);
-                    else drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 3, x, y); // Vertical
+                    if (!nw) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 1, 4, x, y);
+                    else if (!sw) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 1, 3, x, y);
+                    else drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 2, 3, x, y); // Vertical
                 }
                 case 14 -> { // S+E+W
-                    if (!se) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 3, x, y);
-                    else if (!sw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 3, x, y);
-                    else drawSpriteFromSheet(gc, coloredWallSpriteSheet, 2, 4, x, y); // Horizontal
+                    if (!se) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 0, 3, x, y);
+                    else if (!sw) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 1, 3, x, y);
+                    else drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 2, 4, x, y); // Horizontal
                 }
                 case 15 -> { // N+S+E+W
-                    if (!se) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 3, x, y);
-                    else if (!sw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 3, x, y);
-                    else if (!ne) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 0, 4, x, y);
-                    else if (!nw) drawSpriteFromSheet(gc, coloredWallSpriteSheet, 1, 4, x, y);
+                    if (!se) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 0, 3, x, y);
+                    else if (!sw) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 1, 3, x, y);
+                    else if (!ne) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 0, 4, x, y);
+                    else if (!nw) drawSpriteFromSheet(gc, SpriteSheet.WALL_COLORED, 1, 4, x, y);
                 }
             }
         }
@@ -895,7 +794,7 @@ public class UI extends Application {
 
     private void drawSpriteFromSheet(
         GraphicsContext gc,
-        Image spriteSheet,
+        SpriteSheet spriteSheet,
         int srcTileX,
         int srcTileY,
         int destTileX,
@@ -906,7 +805,7 @@ public class UI extends Application {
 
     private void drawSpriteFromSheet(
         GraphicsContext gc,
-        Image spriteSheet,
+        SpriteSheet spriteSheet,
         int srcTileX,
         int srcTileY,
         int destTileX,
@@ -918,7 +817,7 @@ public class UI extends Application {
 
     private void drawSpriteFromSheet(
         GraphicsContext gc,
-        Image spriteSheet,
+        SpriteSheet spriteSheet,
         int srcTileX,
         int srcTileY,
         double destPixelX,
@@ -929,7 +828,7 @@ public class UI extends Application {
 
     private void drawSpriteFromSheet(
         GraphicsContext gc,
-        Image spriteSheet,
+        SpriteSheet spriteSheet,
         int srcTileX,
         int srcTileY,
         double destPixelX,
@@ -938,8 +837,18 @@ public class UI extends Application {
     ) {
         double finalWidth = TILE_SIZE * scaleFactor;
         double finalHeight = TILE_SIZE * scaleFactor;
-        gc.drawImage(spriteSheet, srcTileX * 50, srcTileY * 50, 50, 50, destPixelX, destPixelY, finalWidth,
-            finalHeight);
+        int pixelsPerTile = spriteSheet.pixelsPerTile;
+        gc.drawImage(
+            spriteSheet.image,
+            srcTileX * pixelsPerTile,
+            srcTileY * pixelsPerTile,
+            pixelsPerTile,
+            pixelsPerTile,
+            destPixelX,
+            destPixelY,
+            finalWidth,
+            finalHeight
+        );
     }
 
     private void drawRectangle(GraphicsContext gc, int x, int y, int width, int height) {
@@ -1006,7 +915,7 @@ public class UI extends Application {
                     }
                 }
 
-                drawSpriteFromSheet(gc, coloredWallSpriteSheet, tileTilePos.x, tileTilePos.y, j * TILE_SIZE, i * TILE_SIZE);
+                drawSpriteFromSheet(gc, SpriteSheet.WALL_SHEET, tileTilePos.x, tileTilePos.y, j, i);
             }
         }
     }
