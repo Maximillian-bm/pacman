@@ -184,7 +184,7 @@ public class UI extends Application {
 
         drawRectangle(bgGc, 0, 0, TILES_WIDE, TILES_TALL);
 
-        Button joinLobbyButton = createTiledButton("Join Lobby", 6, 2);
+        Button joinLobbyButton = createTiledButton("Join Lobby", 10, 3);
 
         Text joinedLobbyText = new Text("");
         joinedLobbyText.setFill(Color.WHITE);
@@ -214,13 +214,13 @@ public class UI extends Application {
                 playerCountChoices);
         createLobbyH.setAlignment(Pos.CENTER);
 
-        Button createLobbyButton = createTiledButton("Create Lobby", 6, 2);
+        Button createLobbyButton = createTiledButton("Create Lobby", 10, 3);
         VBox createLobbyV = new VBox(
                 createLobbyH,
                 createLobbyButton);
         createLobbyV.setAlignment(Pos.CENTER);
 
-        Button startButton = createTiledButton("Start Game", 6, 2);
+        Button startButton = createTiledButton("Start Game", 10, 3);
 
         Text LobbyIDText = new Text("Lobby ID: ");
         LobbyIDText.setFill(Color.WHITE);
@@ -648,43 +648,36 @@ public class UI extends Application {
                                     y * TILE_SIZE + TILE_SIZE / 2.0 - pacDotSize / 2.0, pacDotSize, pacDotSize);
                             break;
                         case CHERRY:
-                            gc.drawImage(spriteSheet, 600, 0, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 600, 0, x * TILE_SIZE, y * TILE_SIZE);
                             break;
                         case STRAWBERRY:
-                            gc.drawImage(spriteSheet, 600, 50, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 600, 50, x * TILE_SIZE, y * TILE_SIZE);
                             break;
                         case ORANGE:
-                            gc.drawImage(spriteSheet, 600, 100, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 600, 100, x * TILE_SIZE, y * TILE_SIZE);
                             break;
                         case APPLE:
-                            gc.drawImage(spriteSheet, 600, 150, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                    TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 600, 150, x * TILE_SIZE, y * TILE_SIZE);
                             break;
                         case MELON:
-                            gc.drawImage(spriteSheet, 600, 200, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 600, 200, x * TILE_SIZE, y * TILE_SIZE);
                             break;
                         case GALAXIAN:
-                            gc.drawImage(spriteSheet, 600, 350, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 600, 350, x * TILE_SIZE, y * TILE_SIZE);
                             break;
                         case BELL:
-                            gc.drawImage(spriteSheet, 600, 400, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 600, 400, x * TILE_SIZE, y * TILE_SIZE);
                             break;
                         case KEY:
-                            gc.drawImage(spriteSheet, 600, 450, 50, 50, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE,
-                                TILE_SIZE);
+                            drawSpriteFromSheet(gc, spriteSheet, 600, 450, x * TILE_SIZE, y * TILE_SIZE);
                             break;
                         case ENERGIZER:
                             if (gameState.entityTracker().isAnyPowerActive()) {
                                 gc.setGlobalAlpha(0.33);
                             }
-                            gc.drawImage(spriteSheet, 400, 450, 50, 50, x * TILE_SIZE - TILE_SIZE / 3.0, y * TILE_SIZE - TILE_SIZE / 3.0, TILE_SIZE + (TILE_SIZE / 3.0) * 2,
-                                    TILE_SIZE + (TILE_SIZE / 3.0) * 2);
+                            drawSpriteFromSheet(gc, spriteSheet, 400, 450,
+                                x * TILE_SIZE + TILE_SIZE / 2.0, y * TILE_SIZE + TILE_SIZE / 2.0,
+                                1.0 + 2.0/3.0);
                             gc.setGlobalAlpha(1.0);
                             break;
 
@@ -752,7 +745,7 @@ public class UI extends Application {
 
                     double rsTimer = player.getRespawnTimer();
                     if (rsTimer <= 0) {
-                        gc.drawImage(coloredPlayer, 850, sy, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                        drawSpriteFromSheet(gc, coloredPlayer, 850, sy, playerTilePos.x, playerTilePos.y);
                     } else {
                         double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC/11;
                         float y = 0;
@@ -763,8 +756,7 @@ public class UI extends Application {
                             }
                         }
 
-                        gc.drawImage(coloredPlayer, 350, y, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
-                        // gc.drawImage(coloredPlayer, 0, 0, 50, 50, playerTilePos.x, playerTilePos.y, TILE_SIZE, TILE_SIZE);
+                        drawSpriteFromSheet(gc, coloredPlayer, 350, (int)y, playerTilePos.x, playerTilePos.y);
                     }
                 }
             });
@@ -821,7 +813,7 @@ public class UI extends Application {
                 }
 
                 Position ghostTilePos = ghost.getPosition();
-                gc.drawImage(spriteSheet, sx, sy, 50, 50, ghostTilePos.x, ghostTilePos.y, TILE_SIZE, TILE_SIZE);
+                drawSpriteFromSheet(gc, spriteSheet, sx, sy, ghostTilePos.x, ghostTilePos.y);
             });
         }
 
@@ -903,38 +895,89 @@ public class UI extends Application {
     }
 
     private void drawTileFromTileset(
-            GraphicsContext gc,
-            Image tileset,
-            int tileX,
-            int tileY,
-            double destX,
-            double destY
+        GraphicsContext gc,
+        Image tileset,
+        int tileX,
+        int tileY,
+        double destX,
+        double destY
     ) {
         drawTileFromTileset(gc, tileset, tileX, tileY, 0, 0, 32, 32, destX, destY);
     }
 
     private void drawTileFromTileset(
-            GraphicsContext gc,
-            Image tileset,
-            int tileX,
-            int tileY,
-            int srcOffsetX,
-            int srcOffsetY,
-            int srcWidth,
-            int srcHeight,
-            double destX,
-            double destY) {
+        GraphicsContext gc,
+        Image tileset,
+        int tileX,
+        int tileY,
+        int srcOffsetX,
+        int srcOffsetY,
+        int srcWidth,
+        int srcHeight,
+        double destX,
+        double destY) {
         double scale = Constants.TILE_SIZE / 32.0;
         gc.drawImage(
-                tileset,
-                tileX * 32 + srcOffsetX,
-                tileY * 32 + srcOffsetY,
-                srcWidth,
-                srcHeight,
-                destX,
-                destY,
-                srcWidth * scale,
-                srcHeight * scale);
+            tileset,
+            tileX * 32 + srcOffsetX,
+            tileY * 32 + srcOffsetY,
+            srcWidth,
+            srcHeight,
+            destX,
+            destY,
+            srcWidth * scale,
+            srcHeight * scale);
+    }
+
+    private void drawTileFromTileset(
+        GraphicsContext gc,
+        Image tileset,
+        int tileX,
+        int tileY,
+        double centerX,
+        double centerY,
+        double scaleFactor) {
+        double baseScale = Constants.TILE_SIZE / 32.0;
+        double finalScale = baseScale * scaleFactor;
+        double finalWidth = 32 * finalScale;
+        double finalHeight = 32 * finalScale;
+        double destX = centerX - finalWidth / 2.0;
+        double destY = centerY - finalHeight / 2.0;
+        gc.drawImage(
+            tileset,
+            tileX * 32,
+            tileY * 32,
+            32,
+            32,
+            destX,
+            destY,
+            finalWidth,
+            finalHeight);
+    }
+
+    private void drawSpriteFromSheet(
+        GraphicsContext gc,
+        Image spriteSheet,
+        int srcX,
+        int srcY,
+        double destX,
+        double destY) {
+        gc.drawImage(spriteSheet, srcX, srcY, 50, 50, destX, destY, TILE_SIZE, TILE_SIZE);
+    }
+
+    private void drawSpriteFromSheet(
+        GraphicsContext gc,
+        Image spriteSheet,
+        int srcX,
+        int srcY,
+        double centerX,
+        double centerY,
+        double scaleFactor) {
+        double finalWidth = TILE_SIZE * scaleFactor;
+        double finalHeight = TILE_SIZE * scaleFactor;
+        double destX = centerX - finalWidth / 2.0;
+        double destY = centerY - finalHeight / 2.0;
+        gc.drawImage(spriteSheet, srcX, srcY, 50, 50, destX, destY, finalWidth, finalHeight);
     }
 
     private void drawRectangle(GraphicsContext gc, int x, int y, int width, int height) {
