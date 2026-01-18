@@ -117,7 +117,7 @@ public class ClientGameController extends GameController {
 
         int centerX = tiles[0].length / 2;
         int centerY = tiles.length / 2;
-        int radius = 5;
+        int radius = 7;
         List<int[]> candidates = new ArrayList<>();
 
         for (int dy = -radius; dy <= radius; dy++) {
