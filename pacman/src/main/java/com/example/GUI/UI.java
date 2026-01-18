@@ -579,7 +579,7 @@ public class UI extends Application {
                             break;
                         case ENERGIZER:
                             if (gameState.entityTracker().isAnyPowerActive()) gc.setGlobalAlpha(0.33);
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 8, 9, x, y);
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 8, 9, x, y, 1.5);
                             gc.setGlobalAlpha(1.0);
                             break;
                     }
@@ -646,7 +646,7 @@ public class UI extends Application {
 
                     double rsTimer = player.getRespawnTimer();
                     if (rsTimer <= 0) {
-                        drawSpriteFromSheet(gc, playerSheet, 17, tileY, playerTilePos.x, playerTilePos.y, 1.5);
+                        drawSpriteFromSheet(gc, playerSheet, 17, tileY, playerTilePos.x, playerTilePos.y, 1.75);
                     } else {
                         double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC/11;
                         int respawnTileY = 0;
@@ -657,7 +657,7 @@ public class UI extends Application {
                             }
                         }
 
-                        drawSpriteFromSheet(gc, playerSheet, 7, respawnTileY, playerTilePos.x, playerTilePos.y, 1.5);
+                        drawSpriteFromSheet(gc, playerSheet, 7, respawnTileY, playerTilePos.x, playerTilePos.y, 1.75);
                     }
                 }
             });
@@ -709,7 +709,7 @@ public class UI extends Application {
                 }
 
                 Position ghostTilePos = ghost.getPosition();
-                drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, tileX, tileY, ghostTilePos.x, ghostTilePos.y, 1.5);
+                drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, tileX, tileY, ghostTilePos.x, ghostTilePos.y, 1.75);
             });
         }
 
@@ -832,6 +832,8 @@ public class UI extends Application {
     ) {
         double finalWidth = TILE_SIZE * scaleFactor;
         double finalHeight = TILE_SIZE * scaleFactor;
+        double offsetX = (finalWidth - TILE_SIZE) / 2.0;
+        double offsetY = (finalHeight - TILE_SIZE) / 2.0;
         int pixelsPerTile = spriteSheet.pixelsPerTile;
         gc.drawImage(
             spriteSheet.image,
@@ -839,8 +841,8 @@ public class UI extends Application {
             srcTileY * pixelsPerTile,
             pixelsPerTile,
             pixelsPerTile,
-            destPixelX,
-            destPixelY,
+            destPixelX - offsetX,
+            destPixelY - offsetY,
             finalWidth,
             finalHeight
         );
