@@ -20,10 +20,9 @@ public class Constants {
         }
     }
 
-
     public final static int TILES_WIDE = getCurrentLevelTiles()[0].length;
     public final static int TILES_TALL = getCurrentLevelTiles().length;
-    public final static int TILE_SIZE = 800 / TILES_TALL;
+    public final static int TILE_SIZE = 900 / TILES_TALL;
     public final static int INIT_SCREEN_WIDTH = TILES_WIDE * TILE_SIZE;
     public final static int INIT_SCREEN_HEIGHT = TILES_TALL * TILE_SIZE;
 
