@@ -48,6 +48,13 @@ Gustav
 
 # Installation
 Christian
+
+Our Pac-Man game is compiled and all the required installations is included. The user is required to install the game and then run the .exe file.
+
+### Requirements
+* Have Windows 10+
+ 
+
 > Provide here installation requirements and instructions. Your goal here is that anyone else following the course should be able to follow the steps and run your project.
 
 # References 
