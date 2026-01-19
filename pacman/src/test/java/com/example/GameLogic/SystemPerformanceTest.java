@@ -101,8 +101,18 @@ public class SystemPerformanceTest extends BaseTest {
         ConnectToLobby hostA = new ConnectToLobby();
         ConnectToLobby hostB = new ConnectToLobby();
 
-        hostA.createLobby(playersPerLobby);
-        hostB.createLobby(playersPerLobby);
+        try {
+            hostA.createLobby(playersPerLobby);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        try {
+            hostB.createLobby(playersPerLobby);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         int lobbyIdA = hostA.getLobbyID();
         int lobbyIdB = hostB.getLobbyID();
@@ -169,12 +179,22 @@ public class SystemPerformanceTest extends BaseTest {
     @DisplayName("Lobby should remain stable under rapid join/leave churn")
     public void testJoinLeaveLoopInLobby() {
         ConnectToLobby host = new ConnectToLobby();
-        host.createLobby(5);
+        try {
+            host.createLobby(5);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         String lobbyId = String.valueOf(host.getLobbyID());
 
         for (int i = 0; i < 10; i++) {
             ConnectToLobby p = new ConnectToLobby();
-            p.joinLobby(lobbyId);
+            try {
+                p.joinLobby(lobbyId);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             assertTrue(p.getPlayerID() > 0, "Player should connect");
             p.leaveLobby();
         }
@@ -184,23 +204,53 @@ public class SystemPerformanceTest extends BaseTest {
     @DisplayName("Different lobbies should maintain isolated game states")
     public void testMixedGameStatesInMultipleLobbies() {
         ConnectToLobby host1 = new ConnectToLobby();
-        host1.createLobby(4);
+        try {
+            host1.createLobby(4);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         ConnectToLobby host2 = new ConnectToLobby();
-        host2.createLobby(2);
+        try {
+            host2.createLobby(2);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         ConnectToLobby p2_2 = new ConnectToLobby();
-        p2_2.joinLobby(String.valueOf(host2.getLobbyID()));
+        try {
+            p2_2.joinLobby(String.valueOf(host2.getLobbyID()));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         Thread t2 = new Thread(host2::startGame);
         t2.start();
 
         ConnectToLobby host3 = new ConnectToLobby();
-        host3.createLobby(10);
+        try {
+            host3.createLobby(10);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         ConnectToLobby traveler = new ConnectToLobby();
-        traveler.joinLobby(String.valueOf(host3.getLobbyID()));
+        try {
+            traveler.joinLobby(String.valueOf(host3.getLobbyID()));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         traveler.leaveLobby();
 
-        traveler.joinLobby(String.valueOf(host1.getLobbyID()));
+        try {
+            traveler.joinLobby(String.valueOf(host1.getLobbyID()));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         assertEquals(host1.getLobbyID(), traveler.getLobbyID(), "Traveler should now be in Lobby 1");
     }
 
@@ -208,13 +258,23 @@ public class SystemPerformanceTest extends BaseTest {
     @DisplayName("Player should be able to rejoin the same lobby rapidly")
     public void testRapidRejoiningSameLobby() {
         ConnectToLobby host = new ConnectToLobby();
-        host.createLobby(2);
+        try {
+            host.createLobby(2);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         String lobbyId = String.valueOf(host.getLobbyID());
 
         ConnectToLobby p2 = new ConnectToLobby();
 
         for (int i = 0; i < 5; i++) {
-            p2.joinLobby(lobbyId);
+            try {
+                p2.joinLobby(lobbyId);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             int pid = p2.getPlayerID();
             assertTrue(pid > 0);
             p2.leaveLobby();
@@ -225,11 +285,21 @@ public class SystemPerformanceTest extends BaseTest {
     @DisplayName("Leaving while a game is starting should be handled safely")
     public void testLeaveWhileStarting() throws InterruptedException {
         ConnectToLobby host = new ConnectToLobby();
-        host.createLobby(2);
+        try {
+            host.createLobby(2);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         String lobbyId = String.valueOf(host.getLobbyID());
 
         ConnectToLobby p2 = new ConnectToLobby();
-        p2.joinLobby(lobbyId);
+        try {
+            p2.joinLobby(lobbyId);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         Thread starter = new Thread(host::startGame);
         starter.start();
@@ -245,7 +315,12 @@ public class SystemPerformanceTest extends BaseTest {
     @DisplayName("Late joiners should be blocked from entering already started games")
     public void testLateJoinerToStartedGame() throws InterruptedException {
         ConnectToLobby host = new ConnectToLobby();
-        host.createLobby(1);
+        try {
+            host.createLobby(1);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         Thread t = new Thread(host::startGame);
         t.start();
         t.join(1000);

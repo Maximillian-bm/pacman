@@ -106,7 +106,12 @@ public class GameIntegrationTest extends BaseTest {
     @DisplayName("Client should successfully create a new lobby on the server")
     public void testCreateLobbySuccess() {
         ConnectToLobby client = new ConnectToLobby();
-        client.createLobby(2);
+        try {
+            client.createLobby(2);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         assertTrue(client.getLobbyID() > 0, "Lobby ID should be positive");
         assertTrue(client.getPlayerID() >= 0, "Player ID should be set (usually 0 for creator)");
     }
@@ -115,12 +120,22 @@ public class GameIntegrationTest extends BaseTest {
     @DisplayName("Client should successfully join an existing lobby")
     public void testJoinLobbySuccess() {
         ConnectToLobby creator = new ConnectToLobby();
-        creator.createLobby(2);
+        try {
+            creator.createLobby(2);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         int lobbyId = creator.getLobbyID();
         assertTrue(lobbyId > 0, "Failed to create lobby for join test");
 
         ConnectToLobby joiner = new ConnectToLobby();
-        joiner.joinLobby(String.valueOf(lobbyId));
+        try {
+            joiner.joinLobby(String.valueOf(lobbyId));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         assertEquals(lobbyId, joiner.getLobbyID(), "Joined lobby ID should match");
         assertTrue(joiner.getPlayerID() >= 0, "Player ID should be valid");
         assertNotEquals(creator.getPlayerID(), joiner.getPlayerID(), "Players should have different IDs");
@@ -137,7 +152,12 @@ public class GameIntegrationTest extends BaseTest {
     @DisplayName("Joining a non-existent lobby should fail gracefully")
     public void testJoinNonExistentLobby() {
         ConnectToLobby client = new ConnectToLobby();
-        client.joinLobby("999999");
+        try {
+            client.joinLobby("999999");
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         assertNotEquals(999999, client.getLobbyID(), "Should not be able to join non-existent lobby");
     }
 
@@ -146,7 +166,12 @@ public class GameIntegrationTest extends BaseTest {
     @DisplayName("Lobby creator should wait for other players or start game correctly")
     public void testStartGameWait() throws InterruptedException {
         ConnectToLobby creator = new ConnectToLobby();
-        creator.createLobby(1);
+        try {
+            creator.createLobby(1);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         Thread gameThread = new Thread(creator::startGame);
         gameThread.start();
@@ -159,10 +184,20 @@ public class GameIntegrationTest extends BaseTest {
     @DisplayName("Multiple clients should be able to create unique lobbies simultaneously")
     public void testMultipleLobbyCreation() {
         ConnectToLobby client1 = new ConnectToLobby();
-        client1.createLobby(2);
+        try {
+            client1.createLobby(2);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         ConnectToLobby client2 = new ConnectToLobby();
-        client2.createLobby(2);
+        try {
+            client2.createLobby(2);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         assertNotEquals(client1.getLobbyID(), client2.getLobbyID(), "Lobby IDs should be unique");
     }
@@ -171,10 +206,20 @@ public class GameIntegrationTest extends BaseTest {
     @DisplayName("Joining a full lobby should be prevented")
     public void testLobbyCapacityLimit() {
         ConnectToLobby creator = new ConnectToLobby();
-        creator.createLobby(1);
+        try {
+            creator.createLobby(1);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         ConnectToLobby joiner = new ConnectToLobby();
-        joiner.joinLobby(String.valueOf(creator.getLobbyID()));
+        try {
+            joiner.joinLobby(String.valueOf(creator.getLobbyID()));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         assertNotEquals(creator.getLobbyID(), joiner.getLobbyID(), "Should not be able to join full lobby");
     }

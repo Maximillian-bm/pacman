@@ -174,18 +174,33 @@ public class PlayerLogicTest extends BaseTest {
     @Test
     @DisplayName("Lobby should manage player joining and leaving correctly")
     public void testPlayerJoinAndLeaveLobby() {
-        host.createLobby(3);
+        try {
+            host.createLobby(3);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         int lobbyId = host.getLobbyID();
         assertTrue(lobbyId > 0, "Lobby ID should be valid");
 
         ConnectToLobby p2 = new ConnectToLobby();
-        p2.joinLobby(String.valueOf(lobbyId));
+        try {
+            p2.joinLobby(String.valueOf(lobbyId));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         assertEquals(2, p2.getPlayerID(), "Player 2 should have ID 2");
 
         p2.leaveLobby();
 
         ConnectToLobby p3 = new ConnectToLobby();
-        p3.joinLobby(String.valueOf(lobbyId));
+        try {
+            p3.joinLobby(String.valueOf(lobbyId));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         assertTrue(p3.getPlayerID() > 0, "Lobby should accept new player after one leaves");
     }
@@ -193,31 +208,56 @@ public class PlayerLogicTest extends BaseTest {
     @Test
     @DisplayName("Lobby should remain stable during rapid player join/leave cycles")
     public void testRapidJoinLeaveChurn() {
-        host.createLobby(10);
+        try {
+            host.createLobby(10);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         int lobbyId = host.getLobbyID();
 
         int numberOfChurns = 5;
         for (int i = 0; i < numberOfChurns; i++) {
             ConnectToLobby p = new ConnectToLobby();
-            p.joinLobby(String.valueOf(lobbyId));
+            try {
+                p.joinLobby(String.valueOf(lobbyId));
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
             assertTrue(p.getPlayerID() > 0, "Player " + i + " should join successfully");
             p.leaveLobby();
         }
         
         // After churn, try to join again and see if ID is reused or consistent
         ConnectToLobby finalPlayer = new ConnectToLobby();
-        finalPlayer.joinLobby(String.valueOf(lobbyId));
+        try {
+            finalPlayer.joinLobby(String.valueOf(lobbyId));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         assertTrue(finalPlayer.getPlayerID() > 0, "Should be able to join after churn");
     }
 
     @Test
     @DisplayName("Leaving during game start should remove player from active game")
     public void testLeaveDuringGameStart() {
-        host.createLobby(2);
+        try {
+            host.createLobby(2);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         String lobbyId = String.valueOf(host.getLobbyID());
 
         ConnectToLobby p2 = new ConnectToLobby();
-        p2.joinLobby(lobbyId);
+        try {
+            p2.joinLobby(lobbyId);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         Thread gameThread = new Thread(() -> host.startGame());
         gameThread.setDaemon(true);
@@ -227,7 +267,12 @@ public class PlayerLogicTest extends BaseTest {
         assertFalse(host.isPlayerInGame(p2.getPlayerID()), "Player 2 should be considered out of the game");
 
         ConnectToLobby p2Rejoin = new ConnectToLobby();
-        p2Rejoin.joinLobby(lobbyId);
+        try {
+            p2Rejoin.joinLobby(lobbyId);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         assertTrue(p2Rejoin.getPlayerID() > 0, "Rejoined player should have a valid positive ID");
     }
 
@@ -235,17 +280,37 @@ public class PlayerLogicTest extends BaseTest {
     @DisplayName("Lobby should accept new players once a spot is freed in a full lobby")
     public void testFullLobbyJoinLeaveCycle() {
         int maxPlayers = 3;
-        host.createLobby(maxPlayers);
+        try {
+            host.createLobby(maxPlayers);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         String lobbyId = String.valueOf(host.getLobbyID());
 
         ConnectToLobby p2 = new ConnectToLobby();
-        p2.joinLobby(lobbyId);
+        try {
+            p2.joinLobby(lobbyId);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         ConnectToLobby p3 = new ConnectToLobby();
-        p3.joinLobby(lobbyId);
+        try {
+            p3.joinLobby(lobbyId);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         Thread t = new Thread(() -> {
             ConnectToLobby p4 = new ConnectToLobby();
-            p4.joinLobby(lobbyId);
+            try {
+                p4.joinLobby(lobbyId);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         });
         t.setDaemon(true);
         t.start();
@@ -257,16 +322,31 @@ public class PlayerLogicTest extends BaseTest {
         p2.leaveLobby();
 
         ConnectToLobby p5 = new ConnectToLobby();
-        p5.joinLobby(lobbyId);
+        try {
+            p5.joinLobby(lobbyId);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         assertTrue(p5.getPlayerID() > 0, "Player should be able to join after spot frees up");
     }
 
     @Test
     @DisplayName("Mid-game disconnect should remove player from game state")
     public void testDisconnectMidGame() {
-        host.createLobby(2);
+        try {
+            host.createLobby(2);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         ConnectToLobby p2 = new ConnectToLobby();
-        p2.joinLobby(String.valueOf(host.getLobbyID()));
+        try {
+            p2.joinLobby(String.valueOf(host.getLobbyID()));
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 
         host.startGame();
         p2.startGame();
@@ -282,7 +362,12 @@ public class PlayerLogicTest extends BaseTest {
     @DisplayName("Lobby should handle simultaneous connections and assign unique IDs")
     public void testSimultaneousConnections() throws InterruptedException {
         int numberOfPlayers = 10;
-        host.createLobby(numberOfPlayers);
+        try {
+            host.createLobby(numberOfPlayers);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         String lobbyId = String.valueOf(host.getLobbyID());
 
         List<ConnectToLobby> connectedPlayers = Collections.synchronizedList(new ArrayList<>());

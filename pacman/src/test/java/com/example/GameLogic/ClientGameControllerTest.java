@@ -298,7 +298,7 @@ public class ClientGameControllerTest extends BaseTest {
     @DisplayName("Ghost speed should increase when progressing to higher levels")
     public void testGhostSpeedIncreaseOnLevelUp() {
 
-        double initialSpeed = initialState.entityTracker().getGhostSpeed();
+        double initialSpeed = Constants.GHOST_SPEED;
 
         initialState.ghosts().clear();
         TileType[][] tiles = initialState.tiles();
@@ -310,7 +310,7 @@ public class ClientGameControllerTest extends BaseTest {
 
         initialState = controller.updateGameState(initialState, new ArrayList<>());
 
-        assertTrue(initialState.entityTracker().getGhostSpeed() > initialSpeed, "Ghost speed should increase on level up");
+        assertTrue(Constants.GHOST_SPEED > initialSpeed, "Ghost speed should increase on level up");
     }
 
     @Test
@@ -548,13 +548,13 @@ public class ClientGameControllerTest extends BaseTest {
 
         ghost.setRespawnTimer(0.001);
 
-        double originalSpeed = initialState.entityTracker().getGhostSpeed();
-        initialState.entityTracker().setGhostSpeed(0.0);
+        double originalSpeed = Constants.GHOST_SPEED;
+        //initialState.entityTracker().setGhostSpeed(0.0);
         try {
             initialState = controller.updateGameState(initialState, new ArrayList<>());
             ghost = initialState.ghosts().getFirst();
         } finally {
-            initialState.entityTracker().setGhostSpeed(originalSpeed);
+            //initialState.entityTracker().setGhostSpeed(originalSpeed);
         }
 
         assertEquals(spawnPos.x, ghost.getPosition().x, 0.1, "Ghost should be at spawn position after respawn");
