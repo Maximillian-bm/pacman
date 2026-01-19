@@ -9,8 +9,6 @@ import lombok.Setter;
 
 public class EntityTracker {
     @Getter @Setter
-    private double ghostSpeed = PLAYER_SPEED * 0.8;
-    @Getter @Setter
     private boolean ghostScatterMode = true;
     @Getter @Setter
     private double ghostChaseTimer = 0.0;
@@ -77,7 +75,6 @@ public class EntityTracker {
 
     public EntityTracker copy(){
         EntityTracker r = new EntityTracker();
-        r.setGhostSpeed(ghostSpeed);
         r.setGhostScatterMode(ghostScatterMode);
         r.setGhostChaseTimer(ghostChaseTimer);
         r.setFrightenedTimerSec(frightenedTimerSec);
