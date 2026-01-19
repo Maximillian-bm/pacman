@@ -2,6 +2,9 @@ package com.example.model;
 
 import static com.example.model.Maps.getCurrentLevelTiles;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class Constants {
     //Constants
     public final static long LOBBY_TTL = 300000;
@@ -30,7 +33,7 @@ public class Constants {
     public static final double CENTER_EPS_PX = 1.5;
 
     public final static int COUNTDOWN_DURATION_TICKS = 60;
-    public static final double COLLISION_DISTANCE_PVG = TILE_SIZE/2;
+    public static final double COLLISION_DISTANCE_PVG = TILE_SIZE / 2.0;
     public static final double COLLISION_DISTANCE_PVP = TILE_SIZE;
 
     public static final double FRUIT_RESPAWN_DELAY_SEC = 5.0;
@@ -38,11 +41,14 @@ public class Constants {
     // Player
     public final static int PLAYER_LIVES = 3;
     public final static double PLAYER_SPEED = 175;
-    public final static double PLAYER_FRIGHTENED_SPEED = 150;
+    public final static double PLAYER_FRIGHTENED_SPEED = 130;
     public final static double PLAYER_SPAWN_PROTECT_SEC = 2.0;
     public static final double PLAYER_RESPAWN_DELAY_SEC = 2.0;
 
     // Ghost
+    public static final double GHOST_SPEED = PLAYER_SPEED * .8;
+    public static final double GHOST_FRIGHTENED_SPEED = GHOST_SPEED * .75;
+    public static final double GHOST_RESPAWN_SPEED = GHOST_SPEED * 2;
     public static final double GHOST_RESPAWN_DELAY_SEC  = 8.0;
     public final static double FRIGHTENED_DURATION_SEC = 8.0;
 

@@ -20,6 +20,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.text.Font;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TextField;
@@ -149,6 +151,35 @@ public class UI extends Application {
         header.setFill(Color.WHITE);
         header.setStyle("-fx-font-size: 96px;");
 
+        // Volume slider
+        Text volumeLabel = new Text("Volume:");
+        volumeLabel.setFill(Color.WHITE);
+        volumeLabel.setStyle("-fx-font-size: 14px;");
+
+        Slider volumeSlider = new Slider(0, 100, 50);
+        volumeSlider.setPrefWidth(150);
+        volumeSlider.setShowTickLabels(false);
+        volumeSlider.setShowTickMarks(false);
+
+        Text volumeValueText = new Text("50%");
+        volumeValueText.setFill(Color.WHITE);
+        volumeValueText.setStyle("-fx-font-size: 14px;");
+
+        // Set initial volume to 50%
+        soundEngine.setVolume(0.5);
+
+        // Update volume when slider changes
+        volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            double volume = newValue.doubleValue() / 100.0;
+            soundEngine.setVolume(volume);
+            volumeValueText.setText(String.format("%.0f%%", newValue.doubleValue()));
+        });
+
+        HBox volumeBox = new HBox(10, volumeLabel, volumeSlider, volumeValueText);
+        volumeBox.setAlignment(Pos.CENTER_RIGHT);
+        volumeBox.setPadding(new javafx.geometry.Insets(25, 25, 0, 0));
+        volumeBox.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+
         VBox startRoot = new VBox(
                 header,
                 joinLobbyV,
@@ -165,7 +196,8 @@ public class UI extends Application {
         startRoot.getChildren().add(statusText);
 
         StackPane root = new StackPane();
-        root.getChildren().addAll(backgroundCanvas, startRoot);
+        root.getChildren().addAll(backgroundCanvas, startRoot, volumeBox);
+        StackPane.setAlignment(volumeBox, Pos.TOP_RIGHT);
 
         Scene startScene = new Scene(
                 root,
@@ -559,34 +591,35 @@ public class UI extends Application {
                         case PAC_DOT:
                             drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 8, 8, x, y);
                             break;
-                        case CHERRY:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 0, x, y);
-                            break;
-                        case STRAWBERRY:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 1, x, y);
-                            break;
-                        case ORANGE:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 2, x, y);
-                            break;
-                        case APPLE:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 3, x, y);
-                            break;
-                        case MELON:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 4, x, y);
-                            break;
-                        case GALAXIAN:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 7, x, y);
-                            break;
-                        case BELL:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 8, x, y);
-                            break;
-                        case KEY:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 9, x, y);
-                            break;
                         case ENERGIZER:
-                            if (gameState.entityTracker().isAnyPowerActive()) gc.setGlobalAlpha(0.33);
+                            if (gameState.entityTracker().isAnyPowerActive())
+                                gc.setGlobalAlpha(0.33);
                             drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 8, 9, x, y, 1.5);
                             gc.setGlobalAlpha(1.0);
+                            break;
+                        case CHERRY:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 0, x, y, 1.5);
+                            break;
+                        case STRAWBERRY:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 1, x, y, 1.5);
+                            break;
+                        case ORANGE:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 2, x, y, 1.5);
+                            break;
+                        case APPLE:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 3, x, y, 1.5);
+                            break;
+                        case MELON:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 4, x, y, 1.5);
+                            break;
+                        case GALAXIAN:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 7, x, y, 1.5);
+                            break;
+                        case BELL:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 8, x, y, 1.5);
+                            break;
+                        case KEY:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 9, x, y, 1.5);
                             break;
                     }
 
@@ -685,33 +718,41 @@ public class UI extends Application {
 
             gameState.ghosts().forEach(ghost -> {
                 int tileY = 0, tileX = 0;
-                tileY = switch (ghost.getDirection()) {
-                    case WEST -> 4;
-                    case NORTH -> 6;
-                    case SOUTH -> 2;
-                    default -> tileY;
-                };
+                if (ghost.getRespawnTimer() <= 0) {
+                    tileX = switch (ghost.getType()) {
+                        case RED -> 0; // ("Blinky"),
+                        case PINK -> 1; // ("Pinky"),
+                        case CYAN -> 2; // ("Inky"),
+                        case ORANGE -> 3; // ("Clyde"),
+                        case PURPLE -> 5; // ("Sue");
+                    };
+                    tileY = switch (ghost.getDirection()) {
+                        case WEST -> 4;
+                        case NORTH -> 6;
+                        case SOUTH -> 2;
+                        default -> tileY;
+                    };
+                    double fTimer = gameState.entityTracker().getFrightenedTimerSec();
 
-                tileX = switch (ghost.getType()) {
-                    case RED -> 0; // ("Blinky"),
-                    case PINK -> 1; // ("Pinky"),
-                    case CYAN -> 2; // ("Inky"),
-                    case ORANGE -> 3; // ("Clyde"),
-                    case PURPLE -> 5; // ("Sue");
-                };
+                    if (fTimer > 0) {
+                        tileY += 11;
+                        tileX = 0;
+                    }
 
-                double fTimer = gameState.entityTracker().getFrightenedTimerSec();
-
-                if (fTimer > 0) {
-                    tileY += 11;
-                    tileX = 0;
-                }
-
-                int ghostFrame = (int) ((animationTimeNanos / ghostNanosPerFrame) % ghostFrameCount);
-                if (ghostFrame == 1) {
-                    tileY += 1;
-                    if (fTimer > 0 && fTimer < 2.0)
-                        tileX += 1;
+                    int ghostFrame = (int) ((animationTimeNanos / ghostNanosPerFrame) % ghostFrameCount);
+                    if (ghostFrame == 1) {
+                        tileY += 1;
+                        if (fTimer > 0 && fTimer < 2.0)
+                            tileX += 1;
+                    }
+                } else {
+                    tileX = 6;
+                    tileY = switch (ghost.getDirection()) {
+                        case WEST -> 7;
+                        case NORTH -> 8;
+                        case SOUTH -> 6;
+                        default -> 5;
+                    };
                 }
 
                 Position ghostTilePos = ghost.getPosition();
