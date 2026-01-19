@@ -59,6 +59,10 @@ public class ConnectToLobby {
         }
     }
 
+    public boolean isLobbyOpen() {
+        return true;
+    }
+
     public void joinLobby(String lobbyID, long timeoutMs) throws java.util.concurrent.TimeoutException {
         throw new UnsupportedOperationException("TDD: Implement join with timeout.");
     }

@@ -44,7 +44,7 @@ public class Reader implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }catch (InterruptedException e) {
-            Constants.lobbyClosed = true;
+            e.printStackTrace();
         }
     }
 
