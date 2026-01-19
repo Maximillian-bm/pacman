@@ -54,6 +54,6 @@ public class Constants {
 
     //Varibles
     public static int clock = -COUNTDOWN_DURATION_TICKS;
-    public static int actionOffset = 0;
+    public static int actionOffset = 6;
     public static long timeOffset = 0;
 }
