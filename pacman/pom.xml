@@ -235,6 +235,28 @@
   </plugin>
 
   <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-shade-plugin</artifactId>
+    <version>3.5.0</version>
+    <executions>
+      <execution>
+        <phase>package</phase>
+        <goals>
+          <goal>shade</goal>
+        </goals>
+        <configuration>
+          <finalName>pacman-all</finalName>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <mainClass>com.example.GameLogic.ClientMain</mainClass>
+            </transformer>
+          </transformers>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin>
+
+  <plugin>
     <groupId>org.codehaus.mojo</groupId>
     <artifactId>exec-maven-plugin</artifactId>
     <version>3.1.0</version>
@@ -253,11 +275,11 @@
             <argument>--name</argument>
             <argument>Pacman</argument>
             <argument>--main-jar</argument>
-            <argument>pacman.jar</argument>
+            <argument>pacman-all.jar</argument>
             <argument>--main-class</argument>
             <argument>com.example.GameLogic.ClientMain</argument>
             <argument>--type</argument>
-            <argument>exe</argument>
+            <argument>msi</argument>
             <argument>--icon</argument>
             <argument>${project.basedir}/icon.ico</argument>
             <argument>--win-dir-chooser</argument>
