@@ -651,7 +651,7 @@ public class UI extends Application {
             long invulnBlinkNanosPerUnit = 500_000_000L;
 
             gameState.players().forEach(player -> {
-                if(!player.isDeadWithNoHearts()){
+                if (!player.isDeadWithNoHearts()) {
                     int tileY = switch (player.getDirection()) {
                         case WEST -> 6;
                         case NORTH -> 9;
@@ -666,32 +666,34 @@ public class UI extends Application {
                         default -> tileY + 1;
                     };
 
-                SpriteSheet playerSheet = SpriteSheet.getPlayerSheet(player.getColor());
-
-                boolean hasPowerUp = entityTracker.isPowerOwner(player);
-                if (player.isInvulnerable() || hasPowerUp) {
-                    int blinkFrame = 0;
-                    if (hasPowerUp) {
-                        blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.65, Constants.FRIGHTENED_DURATION_SEC);
-                    } else {
-                        blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.5, Constants.PLAYER_SPAWN_PROTECT_SEC);
-                    }
-                    if (blinkFrame == 1) {
-                        playerSheet = SpriteSheet.getPlayerSheet(Color.WHITE);
-                    }
-                }
-
-                Position playerTilePos = player.getPosition();
+                    SpriteSheet playerSheet = SpriteSheet.getPlayerSheet(player.getColor());
+                    Position playerTilePos = player.getPosition();
 
                     double rsTimer = player.getRespawnTimer();
                     if (rsTimer <= 0) {
+                        if (player.isInvulnerable()) {
+                            int blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit,
+                                player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.5,
+                                Constants.PLAYER_SPAWN_PROTECT_SEC);
+                            if (blinkFrame == 1) {
+                                return;
+                            }
+                        } else if (entityTracker.isPowerOwner(player)) {
+                            int blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit,
+                                player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.65,
+                                Constants.FRIGHTENED_DURATION_SEC);
+                            if (blinkFrame == 1) {
+                                playerSheet = SpriteSheet.getPlayerSheet(Color.WHITE);
+                            }
+                        }
+
                         drawSpriteFromSheet(gc, playerSheet, 17, tileY, playerTilePos.x, playerTilePos.y, 1.75);
                     } else {
-                        double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC/11;
+                        double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC / 11;
                         int respawnTileY = 0;
                         for (int i = 1; i < 11; i++) {
-                            if (rsTimer < rsFrameInterval*i) {
-                                respawnTileY = 11-i;
+                            if (rsTimer < rsFrameInterval * i) {
+                                respawnTileY = 11 - i;
                                 break;
                             }
                         }
