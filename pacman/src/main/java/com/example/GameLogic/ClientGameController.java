@@ -755,12 +755,12 @@ public class ClientGameController extends GameController {
             // Wrap position first to ensure valid grid calculation for direction decisions
             if (pos.x < 0) {
                 pos.x += mapWidth;
-            } else if (pos.x >= mapWidth) {
+            } else if ((pos.x + Constants.TILE_SIZE) >= mapWidth) {
                 pos.x -= mapWidth;
             }
             if (pos.y < 0) {
                 pos.y += mapHeight;
-            } else if (pos.y >= mapHeight) {
+            } else if ((pos.y + Constants.TILE_SIZE) >= mapHeight) {
                 pos.y -= mapHeight;
             }
 
