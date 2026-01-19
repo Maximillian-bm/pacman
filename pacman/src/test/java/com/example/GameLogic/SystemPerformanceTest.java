@@ -20,7 +20,7 @@ import org.junit.jupiter.api.DisplayName;
 @DisplayName("Game Performance, Scalability and Concurrency Tests")
 public class SystemPerformanceTest extends BaseTest {
 
-    private ClientGameController controller;
+    private GameController controller;
     private GameState initialState;
 
     @Override
@@ -30,7 +30,7 @@ public class SystemPerformanceTest extends BaseTest {
 
     @BeforeEach
     public void setUp() {
-        controller = new ClientGameController();
+        controller = new GameController();
         initialState = controller.initializeGameState(4);
     }
 
