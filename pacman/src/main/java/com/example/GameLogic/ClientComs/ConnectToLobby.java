@@ -28,32 +28,47 @@ public class ConnectToLobby {
 
     private boolean isLobbyOpen = true;
 
-    public void createLobby(int nrOfPlayers) {
+    public void createLobby(int nrOfPlayers) throws Exception {
         try {
             space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
             lobbyID = (int) space1.get(new FormalField(Integer.class), new ActualField(0), new ActualField("FREE"))[0];
+
             space1.put(lobbyID, nrOfPlayers, "CREATE");
             space1.get(new ActualField(lobbyID), new ActualField(nrOfPlayers), new ActualField("OK"));
+
             sync = new RemoteSpace(URIUtil.getSyncURI(Constants.REMOTE_PUBLIC_URI, lobbyID));
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class), new ActualField("PLAYERID"));
+
             playerID = (int) t[0];
             this.nrOfPlayers = (int) t[1];
+
+            System.out.println("Created lobby with ID: "+lobbyID);
+
+        } catch (UnknownHostException e) {
+            throw new UnknownHostException("Failed to connect to server");
+        } catch (NullPointerException e) {
+            throw new NullPointerException("Failed to connect to server");
         } catch (Exception e) {
             throw new RuntimeException("Failed to create lobby", e);
         }
-        System.out.println("Created lobby with ID: "+lobbyID);
     }
 
-    public void joinLobby(String lobbyID) {
+    public void joinLobby(String lobbyID) throws Exception {
         try {
             space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
             this.lobbyID = Integer.parseInt(lobbyID);
+
             sync = new RemoteSpace(URIUtil.getSyncURI(Constants.REMOTE_PUBLIC_URI, this.lobbyID));
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class), new ActualField("PLAYERID"));
+
             playerID = (int) t[0];
             nrOfPlayers = (int) t[1];
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid lobby ID: " + lobbyID);
+        } catch (UnknownHostException e) {
+            throw new UnknownHostException("Failed to connect to server");
+        } catch (NullPointerException e) {
+            throw new NullPointerException("Failed to connect to server");
         } catch (IOException e) {
             throw new RuntimeException("Lobby " + lobbyID + " not found or connection failed.");
         } catch (InterruptedException e) {
