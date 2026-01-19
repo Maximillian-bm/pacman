@@ -26,6 +26,8 @@ public class ConnectToLobby {
 
     private Space space1;
 
+    private boolean isLobbyOpen = true;
+
     public void createLobby(int nrOfPlayers) {
         try {
             space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
@@ -63,9 +65,11 @@ public class ConnectToLobby {
     }
 
     public boolean isLobbyOpen() {
+        if(!isLobbyOpen)return false;
         try {
             Object[] t = space1.queryp(new ActualField(lobbyID), new ActualField(0), new ActualField("FREE"));
             if(t != null){
+                isLobbyOpen = false;
                 return false;
             }
         } catch (InterruptedException e) {
