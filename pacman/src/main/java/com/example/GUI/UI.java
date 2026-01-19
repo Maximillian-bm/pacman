@@ -441,7 +441,7 @@ public class UI extends Application {
 
             drawGhosts();
 
-            if (gameState.winner() == null) {
+            if (gameState.winner() == null && lobbyHandler.isLobbyOpen()) {
                 if (Constants.clock < 0) drawCountdown();
                 drawPoints();
                 restartButton.setVisible(false);
@@ -470,10 +470,13 @@ public class UI extends Application {
             );
             gc.setFont(new Font(FONT_FAMILY, 32));
             gc.setFill(Color.YELLOW);
-            gc.fillText("GAME OVER",
+            
+            String endscreenText = lobbyHandler.isLobbyOpen() ? "GAME OVER" : "LOBBY IS CLOSED";
+            gc.fillText(endscreenText,
                 Constants.INIT_SCREEN_WIDTH/2-padding+50,
                 Constants.INIT_SCREEN_HEIGHT/2-padding+50
             );
+            
             List<Player> players = gameState.players()
                     .stream()
                     .sorted(Comparator.comparing((Player p) -> p.getPoints()))
