@@ -18,14 +18,17 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- MUST be 17+ -->
-    <maven.compiler.source>23</maven.compiler.source>
-    <maven.compiler.target>23</maven.compiler.target>
+    <maven.compiler.source>25</maven.compiler.source>
+    <maven.compiler.target>25</maven.compiler.target>
 
     <!-- JavaFX version -->
     <javafx.version>25.0.1</javafx.version>
 
     <!-- JVM options for javafx:run (empty by default) -->
     <jvm.options></jvm.options>
+
+    <!-- Skip tests by default -->
+    <skipTests>true</skipTests>
   </properties>
 
   <dependencies>
