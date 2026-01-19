@@ -715,33 +715,41 @@ public class UI extends Application {
 
             gameState.ghosts().forEach(ghost -> {
                 int tileY = 0, tileX = 0;
-                tileY = switch (ghost.getDirection()) {
-                    case WEST -> 4;
-                    case NORTH -> 6;
-                    case SOUTH -> 2;
-                    default -> tileY;
-                };
+                if (ghost.getRespawnTimer() <= 0) {
+                    tileX = switch (ghost.getType()) {
+                        case RED -> 0; // ("Blinky"),
+                        case PINK -> 1; // ("Pinky"),
+                        case CYAN -> 2; // ("Inky"),
+                        case ORANGE -> 3; // ("Clyde"),
+                        case PURPLE -> 5; // ("Sue");
+                    };
+                    tileY = switch (ghost.getDirection()) {
+                        case WEST -> 4;
+                        case NORTH -> 6;
+                        case SOUTH -> 2;
+                        default -> tileY;
+                    };
+                    double fTimer = gameState.entityTracker().getFrightenedTimerSec();
 
-                tileX = switch (ghost.getType()) {
-                    case RED -> 0; // ("Blinky"),
-                    case PINK -> 1; // ("Pinky"),
-                    case CYAN -> 2; // ("Inky"),
-                    case ORANGE -> 3; // ("Clyde"),
-                    case PURPLE -> 5; // ("Sue");
-                };
+                    if (fTimer > 0) {
+                        tileY += 11;
+                        tileX = 0;
+                    }
 
-                double fTimer = gameState.entityTracker().getFrightenedTimerSec();
-
-                if (fTimer > 0) {
-                    tileY += 11;
-                    tileX = 0;
-                }
-
-                int ghostFrame = (int) ((animationTimeNanos / ghostNanosPerFrame) % ghostFrameCount);
-                if (ghostFrame == 1) {
-                    tileY += 1;
-                    if (fTimer > 0 && fTimer < 2.0)
-                        tileX += 1;
+                    int ghostFrame = (int) ((animationTimeNanos / ghostNanosPerFrame) % ghostFrameCount);
+                    if (ghostFrame == 1) {
+                        tileY += 1;
+                        if (fTimer > 0 && fTimer < 2.0)
+                            tileX += 1;
+                    }
+                } else {
+                    tileX = 6;
+                    tileY = switch (ghost.getDirection()) {
+                        case WEST -> 7;
+                        case NORTH -> 8;
+                        case SOUTH -> 6;
+                        default -> 5;
+                    };
                 }
 
                 Position ghostTilePos = ghost.getPosition();
