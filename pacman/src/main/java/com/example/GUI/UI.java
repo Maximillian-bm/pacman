@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
@@ -350,8 +351,10 @@ public class UI extends Application {
 
         Button quitButton = createTiledButton("QUIT", 6, 2);
         quitButton.setPrefSize(200, 100);
-        quitButton.setTranslateX(Constants.INIT_SCREEN_WIDTH/100);
-        quitButton.setTranslateY(Constants.INIT_SCREEN_HEIGHT/50);
+     
+        StackPane.setAlignment(quitButton, Pos.CENTER);
+        quitButton.translateYProperty().bind(scene.heightProperty().multiply(0.15));
+        
         quitButton.setVisible(false);
 
         final GameAnimator gameAnimator = new GameAnimator(quitButton);
