@@ -175,13 +175,14 @@ public class UI extends Application {
         });
 
         HBox volumeBox = new HBox(10, volumeLabel, volumeSlider, volumeValueText);
-        volumeBox.setAlignment(Pos.CENTER);
+        volumeBox.setAlignment(Pos.CENTER_RIGHT);
+        volumeBox.setPadding(new javafx.geometry.Insets(25, 25, 0, 0));
+        volumeBox.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         VBox startRoot = new VBox(
                 header,
                 joinLobbyV,
                 createLobbyV,
-                volumeBox,
                 notificationText
         );
         startRoot.setAlignment(Pos.CENTER);
@@ -194,7 +195,8 @@ public class UI extends Application {
         startRoot.getChildren().add(statusText);
 
         StackPane root = new StackPane();
-        root.getChildren().addAll(backgroundCanvas, startRoot);
+        root.getChildren().addAll(backgroundCanvas, startRoot, volumeBox);
+        StackPane.setAlignment(volumeBox, Pos.TOP_RIGHT);
 
         Scene startScene = new Scene(
                 root,
