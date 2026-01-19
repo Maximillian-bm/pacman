@@ -24,10 +24,13 @@ public class ConnectToLobby {
 
     private Reader reader;
 
-    public void createLobby(int nrOfPlayers) {
-        try {
-            Space space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
+    private Space space1;
 
+    private boolean isLobbyOpen = true;
+
+    public void createLobby(int nrOfPlayers) throws Exception {
+        try {
+            space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
             lobbyID = (int) space1.get(new FormalField(Integer.class), new ActualField(0), new ActualField("FREE"))[0];
 
             space1.put(lobbyID, nrOfPlayers, "CREATE");
@@ -41,6 +44,8 @@ public class ConnectToLobby {
 
             System.out.println("Created lobby with ID: "+lobbyID);
 
+        } catch (UnknownHostException e) {
+            throw new UnknownHostException("Failed to connect to server");
         } catch (NullPointerException e) {
             throw new NullPointerException("Failed to connect to server");
         } catch (Exception e) {
@@ -48,8 +53,9 @@ public class ConnectToLobby {
         }
     }
 
-    public void joinLobby(String lobbyID) {
+    public void joinLobby(String lobbyID) throws Exception {
         try {
+            space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
             this.lobbyID = Integer.parseInt(lobbyID);
 
             sync = new RemoteSpace(URIUtil.getSyncURI(Constants.REMOTE_PUBLIC_URI, this.lobbyID));
@@ -59,16 +65,32 @@ public class ConnectToLobby {
             nrOfPlayers = (int) t[1];
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid lobby ID: " + lobbyID);
+        } catch (UnknownHostException e) {
+            throw new UnknownHostException("Failed to connect to server");
+        } catch (NullPointerException e) {
+            throw new NullPointerException("Failed to connect to server");
         } catch (IOException e) {
             throw new RuntimeException("Lobby " + lobbyID + " not found or connection failed.");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Join interrupted", e);
-        } catch (NullPointerException e) {
-            throw new NullPointerException("Failed to connect to server");
         } catch (Exception e) {
             throw new RuntimeException("Failed to join lobby: " + e.getMessage(), e);
         }
+    }
+
+    public boolean isLobbyOpen() {
+        if(!isLobbyOpen)return false;
+        try {
+            Object[] t = space1.queryp(new ActualField(lobbyID), new ActualField(0), new ActualField("FREE"));
+            if(t != null){
+                isLobbyOpen = false;
+                return false;
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
     public void joinLobby(String lobbyID, long timeoutMs) throws java.util.concurrent.TimeoutException {

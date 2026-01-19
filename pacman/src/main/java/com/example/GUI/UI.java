@@ -20,6 +20,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.text.Font;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TextField;
@@ -149,6 +151,35 @@ public class UI extends Application {
         header.setFill(Color.WHITE);
         header.setStyle("-fx-font-size: 96px;");
 
+        // Volume slider
+        Text volumeLabel = new Text("Volume:");
+        volumeLabel.setFill(Color.WHITE);
+        volumeLabel.setStyle("-fx-font-size: 14px;");
+
+        Slider volumeSlider = new Slider(0, 100, 50);
+        volumeSlider.setPrefWidth(150);
+        volumeSlider.setShowTickLabels(false);
+        volumeSlider.setShowTickMarks(false);
+
+        Text volumeValueText = new Text("50%");
+        volumeValueText.setFill(Color.WHITE);
+        volumeValueText.setStyle("-fx-font-size: 14px;");
+
+        // Set initial volume to 50%
+        soundEngine.setVolume(0.5);
+
+        // Update volume when slider changes
+        volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            double volume = newValue.doubleValue() / 100.0;
+            soundEngine.setVolume(volume);
+            volumeValueText.setText(String.format("%.0f%%", newValue.doubleValue()));
+        });
+
+        HBox volumeBox = new HBox(10, volumeLabel, volumeSlider, volumeValueText);
+        volumeBox.setAlignment(Pos.CENTER_RIGHT);
+        volumeBox.setPadding(new javafx.geometry.Insets(25, 25, 0, 0));
+        volumeBox.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+
         VBox startRoot = new VBox(
                 header,
                 joinLobbyV,
@@ -165,7 +196,8 @@ public class UI extends Application {
         startRoot.getChildren().add(statusText);
 
         StackPane root = new StackPane();
-        root.getChildren().addAll(backgroundCanvas, startRoot);
+        root.getChildren().addAll(backgroundCanvas, startRoot, volumeBox);
+        StackPane.setAlignment(volumeBox, Pos.TOP_RIGHT);
 
         Scene startScene = new Scene(
                 root,
@@ -409,7 +441,7 @@ public class UI extends Application {
 
             drawGhosts();
 
-            if (gameState.winner() == null) {
+            if (gameState.winner() == null && lobbyHandler.isLobbyOpen()) {
                 if (Constants.clock < 0) drawCountdown();
                 drawPoints();
                 restartButton.setVisible(false);
@@ -438,10 +470,13 @@ public class UI extends Application {
             );
             gc.setFont(new Font(FONT_FAMILY, 32));
             gc.setFill(Color.YELLOW);
-            gc.fillText("GAME OVER",
+            
+            String endscreenText = lobbyHandler.isLobbyOpen() ? "GAME OVER" : "LOBBY IS CLOSED";
+            gc.fillText(endscreenText,
                 Constants.INIT_SCREEN_WIDTH/2-padding+50,
                 Constants.INIT_SCREEN_HEIGHT/2-padding+50
             );
+            
             List<Player> players = gameState.players()
                     .stream()
                     .sorted(Comparator.comparing((Player p) -> p.getPoints()))
@@ -556,34 +591,35 @@ public class UI extends Application {
                         case PAC_DOT:
                             drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 8, 8, x, y);
                             break;
-                        case CHERRY:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 0, x, y);
-                            break;
-                        case STRAWBERRY:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 1, x, y);
-                            break;
-                        case ORANGE:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 2, x, y);
-                            break;
-                        case APPLE:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 3, x, y);
-                            break;
-                        case MELON:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 4, x, y);
-                            break;
-                        case GALAXIAN:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 7, x, y);
-                            break;
-                        case BELL:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 8, x, y);
-                            break;
-                        case KEY:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 9, x, y);
-                            break;
                         case ENERGIZER:
-                            if (gameState.entityTracker().isAnyPowerActive()) gc.setGlobalAlpha(0.33);
+                            if (gameState.entityTracker().isAnyPowerActive())
+                                gc.setGlobalAlpha(0.33);
                             drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 8, 9, x, y, 1.5);
                             gc.setGlobalAlpha(1.0);
+                            break;
+                        case CHERRY:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 0, x, y, 1.5);
+                            break;
+                        case STRAWBERRY:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 1, x, y, 1.5);
+                            break;
+                        case ORANGE:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 2, x, y, 1.5);
+                            break;
+                        case APPLE:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 3, x, y, 1.5);
+                            break;
+                        case MELON:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 4, x, y, 1.5);
+                            break;
+                        case GALAXIAN:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 7, x, y, 1.5);
+                            break;
+                        case BELL:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 8, x, y, 1.5);
+                            break;
+                        case KEY:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 9, x, y, 1.5);
                             break;
                     }
 
@@ -615,7 +651,7 @@ public class UI extends Application {
             long invulnBlinkNanosPerUnit = 500_000_000L;
 
             gameState.players().forEach(player -> {
-                if(!player.isDeadWithNoHearts()){
+                if (!player.isDeadWithNoHearts()) {
                     int tileY = switch (player.getDirection()) {
                         case WEST -> 6;
                         case NORTH -> 9;
@@ -630,32 +666,34 @@ public class UI extends Application {
                         default -> tileY + 1;
                     };
 
-                SpriteSheet playerSheet = SpriteSheet.getPlayerSheet(player.getColor());
-
-                boolean hasPowerUp = entityTracker.isPowerOwner(player);
-                if (player.isInvulnerable() || hasPowerUp) {
-                    int blinkFrame = 0;
-                    if (hasPowerUp) {
-                        blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit, player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.65, Constants.FRIGHTENED_DURATION_SEC);
-                    } else {
-                        blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit, player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.5, Constants.PLAYER_SPAWN_PROTECT_SEC);
-                    }
-                    if (blinkFrame == 1) {
-                        playerSheet = SpriteSheet.getPlayerSheet(Color.WHITE);
-                    }
-                }
-
-                Position playerTilePos = player.getPosition();
+                    SpriteSheet playerSheet = SpriteSheet.getPlayerSheet(player.getColor());
+                    Position playerTilePos = player.getPosition();
 
                     double rsTimer = player.getRespawnTimer();
                     if (rsTimer <= 0) {
+                        if (player.isInvulnerable()) {
+                            int blinkFrame = getBlinkFrame(invulnBlinkNanosPerUnit,
+                                player.getInvulnerableTimer() / Constants.PLAYER_SPAWN_PROTECT_SEC, 0.5,
+                                Constants.PLAYER_SPAWN_PROTECT_SEC);
+                            if (blinkFrame == 1) {
+                                return;
+                            }
+                        } else if (entityTracker.isPowerOwner(player)) {
+                            int blinkFrame = getBlinkFrame(powerupBlinkNanosPerUnit,
+                                player.getPowerUpTimer() / Constants.FRIGHTENED_DURATION_SEC, 0.65,
+                                Constants.FRIGHTENED_DURATION_SEC);
+                            if (blinkFrame == 1) {
+                                playerSheet = SpriteSheet.getPlayerSheet(Color.WHITE);
+                            }
+                        }
+
                         drawSpriteFromSheet(gc, playerSheet, 17, tileY, playerTilePos.x, playerTilePos.y, 1.75);
                     } else {
-                        double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC/11;
+                        double rsFrameInterval = Constants.PLAYER_RESPAWN_DELAY_SEC / 11;
                         int respawnTileY = 0;
                         for (int i = 1; i < 11; i++) {
-                            if (rsTimer < rsFrameInterval*i) {
-                                respawnTileY = 11-i;
+                            if (rsTimer < rsFrameInterval * i) {
+                                respawnTileY = 11 - i;
                                 break;
                             }
                         }
@@ -682,33 +720,41 @@ public class UI extends Application {
 
             gameState.ghosts().forEach(ghost -> {
                 int tileY = 0, tileX = 0;
-                tileY = switch (ghost.getDirection()) {
-                    case WEST -> 4;
-                    case NORTH -> 6;
-                    case SOUTH -> 2;
-                    default -> tileY;
-                };
+                if (ghost.getRespawnTimer() <= 0) {
+                    tileX = switch (ghost.getType()) {
+                        case RED -> 0; // ("Blinky"),
+                        case PINK -> 1; // ("Pinky"),
+                        case CYAN -> 2; // ("Inky"),
+                        case ORANGE -> 3; // ("Clyde"),
+                        case PURPLE -> 5; // ("Sue");
+                    };
+                    tileY = switch (ghost.getDirection()) {
+                        case WEST -> 4;
+                        case NORTH -> 6;
+                        case SOUTH -> 2;
+                        default -> tileY;
+                    };
+                    double fTimer = gameState.entityTracker().getFrightenedTimerSec();
 
-                tileX = switch (ghost.getType()) {
-                    case RED -> 0; // ("Blinky"),
-                    case PINK -> 1; // ("Pinky"),
-                    case CYAN -> 2; // ("Inky"),
-                    case ORANGE -> 3; // ("Clyde"),
-                    case PURPLE -> 5; // ("Sue");
-                };
+                    if (fTimer > 0) {
+                        tileY += 11;
+                        tileX = 0;
+                    }
 
-                double fTimer = gameState.entityTracker().getFrightenedTimerSec();
-
-                if (fTimer > 0) {
-                    tileY += 11;
-                    tileX = 0;
-                }
-
-                int ghostFrame = (int) ((animationTimeNanos / ghostNanosPerFrame) % ghostFrameCount);
-                if (ghostFrame == 1) {
-                    tileY += 1;
-                    if (fTimer > 0 && fTimer < 2.0)
-                        tileX += 1;
+                    int ghostFrame = (int) ((animationTimeNanos / ghostNanosPerFrame) % ghostFrameCount);
+                    if (ghostFrame == 1) {
+                        tileY += 1;
+                        if (fTimer > 0 && fTimer < 2.0)
+                            tileX += 1;
+                    }
+                } else {
+                    tileX = 6;
+                    tileY = switch (ghost.getDirection()) {
+                        case WEST -> 7;
+                        case NORTH -> 8;
+                        case SOUTH -> 6;
+                        default -> 5;
+                    };
                 }
 
                 Position ghostTilePos = ghost.getPosition();

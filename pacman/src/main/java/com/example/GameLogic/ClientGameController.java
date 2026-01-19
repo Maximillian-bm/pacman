@@ -615,7 +615,7 @@ public class ClientGameController extends GameController {
         };
     }
 
-    private Pair<Integer, Integer> computeGhostTargetTile(GameState gameState, Ghost ghost, Player pac, Ghost blinky) {
+    private Pair<Integer, Integer> computeGhostTargetTile(GameState gameState, Ghost ghost, Player pac) {
         Pair<Integer, Integer> pacGrid = pac.getPosition().ToGridPosition();
         int px = pacGrid.getKey();
         int py = pacGrid.getValue();
@@ -653,6 +653,11 @@ public class ClientGameController extends GameController {
             case CYAN -> {
                 int p2x = px + 2 * (pDir == Direction.EAST ? 1 : pDir == Direction.WEST ? -1 : 0);
                 int p2y = py + 2 * (pDir == Direction.SOUTH ? 1 : pDir == Direction.NORTH ? -1 : 0);
+
+                Ghost blinky = gameState.ghosts().stream()
+                    .filter(g -> g.getType() == GhostType.RED)
+                    .findFirst()
+                    .orElse(null);
 
                 if (blinky == null || blinky.getPosition() == null) {
                     yield new Pair<>(p2x, p2y);
@@ -694,20 +699,13 @@ public class ClientGameController extends GameController {
     }
 
     private void GhostMovement(GameState gameState) {
-
         EntityTracker entityTracker = gameState.entityTracker();
 
-        if (gameState.ghosts() == null || gameState.ghosts().isEmpty()) {
-            return;
-        }
-        if (gameState.players() == null || gameState.players().isEmpty()) {
-            return;
-        }
+        if (gameState.ghosts() == null || gameState.ghosts().isEmpty()) return;
+        if (gameState.players() == null || gameState.players().isEmpty()) return;
 
         TileType[][] tiles = gameState.tiles();
-        if (tiles == null) {
-            return;
-        }
+        if (tiles == null) return;
 
         boolean frightened = entityTracker.getFrightenedTimerSec() > 0.0;
 
@@ -718,7 +716,6 @@ public class ClientGameController extends GameController {
                 entityTracker.setGhostChaseTimer(0.0);
                 for (Ghost g : gameState.ghosts()) {
                     g.setDirection(oppositeDir(getGhostDir(g)));
-
                 }
             } else if (!entityTracker.isGhostScatterMode() && entityTracker.getGhostChaseTimer() >= 20.0) {
                 entityTracker.setGhostScatterMode(true);
@@ -729,18 +726,7 @@ public class ClientGameController extends GameController {
             }
         }
 
-        Ghost blinky = gameState.ghosts().stream()
-            .filter(g -> g.getType() == GhostType.RED)
-            .findFirst()
-            .orElse(null);
-
-        double speed = frightened ? (entityTracker.getGhostSpeed() * 0.75) : entityTracker.getGhostSpeed();
-        double movePerFrame = speed / TARGET_FPS;
-
         for (Ghost ghost : gameState.ghosts()) {
-            if (ghost.getRespawnTimer() > 0.0) {
-                continue;
-            }
             if (ghost == null || ghost.getPosition() == null) {
                 continue;
             }
@@ -755,12 +741,12 @@ public class ClientGameController extends GameController {
             // Wrap position first to ensure valid grid calculation for direction decisions
             if (pos.x < 0) {
                 pos.x += mapWidth;
-            } else if (pos.x >= mapWidth) {
+            } else if ((pos.x + Constants.TILE_SIZE) >= mapWidth) {
                 pos.x -= mapWidth;
             }
             if (pos.y < 0) {
                 pos.y += mapHeight;
-            } else if (pos.y >= mapHeight) {
+            } else if ((pos.y + Constants.TILE_SIZE) >= mapHeight) {
                 pos.y -= mapHeight;
             }
 
@@ -781,7 +767,12 @@ public class ClientGameController extends GameController {
                 boolean atIntersection = countWalkableNeighbors(tiles, gx, gy) >= 3;
 
                 if (blockedAhead || atIntersection) {
-                    if (targetPlayer != null && frightened) {
+                    if (ghost.getRespawnTimer() > 0) {
+                        // Respawning ghost moves towards its spawn location
+                        Position spawnPos = ghost.getSpawnPosition();
+                        Pair<Integer, Integer> spawnGrid = spawnPos.ToGridPosition();
+                        dir = chooseBestDirTowardTarget(tiles, gx, gy, dir, spawnGrid.getKey(), spawnGrid.getValue());
+                    } else if (targetPlayer != null && frightened) {
                         Pair<Integer, Integer> pGrid = targetPlayer.getPosition().ToGridPosition();
                         dir = chooseBestDirAwayFromPlayer(tiles, gx, gy, dir, pGrid.getKey(), pGrid.getValue());
                     } else {
@@ -789,7 +780,7 @@ public class ClientGameController extends GameController {
                         if (targetPlayer == null) {
                             targetTile = getScatterCorner(gameState, ghost);
                         } else {
-                            targetTile = computeGhostTargetTile(gameState, ghost, targetPlayer, blinky);
+                            targetTile = computeGhostTargetTile(gameState, ghost, targetPlayer);
                         }
                         dir = chooseBestDirTowardTarget(tiles, gx, gy, dir, targetTile.getKey(),
                             targetTile.getValue());
@@ -810,6 +801,9 @@ public class ClientGameController extends GameController {
                 case NORTH -> dy = -1;
                 case SOUTH -> dy = 1;
             }
+
+            double speed = ghost.getRespawnTimer() > 0 ? GHOST_RESPAWN_SPEED : frightened ? GHOST_FRIGHTENED_SPEED : GHOST_SPEED;
+            double movePerFrame = speed / TARGET_FPS;
 
             pos.x += dx * movePerFrame;
             pos.y += dy * movePerFrame;
@@ -888,7 +882,6 @@ public class ClientGameController extends GameController {
                     if (entityTracker.isPowerOwner(player)) {
                         player.eatGhost();
                         ghost.setRespawnTimer(GHOST_RESPAWN_DELAY_SEC);
-                        ghost.setPosition(new Position(-1000, -1000));
                     }
                     continue;
                 }
@@ -906,10 +899,7 @@ public class ClientGameController extends GameController {
     private void updateRespawnTimers(GameState gameState) {
         double dt = 1.0 / TARGET_FPS;
 
-        for (Player p : gameState.players()) {
-            if (p == null) {
-                continue;
-            }
+        gameState.players().forEach(p -> {
             if (p.getRespawnTimer() > 0.0) {
                 p.setRespawnTimer(Math.max(0.0, p.getRespawnTimer() - dt));
 
@@ -919,58 +909,18 @@ public class ClientGameController extends GameController {
                         p.setPosition(new Position(sp.x, sp.y));
                     }
                     p.setAlive(true);
-                    p.setDirection(Direction.WEST);
+                    p.setDirection(Direction.EAST);
                     p.setIntendedDirection(null);
-
-                    // Check if spawning directly on a ghost (unsafe respawn)
-                    boolean unsafeRespawn = false;
-                    if (sp != null && gameState.entityTracker().getFrightenedTimerSec() <= 0.0) {
-                        for (Ghost g : gameState.ghosts()) {
-                            if (g == null || g.getRespawnTimer() > 0.0) continue;
-                            Position gp = g.getPosition();
-                            if (gp == null) continue;
-                            double dist = Math.sqrt(Math.pow(sp.x - gp.x, 2) + Math.pow(sp.y - gp.y, 2));
-                            if (dist <= Constants.COLLISION_DISTANCE_PVG) {
-                                unsafeRespawn = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (unsafeRespawn) {
-                        // Die immediately on unsafe respawn
-                        int livesLeft = Math.max(0, p.getLives() - 1);
-                        p.setLives(livesLeft);
-                        p.setAlive(false);
-                        p.setRespawnTimer(livesLeft > 0 ? PLAYER_RESPAWN_DELAY_SEC : 0.0);
-                        p.setIntendedDirection(null);
-                    } else {
-                        p.setInvulnerableTimer(Constants.PLAYER_SPAWN_PROTECT_SEC);
-                    }
+                    p.setInvulnerableTimer(Constants.PLAYER_SPAWN_PROTECT_SEC);
                 }
             }
-            if(p.getRespawnTimer() <= 0 && p.getLives() <= 0){
+
+            if (p.getRespawnTimer() <= 0 && p.getLives() <= 0) {
                 p.setDeadWithNoHearts(true);
             }
-        }
+        });
 
-        for (Ghost g : gameState.ghosts()) {
-            if (g == null) {
-                continue;
-            }
-
-            if (g.getRespawnTimer() > 0.0) {
-                g.setRespawnTimer(Math.max(0.0, g.getRespawnTimer() - dt));
-
-                if (g.getRespawnTimer() == 0.0) {
-                    Position sp = g.getSpawnPosition();
-                    if (sp != null) {
-                        g.setPosition(new Position(sp.x, sp.y));
-                    }
-                    g.setDirection(Direction.WEST);
-                }
-            }
-        }
+        gameState.ghosts().forEach(g -> g.setRespawnTimer(Math.max(0.0, g.getRespawnTimer() - dt)));
     }
 
     private void updatePlayerPowerTimers(GameState gameState) {

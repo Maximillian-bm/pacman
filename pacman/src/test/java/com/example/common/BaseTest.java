@@ -2,6 +2,7 @@ package com.example.common;
 
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
+import com.example.GUI.SoundEngine;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import org.junit.jupiter.api.AfterEach;
@@ -43,6 +44,7 @@ public abstract class BaseTest {
 
     @BeforeAll
     public static void ensureServerStarted() {
+        SoundEngine.disabled = true;
         LocalTestServer.startServer();
     }
 
