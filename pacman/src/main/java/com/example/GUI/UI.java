@@ -583,34 +583,35 @@ public class UI extends Application {
                         case PAC_DOT:
                             drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 8, 8, x, y);
                             break;
-                        case CHERRY:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 0, x, y);
-                            break;
-                        case STRAWBERRY:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 1, x, y);
-                            break;
-                        case ORANGE:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 2, x, y);
-                            break;
-                        case APPLE:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 3, x, y);
-                            break;
-                        case MELON:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 4, x, y);
-                            break;
-                        case GALAXIAN:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 7, x, y);
-                            break;
-                        case BELL:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 8, x, y);
-                            break;
-                        case KEY:
-                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 9, x, y);
-                            break;
                         case ENERGIZER:
-                            if (gameState.entityTracker().isAnyPowerActive()) gc.setGlobalAlpha(0.33);
+                            if (gameState.entityTracker().isAnyPowerActive())
+                                gc.setGlobalAlpha(0.33);
                             drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 8, 9, x, y, 1.5);
                             gc.setGlobalAlpha(1.0);
+                            break;
+                        case CHERRY:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 0, x, y, 1.5);
+                            break;
+                        case STRAWBERRY:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 1, x, y, 1.5);
+                            break;
+                        case ORANGE:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 2, x, y, 1.5);
+                            break;
+                        case APPLE:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 3, x, y, 1.5);
+                            break;
+                        case MELON:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 4, x, y, 1.5);
+                            break;
+                        case GALAXIAN:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 7, x, y, 1.5);
+                            break;
+                        case BELL:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 8, x, y, 1.5);
+                            break;
+                        case KEY:
+                            drawSpriteFromSheet(gc, SpriteSheet.OBJECT_SHEET, 12, 9, x, y, 1.5);
                             break;
                     }
 
