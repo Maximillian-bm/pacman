@@ -50,4 +50,5 @@ public class Constants {
     public static int clock = -COUNTDOWN_DURATION_TICKS;
     public static int actionOffset = 6;
     public static long timeOffset = 0;
+    public static boolean lobbyClosed = false;
 }
