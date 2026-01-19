@@ -5,7 +5,7 @@ import static com.example.model.Constants.TILE_SIZE;
 
 import com.example.GameLogic.ClientComs.ConnectToLobby;
 import com.example.GameLogic.ClientComs.KeyHandler;
-import com.example.GameLogic.ClientGameController;
+import com.example.GameLogic.GameController;
 import com.example.model.*;
 
 import java.util.Collections;
@@ -42,7 +42,7 @@ public class UI extends Application {
 
     private final ConnectToLobby lobbyHandler = new ConnectToLobby();
 
-    private final ClientGameController gameController = new ClientGameController();
+    private final GameController gameController = new GameController();
     private GameState gameState;
     private GameState savedState;
 
