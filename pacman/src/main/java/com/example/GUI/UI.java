@@ -19,6 +19,8 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.text.Font;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TextField;
@@ -148,10 +150,38 @@ public class UI extends Application {
         header.setFill(Color.WHITE);
         header.setStyle("-fx-font-size: 96px;");
 
+        // Volume slider
+        Text volumeLabel = new Text("Volume:");
+        volumeLabel.setFill(Color.WHITE);
+        volumeLabel.setStyle("-fx-font-size: 14px;");
+
+        Slider volumeSlider = new Slider(0, 100, 50);
+        volumeSlider.setPrefWidth(150);
+        volumeSlider.setShowTickLabels(false);
+        volumeSlider.setShowTickMarks(false);
+
+        Text volumeValueText = new Text("50%");
+        volumeValueText.setFill(Color.WHITE);
+        volumeValueText.setStyle("-fx-font-size: 14px;");
+
+        // Set initial volume to 50%
+        soundEngine.setVolume(0.5);
+
+        // Update volume when slider changes
+        volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            double volume = newValue.doubleValue() / 100.0;
+            soundEngine.setVolume(volume);
+            volumeValueText.setText(String.format("%.0f%%", newValue.doubleValue()));
+        });
+
+        HBox volumeBox = new HBox(10, volumeLabel, volumeSlider, volumeValueText);
+        volumeBox.setAlignment(Pos.CENTER);
+
         VBox startRoot = new VBox(
                 header,
                 joinLobbyV,
                 createLobbyV,
+                volumeBox,
                 notificationText
         );
         startRoot.setAlignment(Pos.CENTER);

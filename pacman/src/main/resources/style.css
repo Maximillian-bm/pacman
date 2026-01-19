@@ -26,3 +26,23 @@
 	-fx-light-text-color: white;
 	-fx-mark-color: white;
 }
+
+.slider {
+	-fx-background-color: transparent;
+}
+
+.slider .track {
+	-fx-background-color: black;
+	-fx-border-color: blue;
+	-fx-border-width: 1;
+	-fx-background-insets: 0;
+	-fx-background-radius: 0;
+	-fx-border-radius: 0;
+}
+
+.slider .thumb {
+	-fx-background-color: yellow;
+	-fx-background-radius: 0;
+	-fx-border-radius: 0;
+	-fx-padding: 8;
+}
