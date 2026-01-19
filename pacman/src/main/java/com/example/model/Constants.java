@@ -41,19 +41,19 @@ public class Constants {
     // Player
     public final static int PLAYER_LIVES = 3;
     public final static double PLAYER_SPEED = 175;
-    public final static double PLAYER_FRIGHTENED_SPEED = 130;
+    public final static double PLAYER_FRIGHTENED_SPEED = PLAYER_SPEED * 0.75;
     public final static double PLAYER_SPAWN_PROTECT_SEC = 2.0;
     public static final double PLAYER_RESPAWN_DELAY_SEC = 2.0;
 
     // Ghost
-    public static final double GHOST_SPEED = PLAYER_SPEED * .8;
-    public static final double GHOST_FRIGHTENED_SPEED = GHOST_SPEED * .75;
+    public static final double GHOST_SPEED = PLAYER_SPEED * .85;
+    public static final double GHOST_FRIGHTENED_SPEED = GHOST_SPEED * .65;
     public static final double GHOST_RESPAWN_SPEED = GHOST_SPEED * 2;
-    public static final double GHOST_RESPAWN_DELAY_SEC  = 8.0;
+    public static final double GHOST_RESPAWN_DELAY_SEC = 8.0;
     public final static double FRIGHTENED_DURATION_SEC = 8.0;
 
     //Varibles
     public static int clock = -COUNTDOWN_DURATION_TICKS;
-    public static int actionOffset = 6;
+    public static int actionOffset = 0;
     public static long timeOffset = 0;
 }
