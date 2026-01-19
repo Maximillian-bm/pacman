@@ -207,8 +207,69 @@
       </annotationProcessorPaths>
     </configuration>
   </plugin>
-</plugins>
 
+  <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-assembly-plugin</artifactId>
+    <version>3.6.0</version>
+    <executions>
+      <execution>
+        <phase>package</phase>
+        <goals>
+          <goal>single</goal>
+        </goals>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>com.example.GameLogic.ClientMain</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+          <finalName>pacman</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin>
+
+  <plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>exec-maven-plugin</artifactId>
+    <version>3.1.0</version>
+    <executions>
+      <execution>
+        <id>jpackage</id>
+        <phase>package</phase>
+        <goals>
+          <goal>exec</goal>
+        </goals>
+        <configuration>
+          <executable>jpackage</executable>
+          <arguments>
+            <argument>--input</argument>
+            <argument>${project.build.directory}</argument>
+            <argument>--name</argument>
+            <argument>Pacman</argument>
+            <argument>--main-jar</argument>
+            <argument>pacman.jar</argument>
+            <argument>--main-class</argument>
+            <argument>com.example.GameLogic.ClientMain</argument>
+            <argument>--type</argument>
+            <argument>exe</argument>
+            <argument>--icon</argument>
+            <argument>${project.basedir}/icon.ico</argument>
+            <argument>--win-dir-chooser</argument>
+            <argument>--win-shortcut</argument>
+            <argument>--dest</argument>
+            <argument>${project.build.directory}/installer</argument>
+          </arguments>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin>
+    </plugins>
 
     <resources>
       <resource>
