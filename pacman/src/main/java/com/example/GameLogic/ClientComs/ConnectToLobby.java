@@ -24,9 +24,11 @@ public class ConnectToLobby {
 
     private Reader reader;
 
+    private Space space1;
+
     public void createLobby(int nrOfPlayers) {
         try {
-            Space space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
+            space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
             lobbyID = (int) space1.get(new FormalField(Integer.class), new ActualField(0), new ActualField("FREE"))[0];
             space1.put(lobbyID, nrOfPlayers, "CREATE");
             space1.get(new ActualField(lobbyID), new ActualField(nrOfPlayers), new ActualField("OK"));
@@ -42,6 +44,7 @@ public class ConnectToLobby {
 
     public void joinLobby(String lobbyID) {
         try {
+            space1 = new RemoteSpace(URIUtil.getSpace1URI(Constants.REMOTE_PUBLIC_URI));
             this.lobbyID = Integer.parseInt(lobbyID);
             sync = new RemoteSpace(URIUtil.getSyncURI(Constants.REMOTE_PUBLIC_URI, this.lobbyID));
             Object[] t = sync.get(new FormalField(Integer.class), new FormalField(Integer.class), new ActualField("PLAYERID"));
@@ -60,6 +63,14 @@ public class ConnectToLobby {
     }
 
     public boolean isLobbyOpen() {
+        try {
+            Object[] t = space1.queryp(new ActualField(lobbyID), new ActualField(0), new ActualField("FREE"));
+            if(t != null){
+                return false;
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return true;
     }
 

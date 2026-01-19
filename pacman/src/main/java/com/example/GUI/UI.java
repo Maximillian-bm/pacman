@@ -409,7 +409,7 @@ public class UI extends Application {
 
             drawGhosts();
 
-            if (gameState.winner() == null) {
+            if (gameState.winner() == null && lobbyHandler.isLobbyOpen()) {
                 if (Constants.clock < 0) drawCountdown();
                 drawPoints();
                 restartButton.setVisible(false);
