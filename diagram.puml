@@ -5,7 +5,10 @@ package "GameLogic" {
       + registerRawAction(action: Action, remoteRawActions: Space): void
       + handleRawAction(lastActionsClock: int, index: int, action: Action, cleanActions: Space): void
   }
-    class ClientGameController extends GameController {
+    class ClientMain {
+      + main(args: String): void
+  }
+    class GameController {
       + updateGameStateFor(gameState: GameState, tarclock: int): GameState
       + deepCopyGameState(state: GameState): GameState
       + updateGameState(gameState: GameState, actions: List): GameState
@@ -25,7 +28,7 @@ package "GameLogic" {
       - chooseBestDirAwayFromPlayer(tiles: TileType, gx: int, gy: int, currentDir: Direction, playerX: int, playerY: int): Direction
       - findNearestPlayer(gameState: GameState, ghost: Ghost): Player
       - getScatterCorner(gameState: GameState, ghost: Ghost): Pair
-      - computeGhostTargetTile(gameState: GameState, ghost: Ghost, pac: Player, blinky: Ghost): Pair
+      - computeGhostTargetTile(gameState: GameState, ghost: Ghost, pac: Player): Pair
       - GhostMovement(gameState: GameState): void
       - handleGhostPlayerCollisions(gameState: GameState): void
       - updateRespawnTimers(gameState: GameState): void
@@ -40,15 +43,6 @@ package "GameLogic" {
       + allPlayersDead(gameState: GameState): boolean
       + allPointsGathered(gameState: GameState): boolean
       - getWinner(gameState: GameState): Player
-  }
-    class ClientMain {
-      + main(args: String): void
-  }
-    abstract GameController {
-      + updateGameState(gameState: GameState, actions: List): GameState
-      - update(): void
-  }
-    abstract ServerGameController extends GameController {
   }
     class URIUtil {
       + getLobbyID(lobbySpecificURI: String): int
@@ -67,8 +61,11 @@ package "GameLogic" {
         - lobbyID: int
         - sync: Space
         - reader: Reader
+        - space1: Space
+        - isLobbyOpen: boolean
         + createLobby(nrOfPlayers: int): void
         + joinLobby(lobbyID: String): void
+        + isLobbyOpen(): boolean
         + joinLobby(lobbyID: String, timeoutMs: long): void
         + leaveLobby(): void
         + getGameState(): Object
@@ -96,8 +93,6 @@ package "GameLogic" {
         + stop(): void
     }
   }
-  package "ClientThreads" {
-  }
 }
 package "GUI" {
     class SoundEngine {
@@ -109,17 +104,29 @@ package "GUI" {
       + stop(sound: Sound): void
       + setVolume(volume: double): void
   }
+    enum SpriteSheet {
+      OBJECT_SHEET
+      WALL_SHEET
+      PLAYER_YELLOW
+      PLAYER_RED
+      PLAYER_GREEN
+      PLAYER_BLUE
+      PLAYER_WHITE
+      WALL_COLORED
+      + image: Image
+      + pixelsPerTile: int
+      - createColoredPlayerImage(color: Color): Image
+      - createColoredWallImage(color: Color): Image
+      + getPlayerSheet(color: Color): SpriteSheet
+  }
     class UI extends Application {
       - soundEngine: SoundEngine
       - lobbyHandler: ConnectToLobby
-      - gameController: ClientGameController
+      - gameController: GameController
       - gameState: GameState
       - savedState: GameState
       - gc: GraphicsContext
       - canvas: Canvas
-      - spriteSheet: Image
-      - wallSpriteSheet: Image
-      - coloredPlayerCache: Map
       - keyHandler: KeyHandler
       - createLobby: Runnable
       - notificationText: Text
@@ -129,15 +136,14 @@ package "GUI" {
       + TilePos(x: int, y: int): record
       + stop(): void
       + start(stage: Stage): void
-      - colorPlayer(color: Color): Image
-      - precomputePlayerColors(): void
-      - createColoredPlayerImage(color: Color): Image
       - initializeMainMenu(stage: Stage): void
       + notifyDisconnection(message: String): void
       - startLobby(stage: Stage): void
       - startGame(stage: Stage): void
-      - drawTileFromTileset(gc: GraphicsContext, tileset: Image, tileX: int, tileY: int, destX: double, destY: double): void
-      - drawTileFromTileset(gc: GraphicsContext, tileset: Image, tileX: int, tileY: int, srcOffsetX: int, srcOffsetY: int, srcWidth: int, srcHeight: int, destX: double, destY: double): void
+      - drawSpriteFromSheet(gc: GraphicsContext, spriteSheet: SpriteSheet, srcTileX: int, srcTileY: int, destTileX: int, destTileY: int): void
+      - drawSpriteFromSheet(gc: GraphicsContext, spriteSheet: SpriteSheet, srcTileX: int, srcTileY: int, destTileX: int, destTileY: int, scaleFactor: double): void
+      - drawSpriteFromSheet(gc: GraphicsContext, spriteSheet: SpriteSheet, srcTileX: int, srcTileY: int, destPixelX: double, destPixelY: double): void
+      - drawSpriteFromSheet(gc: GraphicsContext, spriteSheet: SpriteSheet, srcTileX: int, srcTileY: int, destPixelX: double, destPixelY: double, scaleFactor: double): void
       - drawRectangle(gc: GraphicsContext, x: int, y: int, width: int, height: int): void
       - createTiledButton(text: String, tilesWide: int, tilesTall: int): Button
       - createTiledImageView(width: double, height: double): ImageView
@@ -186,6 +192,9 @@ package "model" {
       + PLAYER_FRIGHTENED_SPEED: double
       + PLAYER_SPAWN_PROTECT_SEC: double
       + PLAYER_RESPAWN_DELAY_SEC: double
+      + GHOST_SPEED: double
+      + GHOST_FRIGHTENED_SPEED: double
+      + GHOST_RESPAWN_SPEED: double
       + GHOST_RESPAWN_DELAY_SEC: double
       + FRIGHTENED_DURATION_SEC: double
       + clock: int
@@ -207,7 +216,6 @@ package "model" {
       + distanceTo(e: Entity): double
   }
     class EntityTracker {
-      - ghostSpeed: double
       - ghostScatterMode: boolean
       - ghostChaseTimer: double
       - frightenedTimerSec: double
@@ -360,7 +368,7 @@ package "ServerLogic" {
   ConnectToLobby o-- Reader: contains
   UI o-- SoundEngine: contains
   UI o-- ConnectToLobby: contains
-  UI o-- ClientGameController: contains
+  UI o-- GameController: contains
   UI o-- KeyHandler: contains
   Constants o-- ActionList: contains
   Entity "1" o-- "many" Position: contains
