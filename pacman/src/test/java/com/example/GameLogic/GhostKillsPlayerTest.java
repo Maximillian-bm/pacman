@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Ghost Kills Player Tests")
 public class GhostKillsPlayerTest extends BaseTest {
 
-    private ClientGameController controller;
+    private GameController controller;
     private GameState state;
 
     // Test position coordinates
@@ -52,7 +52,7 @@ public class GhostKillsPlayerTest extends BaseTest {
 
     @BeforeEach
     public void setUp() {
-        controller = new ClientGameController();
+        controller = new GameController();
         Constants.clock = 0;
         state = controller.initializeGameState(2);
         state.entityTracker().setGhostScatterMode(false);

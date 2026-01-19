@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("Ghost Eating with Energizer Tests")
 public class GhostEatingTest extends BaseTest {
 
-    private ClientGameController controller;
+    private GameController controller;
     private GameState state;
 
     @Override
@@ -41,7 +41,7 @@ public class GhostEatingTest extends BaseTest {
 
     @BeforeEach
     public void setUp() {
-        controller = new ClientGameController();
+        controller = new GameController();
         Constants.clock = 0;
         state = controller.initializeGameState(2);
         state.entityTracker().setGhostScatterMode(false);

@@ -28,7 +28,7 @@ import org.junit.jupiter.api.DisplayName;
 @DisplayName("Player Game Logic and Lobby Interaction Tests")
 public class PlayerLogicTest extends BaseTest {
 
-    private ClientGameController controller;
+    private GameController controller;
     private GameState initialState;
     private ConnectToLobby host;
 
@@ -44,7 +44,7 @@ public class PlayerLogicTest extends BaseTest {
 
     @BeforeEach
     public void setUp() {
-        controller = new ClientGameController();
+        controller = new GameController();
         initialState = controller.initializeGameState(2);
         initialState.ghosts().clear();
 

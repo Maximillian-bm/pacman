@@ -27,7 +27,7 @@ import org.junit.jupiter.api.DisplayName;
 @DisplayName("Client Game Controller Logic and State Management Tests")
 public class ClientGameControllerTest extends BaseTest {
 
-    private ClientGameController controller;
+    private GameController controller;
     private GameState initialState;
 
     @Override
@@ -42,7 +42,7 @@ public class ClientGameControllerTest extends BaseTest {
 
     @BeforeEach
     public void setUp() {
-        controller = new ClientGameController();
+        controller = new GameController();
         Constants.clock = 0;
 
         initialState = controller.initializeGameState(1);
