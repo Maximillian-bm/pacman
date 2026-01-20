@@ -37,6 +37,7 @@ public class Constants {
     public static final double COLLISION_DISTANCE_PVP = TILE_SIZE;
 
     public static final double FRUIT_RESPAWN_DELAY_SEC = 5.0;
+    public static final double TIME_OFFSET_CAP = 8;
 
     // Player
     public final static int PLAYER_LIVES = 3;
