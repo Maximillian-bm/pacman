@@ -12,37 +12,9 @@ package "GameLogic" {
       + updateGameStateFor(gameState: GameState, tarclock: int): GameState
       + deepCopyGameState(state: GameState): GameState
       + updateGameState(gameState: GameState, actions: List): GameState
-      - handleFruitSpawning(gameState: GameState): void
       + initializeGameState(nrOfPlayers: int): GameState
-      - handleActions(gameState: GameState, actions: List): void
-      - stepMovement(gameState: GameState): void
-      - handlePlayerGridPosition(gameState: GameState): void
-      - directionFromMove(move: int): Direction
-      - isWall(tiles: TileType, x: double, y: double): boolean
-      - getGhostDir(ghost: Ghost): Direction
-      - oppositeDir(dir: Direction): Direction
-      - countWalkableNeighbors(tiles: TileType, x: int, y: int): int
-      - isWalkable(tiles: TileType, x: int, y: int): boolean
-      - isWalkableInDir(tiles: TileType, x: int, y: int, d: Direction): boolean
-      - chooseBestDirTowardTarget(tiles: TileType, gx: int, gy: int, currentDir: Direction, targetX: int, targetY: int): Direction
-      - chooseBestDirAwayFromPlayer(tiles: TileType, gx: int, gy: int, currentDir: Direction, playerX: int, playerY: int): Direction
-      - findNearestPlayer(gameState: GameState, ghost: Ghost): Player
-      - getScatterCorner(gameState: GameState, ghost: Ghost): Pair
-      - computeGhostTargetTile(gameState: GameState, ghost: Ghost, pac: Player): Pair
-      - GhostMovement(gameState: GameState): void
-      - handleGhostPlayerCollisions(gameState: GameState): void
-      - updateRespawnTimers(gameState: GameState): void
-      - updatePlayerPowerTimers(gameState: GameState): void
-      - isPowered(p: Player, entityTracker: EntityTracker): boolean
-      - handlePvPcollitions(gameState: GameState): void
-      - isPlayerCollidable(p: Player): boolean
-      - eatPlayer(gameState: GameState, eater: Player, victim: Player): void
-      - resolvePlayerOverlap(a: Player, b: Player): void
-      - updateInvulnerabilityTimers(gameState: GameState): void
-      - isInvulnerable(p: Player): boolean
       + allPlayersDead(gameState: GameState): boolean
       + allPointsGathered(gameState: GameState): boolean
-      - getWinner(gameState: GameState): Player
   }
     class URIUtil {
       + getLobbyID(lobbySpecificURI: String): int
@@ -50,9 +22,6 @@ package "GameLogic" {
       + getRawActionURI(baseURI: String, lobbyId: int): String
       + getCleanActionURI(baseURI: String, lobbyId: int): String
       + getSpace1URI(baseURI: String): String
-      - buildLobbyURI(baseURI: String, lobbyId: int, actionSuffix: String): String
-      - parse(uri: String): URI
-      - buildLobbyURI(baseURI: String, actionSuffix: String): String
   }
   package "ClientComs" {
         class ConnectToLobby {
@@ -65,16 +34,10 @@ package "GameLogic" {
         - isLobbyOpen: boolean
         + createLobby(nrOfPlayers: int): void
         + joinLobby(lobbyID: String): void
-        + isLobbyOpen(): boolean
-        + joinLobby(lobbyID: String, timeoutMs: long): void
         + leaveLobby(): void
-        + getGameState(): Object
         + isPlayerInGame(playerID: int): boolean
         + startGame(): void
         + quit(): void
-        + getLobbyID(): int
-        + getNrOfPlayers(): int
-        + getPlayerID(): int
     }
         class KeyHandler {
         - rawActions: Space
@@ -136,17 +99,7 @@ package "GUI" {
       + TilePos(x: int, y: int): record
       + stop(): void
       + start(stage: Stage): void
-      - initializeMainMenu(stage: Stage): void
       + notifyDisconnection(message: String): void
-      - startLobby(stage: Stage): void
-      - startGame(stage: Stage): void
-      - drawSpriteFromSheet(gc: GraphicsContext, spriteSheet: SpriteSheet, srcTileX: int, srcTileY: int, destTileX: int, destTileY: int): void
-      - drawSpriteFromSheet(gc: GraphicsContext, spriteSheet: SpriteSheet, srcTileX: int, srcTileY: int, destTileX: int, destTileY: int, scaleFactor: double): void
-      - drawSpriteFromSheet(gc: GraphicsContext, spriteSheet: SpriteSheet, srcTileX: int, srcTileY: int, destPixelX: double, destPixelY: double): void
-      - drawSpriteFromSheet(gc: GraphicsContext, spriteSheet: SpriteSheet, srcTileX: int, srcTileY: int, destPixelX: double, destPixelY: double, scaleFactor: double): void
-      - drawRectangle(gc: GraphicsContext, x: int, y: int, width: int, height: int): void
-      - createTiledButton(text: String, tilesWide: int, tilesTall: int): Button
-      - createTiledImageView(width: double, height: double): ImageView
   }
 }
 package "model" {
@@ -155,11 +108,7 @@ package "model" {
       - clock: int
       - move: int
       - index: int
-      + getPlayerId(): int
       + clock(): int
-      + getMove(): int
-      + getIndex(): int
-      + setClock(clock: int): void
   }
     class ActionList {
       - actionsMap: Map
@@ -187,6 +136,7 @@ package "model" {
       + COLLISION_DISTANCE_PVG: double
       + COLLISION_DISTANCE_PVP: double
       + FRUIT_RESPAWN_DELAY_SEC: double
+      + TIME_OFFSET_CAP: double
       + PLAYER_LIVES: int
       + PLAYER_SPEED: double
       + PLAYER_FRIGHTENED_SPEED: double
@@ -330,7 +280,6 @@ package "ServerLogic" {
       - timeOfCreation: long
       + run(): void
       + stop(): void
-      + getRep(): SpaceRepository
   }
     class LobbyActionHandler implements Runnable {
       + repository: SpaceRepository
@@ -372,6 +321,9 @@ package "ServerLogic" {
   UI o-- KeyHandler: contains
   Constants o-- ActionList: contains
   Entity "1" o-- "many" Position: contains
+  ActionList "1" o-- "many" Action: contains
+  LobbyCleaner "1" o-- "many" Lobby: contains
+  ServerController "1" o-- "many" Lobby: contains
   Entity o-- Direction: contains
   Ghost o-- GhostType: contains
   Player o-- Direction: contains
